@@ -1,5 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@root//:bazel/configure_file.bzl", "configure_file")
+load("@root//bazel:configure_file.bzl", "configure_file")
 
 CONFIG = {
     "HAVE_INT16_T": "",
