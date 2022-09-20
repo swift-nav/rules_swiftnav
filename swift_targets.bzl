@@ -99,7 +99,7 @@ def swift_get_compile_options(
     if c_standard:
         all_flags.append("-std=c" + c_standard)
     else:
-        all_flags.append("-std=c99")
+        all_flags.append("-std=gnu99")
 
     return all_flags
 
