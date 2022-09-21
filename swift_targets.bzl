@@ -25,8 +25,8 @@ def swift_get_compile_options(
 
     all_flags = []
 
-    # if not warning:
-    #     all_flags += ["-Werror", "-Wno-error=deprecated-declarations"]
+    if not warning:
+        all_flags += ["-Werror", "-Wno-error=deprecated-declarations"]
 
     # '-Wall' '-Wunused-but-set-parameter' '-Wno-free-nonheap-object' flags are set by default by bazel
     all_flags += [
@@ -93,13 +93,9 @@ def swift_get_compile_options(
 
     if cxx_standard:
         all_flags.append("-std=c++" + cxx_standard)
-    else:
-        all_flags.append("-std=c++14")
 
     if c_standard:
         all_flags.append("-std=c" + c_standard)
-    else:
-        all_flags.append("-std=gnu99")
 
     return all_flags
 
