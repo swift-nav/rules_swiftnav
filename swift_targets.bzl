@@ -220,21 +220,12 @@ def swift_cc_test(
         includes = None,
         visibility = None,
         deps = None,
-        add_compile_options = None,
-        remove_compile_options = None,
-        cxx_standard = None,
-        c_standard = None):
-    copts = swift_get_compile_options(
-        add_compile_options = add_compile_options,
-        remove_compile_options = remove_compile_options,
-        cxx_standard = cxx_standard,
-        c_standard = c_standard,
-    )
+        add_compile_options = None):
     native.cc_test(
         name = name,
         srcs = srcs,
         hdrs = hdrs,
-        copts = copts,
+        copts = add_compile_options,
         data = data,
         includes = includes,
         visibility = visibility,
