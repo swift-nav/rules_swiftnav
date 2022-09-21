@@ -47,7 +47,7 @@ def swift_get_compile_options(
         "-Winvalid-pch",
         "-Wmissing-braces",
         "-Wmissing-field-initializers",
-        "-Wmissing-include-dirs",
+        # "-Wmissing-include-dirs",
         "-Wparentheses",
         "-Wpointer-arith",
         "-Wredundant-decls",
@@ -85,11 +85,6 @@ def swift_get_compile_options(
         all_flags.append("-fexceptions")
     else:
         all_flags.append("-fno-exceptions")
-
-    if rtti:
-        all_flags.append("-frtti")
-    else:
-        all_flags.append("-fno-rtti")
 
     if cxx_standard:
         all_flags.append("-std=c++" + cxx_standard)
