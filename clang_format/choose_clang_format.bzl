@@ -7,8 +7,12 @@ def _choose_clang_format(ctx):
         if command -v clang-format-14 &> /dev/null
         then
             echo clang-format-14 \\"\\$@\\" > {0}
-        else
+        elif command -v clang-format &> /dev/null
+        then
             echo clang-format \\"\\$@\\" > {0}
+        else
+            echo "clang-format-14 / clang-format: command not found"
+            exit 1
         fi
         """.format(out.path),
     )
