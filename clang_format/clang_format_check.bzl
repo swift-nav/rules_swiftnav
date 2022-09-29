@@ -1,7 +1,7 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 
 def _check_format(ctx, exe, config, infile, clang_format_bin):
-    output = ctx.actions.declare_file(infile.basename + ".clang-format.txt")
+    output = ctx.actions.declare_file(infile.path + ".clang-format.txt")
 
     args = ctx.actions.args()
 
