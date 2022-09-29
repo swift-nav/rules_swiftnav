@@ -59,5 +59,4 @@ clang_format_check_aspect = aspect(
         "_clang_format_config": attr.label(default = Label("//:clang_format_config")),
         "_clang_format_bin": attr.label(default = Label("//bazel/clang_format:clang_format_bin")),
     },
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
 )
