@@ -24,6 +24,11 @@ def swift_cc_tool(**kwargs):
     """
     native.cc_binary(**kwargs)
 
+def swift_cc_test_library(**kwargs):
+    """Wraps cc_library to enforce Swift test library conventions.
+    """
+    native.cc_library(**kwargs)
+
 def swift_cc_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
 
