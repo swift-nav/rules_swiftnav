@@ -11,8 +11,10 @@ def _choose_clang_format(ctx):
         then
             echo clang-format \\"\\$@\\" > {0}
         else
-            echo "clang-format-14 / clang-format: command not found"
-            exit 1
+            err_msg='clang-format-14 / clang-format: command not found'
+            echo $err_msg
+            echo "echo "$err_msg">&2" >> {0}
+            echo "exit 1" >> {0}
         fi
         """.format(out.path),
     )
