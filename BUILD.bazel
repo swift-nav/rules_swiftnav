@@ -1,0 +1,4 @@
+sh_binary(
+    name = "qac_compile_commands",
+    srcs = ["qac_compile_commands.sh"],
+)
