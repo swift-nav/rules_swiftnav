@@ -44,5 +44,5 @@ def swift_cc_test(name, type, **kwargs):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
     kwargs["name"] = name
-    kwargs["tags"] = [type]
+    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type]
     native.cc_test(**kwargs)
