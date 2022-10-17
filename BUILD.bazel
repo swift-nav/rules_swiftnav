@@ -1,6 +1,1 @@
-sh_binary(
-    name = "qac_compile_commands",
-    srcs = ["qac_compile_commands.sh"],
-    args = ["$(location //:refresh_compile_commands)"],
-    data = ["//:refresh_compile_commands"],
-)
+exports_files(["qac_compile_commands.sh"])
