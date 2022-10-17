@@ -15,5 +15,5 @@ def qac_compile_commands(name, tool, **kwargs):
         srcs = ["//bazel:qac_compile_commands.sh"],
         args = [arg],
         data = [tool],
-        **kwargs,
+        **kwargs
     )
