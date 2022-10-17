@@ -1,4 +1,4 @@
-def qac_compile_commands(name, tool):
+def qac_compile_commands(name, tool, **kwargs):
     """Replaces -isystem with -I in a compile_commands.json file.
 
     This is necessary to get Helix QAC to work correctly.
@@ -15,4 +15,5 @@ def qac_compile_commands(name, tool):
         srcs = ["//bazel:qac_compile_commands.sh"],
         args = [arg],
         data = [tool],
+        **kwargs,
     )
