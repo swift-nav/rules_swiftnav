@@ -3,7 +3,7 @@
 # This is needed for Helix QAC to work properly.
 # Usage: qac_compile_commands <REFRESH_COMPILE_COMMANDS>
 
-REFRESH_COMPILE_COMMANDS=$(realpath $1)
+REFRESH_COMPILE_COMMANDS=$1
 
 $REFRESH_COMPILE_COMMANDS
 sed -i 's/-isystem/-I/' $BUILD_WORKSPACE_DIRECTORY/compile_commands.json
