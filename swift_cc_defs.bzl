@@ -7,9 +7,9 @@ INTEGRATION = "integration"
 def _common_c_opts(pedantic = False):
     copts = [
         "-Wall",
-        "-Wunused-but-set-parameter",
-        "-Wno-free-nonheap-object",
         "-Wcast-align",
+#        "-Wunused-but-set-parameter",
+#        "-Wno-free-nonheap-object",
         "-Wcast-qual",
         "-Wchar-subscripts",
         "-Wcomment",
@@ -74,7 +74,6 @@ def swift_cc_library(**kwargs):
     """
     features = _common_features()
     kwargs["features"] = (kwargs["features"] if "features" in kwargs else []) + features
-    print(kwargs["features"])
 
     copts = _common_c_opts(pedantic = True)
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
