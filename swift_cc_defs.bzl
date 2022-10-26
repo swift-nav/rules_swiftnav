@@ -4,9 +4,10 @@ UNIT = "unit"
 # Name for a integration test
 INTEGRATION = "integration"
 
-def _common_c_opts(pedantic = False):
+def _common_c_opts(nocopts, pedantic = False):
     copts = [
         "-Wall",
+        "-Werror",
         "-Wcast-align",
 #        "-Wunused-but-set-parameter",
 #        "-Wno-free-nonheap-object",
@@ -53,29 +54,20 @@ def _common_c_opts(pedantic = False):
         "-Wno-error=deprecated-declarations",
     ]
 
+    # filter nocopts from the list
+    copts = [copt for copt in copts if copt not in nocopts]
+
     if pedantic:
         copts.append("-pedantic")
 
     return copts
 
-
-def _common_features(**kwargs):
-    return [
-        "treat_warnings_as_errors", # Not available until Bazel 6.0!
-        "c99_standard",
-        "cxx14_standard",
-        "no_rtti",
-        "no_exceptions",
-    ]
-
-
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
     """
-    features = _common_features()
-    kwargs["features"] = (kwargs["features"] if "features" in kwargs else []) + features
+    nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(pedantic = True)
+    copts = _common_c_opts(nocopts, pedantic = True)
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_library(**kwargs)
@@ -84,10 +76,9 @@ def swift_cc_library(**kwargs):
 def swift_cc_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production library.
     """
-    features = _common_features()
-    kwargs["features"] = (kwargs["features"] if "features" in kwargs else []) + features
+    nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(pedantic = False)
+    copts = _common_c_opts(nocopts, pedantic = False)
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_library(**kwargs)
@@ -96,10 +87,9 @@ def swift_cc_tool_library(**kwargs):
 def swift_cc_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production binary.
     """
-    features = _common_features()
-    kwargs["features"] = (kwargs["features"] if "features" in kwargs else []) + features
+    nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(pedantic = True)
+    copts = _common_c_opts(nocopts, pedantic = True)
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_binary(**kwargs)
@@ -108,10 +98,9 @@ def swift_cc_binary(**kwargs):
 def swift_cc_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production binary.
     """
-    features = _common_features()
-    kwargs["features"] = (kwargs["features"] if "features" in kwargs else []) + features
+    nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(pedantic = False)
+    copts = _common_c_opts(nocopts, pedantic = False)
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_binary(**kwargs)
