@@ -63,7 +63,19 @@ def _common_c_opts(nocopts, pedantic = False):
     return copts
 
 def swift_cc_library(**kwargs):
-    """Wraps cc_library to enforce standards for a production library.
+    """Wraps cc_library to enforce a standards for a production library.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Production targets (swift_cc_*), are compiled with the -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
+            
+            An additional attribute nocopts is supported. This
+            attribute takes a list of flags to remove from the 
+            default compiler options.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -75,6 +87,19 @@ def swift_cc_library(**kwargs):
 
 def swift_cc_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production library.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Non-production target (swift_cc_tool*), are compiled without the
+    -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
+            
+            An additional attribute nocopts is supported. This
+            attribute takes a list of flags to remove from the 
+            default compiler options.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -86,6 +111,18 @@ def swift_cc_tool_library(**kwargs):
 
 def swift_cc_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production binary.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Production targets (swift_cc*), are compiled with the -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
+            
+            An additional attribute nocopts is supported. This
+            attribute takes a list of flags to remove from the 
+            default compiler options.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -97,6 +134,19 @@ def swift_cc_binary(**kwargs):
 
 def swift_cc_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production binary.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Non-production target (swift_cc_tool*), are compiled without the
+    -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
+            
+            An additional attribute nocopts is supported. This
+            attribute takes a list of flags to remove from the 
+            default compiler options.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -108,6 +158,9 @@ def swift_cc_tool(**kwargs):
 
 def swift_cc_test_library(**kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
     """
     native.cc_library(**kwargs)
 
@@ -121,6 +174,8 @@ def swift_cc_test(name, type, **kwargs):
 
             These are passed to cc_test as tags which enables running
             these test types seperately: `bazel test --test_tag_filters=unit //...`
+
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
     """
 
     if not (type == UNIT or type == INTEGRATION):
