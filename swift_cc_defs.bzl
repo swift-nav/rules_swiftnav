@@ -77,7 +77,7 @@ def swift_cc_library(**kwargs):
             attribute takes a list of flags to remove from the
             default compiler options. Use judiciously.
     """
-    nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a depricated cc* attr.
+    nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
     copts = _common_c_opts(nocopts, pedantic = True)
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
