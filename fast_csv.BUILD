@@ -3,7 +3,7 @@ package(
 )
 
 cc_library(
-    name = "fast-cpp-csv-parser",
+    name = "fast_csv",
     hdrs = glob(["**"]),
     includes = ["."],
 )
