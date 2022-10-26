@@ -5,12 +5,11 @@ UNIT = "unit"
 INTEGRATION = "integration"
 
 def _common_c_opts(nocopts, pedantic = False):
+    # The following are set by default by Bazel:
+    # -Wall, -Wunused-but-set-parameter, -Wno-free-heap-object
     copts = [
-        "-Wall",
         "-Werror",
         "-Wcast-align",
-#        "-Wunused-but-set-parameter",
-#        "-Wno-free-nonheap-object",
         "-Wcast-qual",
         "-Wchar-subscripts",
         "-Wcomment",
@@ -27,7 +26,6 @@ def _common_c_opts(nocopts, pedantic = False):
         "-Winvalid-pch",
         "-Wmissing-braces",
         "-Wmissing-field-initializers",
-        #"-Wmissing-include-dirs",
         "-Wparentheses",
         "-Wpointer-arith",
         "-Wredundant-decls",
@@ -52,9 +50,11 @@ def _common_c_opts(nocopts, pedantic = False):
         "-Wvolatile-register-var",
         "-Wwrite-strings",
         "-Wno-error=deprecated-declarations",
+        #TODO: [BUILD-405] - Figure out why build breaks with this flag
+        #"-Wmissing-include-dirs"
     ]
 
-    # filter nocopts from the list
+    # filter nocopts from the default list
     copts = [copt for copt in copts if copt not in nocopts]
 
     if pedantic:
@@ -75,7 +75,7 @@ def swift_cc_library(**kwargs):
             
             An additional attribute nocopts is supported. This
             attribute takes a list of flags to remove from the 
-            default compiler options.
+            default compiler options. Use judiciously.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -99,7 +99,7 @@ def swift_cc_tool_library(**kwargs):
             
             An additional attribute nocopts is supported. This
             attribute takes a list of flags to remove from the 
-            default compiler options.
+            default compiler options. Use judiciously.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -122,7 +122,7 @@ def swift_cc_binary(**kwargs):
             
             An additional attribute nocopts is supported. This
             attribute takes a list of flags to remove from the 
-            default compiler options.
+            default compiler options. Use judiciously.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -146,7 +146,7 @@ def swift_cc_tool(**kwargs):
             
             An additional attribute nocopts is supported. This
             attribute takes a list of flags to remove from the 
-            default compiler options.
+            default compiler options. Use judiciously.
     """
     nocopts = kwargs.pop("nocopts", [])
 
