@@ -1,0 +1,4 @@
+/bazel-*
+/bazel-out
+/bazel-bin
+
