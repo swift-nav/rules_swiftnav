@@ -66,9 +66,8 @@ def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
 
     Primarily this consists of a default set of compiler options and
-    language standards.
-
-    Production targets (swift_cc*), are compiled with the -pedantic flag.
+    language standards. Production targets (swift_cc*), are compiled 
+    with the -pedantic flag.
 
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
@@ -88,10 +87,8 @@ def swift_cc_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production library.
 
     Primarily this consists of a default set of compiler options and
-    language standards.
-
-    Non-production targets (swift_cc_tool*), are compiled without the
-    -pedantic flag.
+    language standards. Non-production targets (swift_cc_tool*), 
+    are compiled without the -pedantic flag.
 
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
@@ -111,9 +108,8 @@ def swift_cc_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production binary.
 
     Primarily this consists of a default set of compiler options and
-    language standards.
-
-    Production targets (swift_cc*), are compiled with the -pedantic flag.
+    language standards. Production targets (swift_cc*), are compiled 
+    with the -pedantic flag.
 
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
@@ -133,10 +129,8 @@ def swift_cc_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production binary.
 
     Primarily this consists of a default set of compiler options and
-    language standards.
-
-    Non-production targets (swift_cc_tool*), are compiled without the
-    -pedantic flag.
+    language standards. Non-production targets (swift_cc_tool*), are 
+    compiled without the -pedantic flag.
 
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary

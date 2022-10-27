@@ -13,9 +13,8 @@ swift_cc_binary(<a href="#swift_cc_binary-kwargs">kwargs</a>)
 Wraps cc_binary to enforce standards for a production binary.
 
 Primarily this consists of a default set of compiler options and
-language standards.
-
-Production targets (swift_cc*), are compiled with the -pedantic flag.
+language standards. Production targets (swift_cc*), are compiled 
+with the -pedantic flag.
 
 
 **PARAMETERS**
@@ -37,9 +36,8 @@ swift_cc_library(<a href="#swift_cc_library-kwargs">kwargs</a>)
 Wraps cc_library to enforce standards for a production library.
 
 Primarily this consists of a default set of compiler options and
-language standards.
-
-Production targets (swift_cc*), are compiled with the -pedantic flag.
+language standards. Production targets (swift_cc*), are compiled 
+with the -pedantic flag.
 
 
 **PARAMETERS**
@@ -99,10 +97,8 @@ swift_cc_tool(<a href="#swift_cc_tool-kwargs">kwargs</a>)
 Wraps cc_binary to enforce standards for a non-production binary.
 
 Primarily this consists of a default set of compiler options and
-language standards.
-
-Non-production targets (swift_cc_tool*), are compiled without the
--pedantic flag.
+language standards. Non-production targets (swift_cc_tool*), are 
+compiled without the -pedantic flag.
 
 
 **PARAMETERS**
@@ -124,10 +120,8 @@ swift_cc_tool_library(<a href="#swift_cc_tool_library-kwargs">kwargs</a>)
 Wraps cc_library to enforce standards for a non-production library.
 
 Primarily this consists of a default set of compiler options and
-language standards.
-
-Non-production targets (swift_cc_tool*), are compiled without the
--pedantic flag.
+language standards. Non-production targets (swift_cc_tool*), 
+are compiled without the -pedantic flag.
 
 
 **PARAMETERS**
