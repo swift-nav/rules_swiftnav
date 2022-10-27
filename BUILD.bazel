@@ -6,4 +6,10 @@ stardoc(
     out = "swift_cc_defs.md",
 )
 
+stardoc(
+    name = "configure_file_docs",
+    input = "configure_file.bzl",
+    out = "configure_file.md",
+)
+
 exports_files(["qac_compile_commands.sh"])

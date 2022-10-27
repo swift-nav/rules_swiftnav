@@ -20,10 +20,28 @@ def _configure_file_impl(ctx):
 
 configure_file = rule(
     implementation = _configure_file_impl,
+    doc = """
+Equivalent of CMake's configure_file
+
+Example:
+  ```starlark
+  configure_file(
+      name = "config",
+      out = "config.h",
+      template = "config.h.in",
+      vars = { "FOO":"BAR" }
+  )
+  ```
+""",
     attrs = {
-        "vars": attr.string_dict(),
-        "out": attr.string(),
+        "vars": attr.string_dict(
+            doc = "Key values pairs to substitute.",
+        ),
+        "out": attr.string(
+            doc = "Name of the generated file.",
+        ),
         "template": attr.label(
+            doc = "CMake style input template.",
             allow_single_file = [".in"],
             mandatory = True,
         ),
