@@ -23,14 +23,20 @@ configure_file = rule(
     doc = """
 Equivalent of CMake's configure_file
 
+The generated output files are not an exact match
+with the CMake version but should be functionally
+equivalent.
+
 Example:
   For the following CMake configure_file call
+
   ```cmake
   set(MAX_CHANNELS "63")
   configure_file(config.h.in, config.h)
   ```
 
-  The equivalent would be
+  The Bazel equivalent would be
+
   ```starlark
   configure_file(
       name = "config",
