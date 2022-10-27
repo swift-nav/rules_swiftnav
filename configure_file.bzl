@@ -24,12 +24,19 @@ configure_file = rule(
 Equivalent of CMake's configure_file
 
 Example:
+  For the following CMake configure_file call:
+  ```cmake
+  set(MAX_CHANNELS "63")
+  configure_file(config.h.in, config.h)
+  ```
+
+  The equivalent would be:
   ```starlark
   configure_file(
       name = "config",
       out = "config.h",
       template = "config.h.in",
-      vars = { "FOO":"BAR" }
+      vars = { "MAX_CHANNELS":"63" }
   )
   ```
 """,
