@@ -6,12 +6,12 @@ def _configure_file_impl(ctx):
         cmake_define_nl = "#cmakedefine {}\n".format(key)
         define_nl = "// #undef {}\n".format(key) if val in CMAKE_FALSE_CONSTANTS else "#define {}\n".format(key)
         cmake_define_s = "#cmakedefine {} ".format(key)
-        define_s = "// #undef {}\n".format(key) if val in CMAKE_FALSE_CONSTANTS else "#define {} ".format(key)
+        define_s = "// #undef {} ".format(key) if val in CMAKE_FALSE_CONSTANTS else "#define {} ".format(key)
 
         cmake_define_01_nl = "#cmakedefine01 {}\n".format(key)
         define_01_nl = "#define {} 0\n".format(key) if val in CMAKE_FALSE_CONSTANTS else "#define {} 1\n".format(key)
         cmake_define_01_s = "#cmakedefine01 {} ".format(key)
-        define_01_s = "#define {} 0\n".format(key) if val in CMAKE_FALSE_CONSTANTS else "#define {} 1 ".format(key)
+        define_01_s = "#define {} 0 ".format(key) if val in CMAKE_FALSE_CONSTANTS else "#define {} 1 ".format(key)
 
         vars[cmake_define_nl] = define_nl
         vars[cmake_define_s] = define_s

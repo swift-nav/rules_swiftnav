@@ -18,8 +18,6 @@ cmake(
         "-DRC_ENABLE_GTEST=ON",
     ],
     lib_source = ":srcs",
-    # out_interface_libs = ["rapidcheck_gtest.lib"],
-    # out_include_dir = "costam",
     out_static_libs = ["librapidcheck.a"],
     visibility = ["//visibility:public"],
 )
