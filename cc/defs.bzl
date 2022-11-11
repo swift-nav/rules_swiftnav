@@ -66,11 +66,11 @@ def _common_c_opts(nocopts, pedantic = False):
         #"-Wmissing-include-dirs"
     ]
 
-    # filter nocopts from the default list
-    copts = [copt for copt in copts if copt not in nocopts]
-
     if pedantic:
         copts.append("-pedantic")
+
+    # filter nocopts from the default list
+    copts = [copt for copt in copts if copt not in nocopts]
 
     return copts
 
