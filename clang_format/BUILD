@@ -1,5 +1,16 @@
 load(":choose_clang_format.bzl", "choose_clang_format")
 
+filegroup(
+    name = "clang_format_config_default",
+    srcs = [ ".clang-format" ],
+)
+
+label_flag(
+    name = "clang_format_config",
+    build_setting_default = ":clang_format_config_default",
+    visibility = ["//visibility:public"],
+)
+
 choose_clang_format(
     name = "clang_format_bin",
     visibility = ["//visibility:public"],
@@ -21,7 +32,12 @@ sh_binary(
     ],
     data = [
         ":_clang_format_bin",
-        "//:clang_format_config",
+        ":clang_format_config",
     ],
+    visibility = ["//visibility:public"],
+)
+
+exports_files(
+    glob(["*.bzl"]) + ["run_clang_format.sh"] + [".clang-format"],
     visibility = ["//visibility:public"],
 )
