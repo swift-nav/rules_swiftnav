@@ -1,23 +1,13 @@
-load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
-
 package(
     default_visibility = ["//visibility:public"],
 )
 
-filegroup(
-    name = "srcs",
-    srcs = glob(["**"]),
-)
-
-cmake(
+cc_library(
     name = "rapidcheck",
-    cache_entries = {
-        "CMAKE_C_FLAGS": "-fPIC",
-    },
-    generate_args = [
-        "-DRC_ENABLE_GTEST=ON",
+    srcs = glob(["src/**"]),
+    hdrs = glob(["include/**"] + ["extras/**"]),
+    includes = [
+        "extras/gtest/include",
+        "include",
     ],
-    lib_source = ":srcs",
-    out_static_libs = ["librapidcheck.a"],
-    visibility = ["//visibility:public"],
 )
