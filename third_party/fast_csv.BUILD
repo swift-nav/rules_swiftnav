@@ -15,5 +15,6 @@ package(
 cc_library(
     name = "fast_csv",
     hdrs = glob(["**"]),
+    defines = ["FAST_CSV_OPTION_TYPE_SUPPORT"],
     includes = ["."],
 )
