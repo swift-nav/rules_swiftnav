@@ -2,7 +2,7 @@ load(":choose_clang_format.bzl", "choose_clang_format")
 
 filegroup(
     name = "clang_format_config_default",
-    srcs = [ ".clang-format" ],
+    srcs = [".clang-format"],
 )
 
 label_flag(
@@ -29,6 +29,7 @@ sh_binary(
     args = [
         "format_all",
         "$(location :_clang_format_bin)",
+        "$(location :clang_format_config)",
     ],
     data = [
         ":_clang_format_bin",

@@ -1,5 +1,4 @@
 def _choose_clang_format(ctx):
-    print("I'M CHOOSING CLANG FORMAT")
     out = ctx.actions.declare_file("clang_format_bin.sh")
 
     ctx.actions.run_shell(
