@@ -12,7 +12,9 @@ format_all() {
         echo ".clang-format file not found. Bazel will copy the default .clang-format file."
         cp $CLANG_FORMAT_CONFIG .
     fi
-    git ls-files '*.[ch]' '*.cpp' '*.cc' '*.hpp' | xargs $CLANG_FORMAT_BIN -i
+    git describe --tags --abbrev=0 --always \
+    | xargs -I % git diff --diff-filter=ACMRTUXB --name-only --line-prefix=`git rev-parse --show-toplevel`/ % -- '*.[ch]' '*.cpp' '*.cc' '*.hpp' \
+    | xargs clang-format-14 -i
 }
 
 check_file() {
