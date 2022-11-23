@@ -1,0 +1,32 @@
+name: rules_swiftnav
+
+on:
+  pull_request: ~
+  push:
+    branches:
+      - 'main'
+
+jobs:
+
+  check-formatting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+      - name: Set up cache
+        run: |
+          npm install -g bazels3cache
+          bazels3cache --bucket=${{ secrets.BAZEL_BUCKET }}
+
+      - name: Checkout source
+        uses: actions/checkout@v2
+
+      - name: Run format
+        run: |
+          bazel run --remote_cache=http://localhost:7777 //:buildifier
+          git diff --exit-code
