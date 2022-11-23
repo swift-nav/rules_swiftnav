@@ -23,7 +23,10 @@ cmake(
     lib_source = ":srcs",
     linkopts = select({
         "@bazel_tools//src/conditions:darwin": ["-lpthread"],
-        "//conditions:default": ["-lpthread", "-lrt"],
+        "//conditions:default": [
+            "-lpthread",
+            "-lrt",
+        ],
     }),
     out_static_libs = select({
         "@bazel_tools//src/conditions:windows": ["check.lib"],
