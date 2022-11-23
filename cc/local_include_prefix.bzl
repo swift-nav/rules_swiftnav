@@ -8,9 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-
 def local_include_prefix():
     root = Label(native.repository_name() + "//:WORKSPACE").workspace_root or "."
-    root = root + "/"
-    print(root)
-    return root
+    package = native.package_name()
+    return root + "/" + package + "/"
