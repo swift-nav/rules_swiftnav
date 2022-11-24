@@ -10,6 +10,8 @@
 
 """Swift wrappers for native cc rules."""
 
+load(":local_include_prefix.bzl", "local_include_prefix")
+
 # Name for a unit test
 UNIT = "unit"
 
@@ -74,6 +76,9 @@ def _common_c_opts(nocopts, pedantic = False):
 
     return copts
 
+def _construct_local_includes(local_includes):
+    return ["-I" + local_include_prefix() + include for include in local_includes]
+
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
 
@@ -89,10 +94,12 @@ def swift_cc_library(**kwargs):
             attribute takes a list of flags to remove from the
             default compiler options. Use judiciously.
     """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
     copts = _common_c_opts(nocopts, pedantic = True)
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes + copts
 
     native.cc_library(**kwargs)
 
@@ -112,6 +119,8 @@ def swift_cc_tool_library(**kwargs):
             attribute takes a list of flags to remove from the
             default compiler options. Use judiciously.
     """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
