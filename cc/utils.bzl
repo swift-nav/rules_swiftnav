@@ -24,7 +24,6 @@ def construct_local_include(path):
             Use the special argument $(GENDIR) to construct an include path for
             any generated files the build depends on. Assumes these files are
             not generated into a subdirectory.
-
     """
     root = Label(native.repository_name() + "//:WORKSPACE").workspace_root or "."
     package = native.package_name()
