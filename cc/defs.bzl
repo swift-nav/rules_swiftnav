@@ -10,7 +10,7 @@
 
 """Swift wrappers for native cc rules."""
 
-load(":local_include_prefix.bzl", "local_include_prefix")
+load(":utils.bzl", "construct_local_include")
 
 # Name for a unit test
 UNIT = "unit"
@@ -77,7 +77,7 @@ def _common_c_opts(nocopts, pedantic = False):
     return copts
 
 def _construct_local_includes(local_includes):
-    return ["-I" + local_include_prefix() + include for include in local_includes]
+    return [construct_local_include(path) for path in local_includes]
 
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
@@ -90,16 +90,22 @@ def swift_cc_library(**kwargs):
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
-            An additional attribute nocopts is supported. This
-            attribute takes a list of flags to remove from the
-            default compiler options. Use judiciously.
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
     """
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
     copts = _common_c_opts(nocopts, pedantic = True)
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes + copts
+    copts = local_includes + copts
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_library(**kwargs)
 
@@ -115,15 +121,21 @@ def swift_cc_tool_library(**kwargs):
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
-            An additional attribute nocopts is supported. This
-            attribute takes a list of flags to remove from the
-            default compiler options. Use judiciously.
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
     """
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
+    copts = local_includes + copts
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_library(**kwargs)
@@ -139,13 +151,21 @@ def swift_cc_binary(**kwargs):
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
 
-            An additional attribute nocopts is supported. This
-            attribute takes a list of flags to remove from the
-            default compiler options. Use judiciously.
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
     """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = True)
+    copts = local_includes + copts
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
 
     native.cc_binary(**kwargs)
@@ -162,9 +182,14 @@ def swift_cc_tool(**kwargs):
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
 
-            An additional attribute nocopts is supported. This
-            attribute takes a list of flags to remove from the
-            default compiler options. Use judiciously.
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
     """
     nocopts = kwargs.pop("nocopts", [])
 
@@ -178,7 +203,16 @@ def swift_cc_test_library(**kwargs):
 
     Args:
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
     """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
@@ -192,11 +226,20 @@ def swift_cc_test(name, type, **kwargs):
             these test types seperately: `bazel test --test_tag_filters=unit //...`
 
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
     """
 
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
     kwargs["name"] = name
     kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type]
     native.cc_test(**kwargs)
