@@ -22,7 +22,8 @@ def construct_local_include(path):
         path: The include path relative to the package this macro is called from
 
             Use the special argument $(GENDIR) to construct an include path for
-            any generated files the build depends on.
+            any generated files the build depends on. Assumes these files are
+            not generated into a subdirectory.
 
     """
     root = Label(native.repository_name() + "//:WORKSPACE").workspace_root or "."
