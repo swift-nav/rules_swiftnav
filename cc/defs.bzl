@@ -19,6 +19,12 @@ UNIT = "unit"
 # Name for a integration test
 INTEGRATION = "integration"
 
+# Name for swift_cc_library
+LIBRARY = "library"
+
+# Name for swift_cc_binary
+BINARY = "binary"
+
 def _common_c_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
@@ -55,6 +61,7 @@ def swift_cc_library(**kwargs):
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
     kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
+    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [LIBRARY]
 
     native.cc_library(**kwargs)
 
@@ -116,6 +123,7 @@ def swift_cc_binary(**kwargs):
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
     kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
+    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [BINARY]
 
     native.cc_binary(**kwargs)
 

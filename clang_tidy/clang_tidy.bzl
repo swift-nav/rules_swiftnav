@@ -1,7 +1,11 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("//cc:defs.bzl", "BINARY", "LIBRARY")
 
-def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_context, infile, discriminator):
-    inputs = depset(direct = [infile, config] + additional_deps.files.to_list() + ([exe.files_to_run.executable] if exe.files_to_run.executable else []), transitive = [compilation_context.headers])
+def _flatten(l):
+    return [item for sublist in l for item in sublist]
+
+def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_contexts, infile, discriminator):
+    inputs = depset(direct = [infile, config] + additional_deps.files.to_list() + ([exe.files_to_run.executable] if exe.files_to_run.executable else []), transitive = [compilation_context.headers for compilation_context in compilation_contexts])
 
     args = ctx.actions.args()
 
@@ -16,6 +20,8 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     else:
         args.add(exe.files_to_run.executable)
 
+    args.add(config.path)
+
     args.add(outfile.path)  # this is consumed by the wrapper script
     args.add("--export-fixes", outfile.path)
 
@@ -29,22 +35,25 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     args.add_all(flags)
 
     # add defines
-    for define in compilation_context.defines.to_list():
+    for define in _flatten([compilation_context.defines.to_list() for compilation_context in compilation_contexts]):
         args.add("-D" + define)
 
-    for define in compilation_context.local_defines.to_list():
+    for define in _flatten([compilation_context.local_defines.to_list() for compilation_context in compilation_contexts]):
         args.add("-D" + define)
 
     # add includes
-    for i in compilation_context.framework_includes.to_list():
+    for i in _flatten([compilation_context.framework_includes.to_list() for compilation_context in compilation_contexts]):
         args.add("-F" + i)
 
-    for i in compilation_context.includes.to_list():
-        args.add("-I" + i)
+    for i in _flatten([compilation_context.includes.to_list() for compilation_context in compilation_contexts]):
+        if "gflags" in i:
+            args.add("-isystem" + i)
+        else:
+            args.add("-I" + i)
 
-    args.add_all(compilation_context.quote_includes.to_list(), before_each = "-iquote")
+    args.add_all(_flatten([compilation_context.quote_includes.to_list() for compilation_context in compilation_contexts]), before_each = "-iquote")
 
-    args.add_all(compilation_context.system_includes.to_list(), before_each = "-isystem")
+    args.add_all(_flatten([compilation_context.system_includes.to_list() for compilation_context in compilation_contexts]), before_each = "-isystem")
 
     ctx.actions.run(
         inputs = inputs,
@@ -89,13 +98,34 @@ def _safe_flags(flags):
     unsupported_flags = [
         "-fno-canonical-system-headers",
         "-fstack-usage",
+        "-Wno-free-nonheap-object",
+        "-Wunused-but-set-parameter",
+        "-std=c++0x",
+        "-std=c++14",
     ]
 
     return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("--sysroot")]
 
+def _replace_gendir(flags, ctx):
+    return [flag.replace("$(GENDIR)", ctx.genfiles_dir.path) for flag in flags]
+
+# since implementation_deps is currently the experimental feature we have to add compilation context from implementation_deps manually
+def _get_compilation_contexts(target, ctx):
+    compilation_contexts = [target[CcInfo].compilation_context]
+
+    implementation_deps = getattr(ctx.rule.attr, "implementation_deps", [])
+    for implementation_dep in implementation_deps:
+        compilation_contexts.append(implementation_dep[CcInfo].compilation_context)
+
+    return compilation_contexts
+
 def _clang_tidy_aspect_impl(target, ctx):
     # if not a C/C++ target, we are not interested
     if not CcInfo in target:
+        return []
+
+    tags = getattr(ctx.rule.attr, "tags", [])
+    if not LIBRARY in tags and not BINARY in tags:
         return []
 
     wrapper = ctx.attr._clang_tidy_wrapper.files_to_run
@@ -105,10 +135,11 @@ def _clang_tidy_aspect_impl(target, ctx):
     toolchain_flags = _toolchain_flags(ctx)
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     safe_flags = _safe_flags(toolchain_flags + rule_flags)
-    compilation_context = target[CcInfo].compilation_context
-    srcs = _rule_sources(ctx)
-    outputs = [_run_tidy(ctx, wrapper, exe, additional_deps, config, safe_flags, compilation_context, src, target.label.name) for src in srcs]
+    final_flags = _replace_gendir(safe_flags, ctx)
+    compilation_contexts = _get_compilation_contexts(target, ctx)
 
+    srcs = _rule_sources(ctx)
+    outputs = [_run_tidy(ctx, wrapper, exe, additional_deps, config, final_flags, compilation_contexts, src, target.label.name) for src in srcs]
     return [
         OutputGroupInfo(report = depset(direct = outputs)),
     ]
@@ -119,9 +150,9 @@ clang_tidy_aspect = aspect(
     attrs = {
         "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
         "_clang_tidy_wrapper": attr.label(default = Label("//clang_tidy:clang_tidy")),
-        "_clang_tidy_executable": attr.label(default = Label("//:clang_tidy_executable")),
-        "_clang_tidy_additional_deps": attr.label(default = Label("//:clang_tidy_additional_deps")),
-        "_clang_tidy_config": attr.label(default = Label("//:clang_tidy_config")),
+        "_clang_tidy_executable": attr.label(default = Label("//clang_tidy:clang_tidy_executable")),
+        "_clang_tidy_additional_deps": attr.label(default = Label("//clang_tidy:clang_tidy_additional_deps")),
+        "_clang_tidy_config": attr.label(default = Label("//clang_tidy:clang_tidy_config")),
     },
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
 )
