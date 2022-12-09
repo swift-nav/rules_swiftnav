@@ -1,8 +1,8 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//cc:defs.bzl", "BINARY", "LIBRARY")
 
-def _flatten(l):
-    return [item for sublist in l for item in sublist]
+def _flatten(input_list):
+    return [item for sublist in input_list for item in sublist]
 
 def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_contexts, infile, discriminator):
     inputs = depset(direct = [infile, config] + additional_deps.files.to_list() + ([exe.files_to_run.executable] if exe.files_to_run.executable else []), transitive = [compilation_context.headers for compilation_context in compilation_contexts])
@@ -100,11 +100,9 @@ def _safe_flags(flags):
         "-fstack-usage",
         "-Wno-free-nonheap-object",
         "-Wunused-but-set-parameter",
-        "-std=c++0x",
-        "-std=c++14",
     ]
 
-    return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("--sysroot")]
+    return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("--sysroot") and not "-std=" in flag]
 
 def _replace_gendir(flags, ctx):
     return [flag.replace("$(GENDIR)", ctx.genfiles_dir.path) for flag in flags]
