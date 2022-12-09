@@ -1,3 +1,10 @@
+load(":choose_clang_tidy.bzl", "choose_clang_tidy")
+
+choose_clang_tidy(
+    name = "clang_tidy_bin",
+    visibility = ["//visibility:public"],
+)
+
 sh_binary(
     name = "clang_tidy",
     srcs = ["run_clang_tidy.sh"],
@@ -7,10 +14,7 @@ sh_binary(
 
 filegroup(
     name = "clang_tidy_config_default",
-    srcs = [
-        ".clang-tidy",
-        # '//example:clang_tidy_config', # add package specific configs if needed
-    ],
+    srcs = [".clang-tidy"],
 )
 
 label_flag(
@@ -21,7 +25,7 @@ label_flag(
 
 filegroup(
     name = "clang_tidy_executable_default",
-    srcs = [],  # empty list: system clang-tidy
+    srcs = [":clang_tidy_bin"],
 )
 
 label_flag(
