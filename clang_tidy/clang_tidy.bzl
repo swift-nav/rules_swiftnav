@@ -109,7 +109,7 @@ def _safe_flags(flags):
 def _replace_gendir(flags, ctx):
     return [flag.replace("$(GENDIR)", ctx.genfiles_dir.path) for flag in flags]
 
-# since implementation_deps is currently the experimental feature we have to add compilation context from implementation_deps manually
+# since implementation_deps is currently an experimental feature we have to add compilation context from implementation_deps manually
 def _get_compilation_contexts(target, ctx):
     compilation_contexts = [target[CcInfo].compilation_context]
 
