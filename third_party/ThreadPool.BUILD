@@ -8,30 +8,12 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-
 package(
     default_visibility = ["//visibility:public"],
 )
 
-string_flag(
-    name = "fast_csv_option_type_support",
-    build_setting_default = "",
-)
-
-config_setting(
-    name = "_fast_csv_option_type_support",
-    flag_values = {
-        ":fast_csv_option_type_support": "on",
-    },
-)
-
 cc_library(
-    name = "fast_csv",
-    hdrs = glob(["**"]),
-    defines = select({
-        ":_fast_csv_option_type_support": ["FAST_CSV_OPTION_TYPE_SUPPORT"],
-        "//conditions:default": [],
-    }),
+    name = "ThreadPool",
+    hdrs = ["ThreadPool.h"],
     includes = ["."],
 )
