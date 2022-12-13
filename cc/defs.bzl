@@ -202,7 +202,7 @@ def swift_cc_test_library(**kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
 
     Args:
-        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
             The following additional attributes are supported:
 
@@ -211,16 +211,20 @@ def swift_cc_test_library(**kwargs):
             be relative to the package this macro is called from.
     """
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    nocopts = kwargs.pop("nocopts", [])
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = local_includes + copts
+    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
     native.cc_library(**kwargs)
 
-def swift_cc_test(name, type, **kwargs):
+def swift_cc_test(name, type, common_c_opts = False, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
 
     Args:
         name: A unique name for this rule.
         type: Specifies whether the test is a unit or integration test.
+        common_c_opts: Bool flag that indicates if common compilation flags will be added. Default False.
 
             These are passed to cc_test as tags which enables running
             these test types seperately: `bazel test --test_tag_filters=unit //...`
@@ -239,7 +243,14 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    copts = []
+    if common_c_opts:
+        nocopts = kwargs.pop("nocopts", [])
+        copts = _common_c_opts(nocopts, pedantic = False)
+    copts = local_includes + copts
+
+    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
     kwargs["name"] = name
     kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type]
+    kwargs["linkstatic"] = (kwargs["linkstatic"] if "linkstatic" in kwargs else True)
     native.cc_test(**kwargs)
