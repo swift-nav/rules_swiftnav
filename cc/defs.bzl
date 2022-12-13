@@ -105,7 +105,7 @@ def swift_cc_library(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
+    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
 
     native.cc_library(**kwargs)
 
@@ -136,7 +136,7 @@ def swift_cc_tool_library(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = False)
     copts = local_includes + copts
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
+    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
 
     native.cc_library(**kwargs)
 
@@ -166,7 +166,7 @@ def swift_cc_binary(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
+    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
 
     native.cc_binary(**kwargs)
 
@@ -194,7 +194,7 @@ def swift_cc_tool(**kwargs):
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + copts
+    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
 
     native.cc_binary(**kwargs)
 
