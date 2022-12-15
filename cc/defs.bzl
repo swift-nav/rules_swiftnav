@@ -210,6 +210,9 @@ def swift_cc_test_library(**kwargs):
             this to passing local includes using copts. Paths are expected to
             be relative to the package this macro is called from.
     """
+
+    _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
@@ -233,6 +236,8 @@ def swift_cc_test(name, type, **kwargs):
             this to passing local includes using copts. Paths are expected to
             be relative to the package this macro is called from.
     """
+
+    _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
 
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
