@@ -11,6 +11,7 @@
 """Swift wrappers for native cc rules."""
 
 load(":utils.bzl", "construct_local_include")
+load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
 
 # Name for a unit test
 UNIT = "unit"
@@ -19,62 +20,10 @@ UNIT = "unit"
 INTEGRATION = "integration"
 
 def _common_c_opts(nocopts, pedantic = False):
-    # The following are set by default by Bazel:
-    # -Wall, -Wunused-but-set-parameter, -Wno-free-heap-object
-    copts = [
-        "-Werror",
-        "-Wcast-align",
-        "-Wcast-qual",
-        "-Wchar-subscripts",
-        "-Wcomment",
-        "-Wconversion",
-        "-Wdisabled-optimization",
-        "-Wextra",
-        "-Wfloat-equal",
-        "-Wformat",
-        "-Wformat-security",
-        "-Wformat-y2k",
-        "-Wimplicit-fallthrough",
-        "-Wimport",
-        "-Winit-self",
-        "-Winvalid-pch",
-        "-Wmissing-braces",
-        "-Wmissing-field-initializers",
-        "-Wparentheses",
-        "-Wpointer-arith",
-        "-Wredundant-decls",
-        "-Wreturn-type",
-        "-Wsequence-point",
-        "-Wshadow",
-        "-Wsign-compare",
-        "-Wstack-protector",
-        "-Wswitch",
-        "-Wswitch-default",
-        "-Wswitch-enum",
-        "-Wtrigraphs",
-        "-Wuninitialized",
-        "-Wunknown-pragmas",
-        "-Wunreachable-code",
-        "-Wunused",
-        "-Wunused-function",
-        "-Wunused-label",
-        "-Wunused-parameter",
-        "-Wunused-value",
-        "-Wunused-variable",
-        "-Wvolatile-register-var",
-        "-Wwrite-strings",
-        "-Wno-error=deprecated-declarations",
-        #TODO: [BUILD-405] - Figure out why build breaks with this flag
-        #"-Wmissing-include-dirs"
-    ]
-
-    # filter nocopts from the default list
-    copts = [copt for copt in copts if copt not in nocopts]
-
-    if pedantic:
-        copts.append("-pedantic")
-
-    return copts
+    return select({
+        Label("//constraints/compiler:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
+        "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
+    }) + ["-pedantic"] if pedantic else []
 
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
