@@ -21,7 +21,7 @@ INTEGRATION = "integration"
 
 def _common_c_opts(nocopts, pedantic = False):
     return select({
-        Label("//constraints/compiler:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
+        Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
     }) + ["-pedantic"] if pedantic else []
 
