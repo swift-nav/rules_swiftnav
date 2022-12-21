@@ -47,4 +47,5 @@ DEFAULT_COPTS = [
     #"-Wmissing-include-dirs"
 ]
 
-GCC6_COPTS = [copt for copt in DEFAULT_COPTS if copt != "-Wimplicit-fallthrough"]
+GCC6_DISABLED_COPTS = ["-Wimplicit-fallthrough"]
+GCC6_COPTS = [copt for copt in DEFAULT_COPTS if copt in GCC6_DISABLED_COPTS]
