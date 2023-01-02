@@ -10,9 +10,10 @@
 
 """
 hdf5@1.12.2
-"""
 
-licenses(["notice"])  # BSD-like license
+An hdf5 build file based on the one found in tensorflow repository:
+https://github.com/tensorflow/io/blob/master/third_party/hdf5.BUILD
+"""
 
 exports_files(["COPYING"])
 
