@@ -12,18 +12,18 @@ filegroup(
 cmake(
     name = "netcdf-c",
     cache_entries = {
-        "BUILD_SHARED_LIBS": "ON",
+        "BUILD_SHARED_LIBS": "OFF",
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_INSTALL_LIBDIR": "lib",
         "ENABLE_DAP": "OFF",
         "ENABLE_EXAMPLES": "OFF",
         "ENABLE_PNETCDF": "OFF",
         "ENABLE_TESTS": "OFF",
+        "ENABLE_NCZARR": "OFF",
         "USE_SZIP": "OFF",
     },
-    generate_args = ["-GNinja"],
+    copts = ["-fPIC"],
     lib_source = ":allsrcs",
-    out_shared_libs = ["libnetcdf.so"],
+    out_static_libs = ["libnetcdf.a"],
     visibility = ["//visibility:public"],
     deps = [
         "@hdf5",
