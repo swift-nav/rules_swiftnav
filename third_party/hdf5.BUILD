@@ -349,6 +349,7 @@ genrule(
     ]),
 )
 
+# TODO Generated file will cause problems with caching [BUILD-499]
 genrule(
     name = "H5Tinit_c",
     outs = ["config/H5Tinit.c"],

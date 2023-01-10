@@ -23,7 +23,6 @@ cmake(
     name = "netcdf-c",
     cache_entries = {
         "BUILD_SHARED_LIBS": "OFF",
-        "CMAKE_BUILD_TYPE": "Release",
         "ENABLE_DAP": "OFF",
         "ENABLE_EXAMPLES": "OFF",
         "ENABLE_PNETCDF": "OFF",
