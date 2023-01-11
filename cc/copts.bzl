@@ -48,4 +48,4 @@ DEFAULT_COPTS = [
 ]
 
 GCC6_DISABLED_COPTS = ["-Wimplicit-fallthrough"]
-GCC6_COPTS = [copt for copt in DEFAULT_COPTS if copt in GCC6_DISABLED_COPTS]
+GCC6_COPTS = [copt for copt in DEFAULT_COPTS if copt not in GCC6_DISABLED_COPTS]
