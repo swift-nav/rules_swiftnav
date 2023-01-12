@@ -36,5 +36,6 @@ cmake(
     visibility = ["//visibility:public"],
     deps = [
         "@hdf5",
+        "@hdf5//:hdf5_hl",
     ],
 )

@@ -23,7 +23,6 @@ cc_library(
         [
             "src/**/*.c",
             "hl/src/*.c",
-            "c++/src/*.cpp",
         ],
         exclude = [
             "src/H5make_libsettings.c",
@@ -42,9 +41,7 @@ cc_library(
         ],
     }),
     includes = [
-        "c++/src",
         "config",
-        "hl/src",
         "src",
         "src/H5FDsubfiling",
     ],
@@ -52,6 +49,26 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":header",
+    ],
+)
+
+cc_library(
+    name = "hdf5_hl",
+    srcs = glob(["hl/src/*.c"]),
+    copts = select({
+        "@bazel_tools//src/conditions:windows": [
+            "/Zc:preprocessor-",
+        ],
+        "//conditions:default": [
+            "-Wno-error=implicit-function-declaration",
+        ],
+    }),
+    includes = [
+        "hl/src",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":hdf5",
     ],
 )
 
