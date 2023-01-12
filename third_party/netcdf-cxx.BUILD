@@ -24,9 +24,14 @@ cmake(
     cache_entries = {
         "BUILD_SHARED_LIBS": "OFF",
         "NCXX_ENABLE_TESTS": "OFF",
+        "HDF5_C_LIBRARY_hdf5": "libhdf5.a",
     },
     lib_source = ":srcs",
     out_static_libs = ["libnetcdf-cxx4.a"],
     visibility = ["//visibility:public"],
-    deps = ["@netcdf-c"],
+    deps = [
+        "@hdf5",
+        "@hdf5//:hdf5_hl",
+        "@netcdf-c",
+    ],
 )
