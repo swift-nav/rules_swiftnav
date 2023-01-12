@@ -24,7 +24,10 @@ cmake(
     cache_entries = {
         "BUILD_SHARED_LIBS": "OFF",
         "NCXX_ENABLE_TESTS": "OFF",
-        "HDF5_C_LIBRARY_hdf5": "libhdf5.a",
+        # This variable is expected to be set by hdf5's cmake build scripts,
+        # but since we're building hdf5 directly in bazel, we have to pass it here.
+        # The value is unimportant to the build unless you need H5free_memory.
+        "HDF5_C_LIBRARY_hdf5": "foo",
     },
     lib_source = ":srcs",
     out_static_libs = ["libnetcdf-cxx4.a"],
