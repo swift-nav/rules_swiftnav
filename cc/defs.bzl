@@ -25,11 +25,13 @@ LIBRARY = "library"
 # Name for swift_cc_binary
 BINARY = "binary"
 
-def _common_c_opts(nocopts, pedantic = False):
+def _common_c_opts(nocopts, exceptions, pedantic = False):
     return select({
-        Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
-        "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
-    }) + ["-pedantic"] if pedantic else []
+               Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
+               "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
+           }) + [copt for copt in GCC6_COPTS if copt not in nocopts] + \
+           (["-fexceptions"] if exceptions else ["-fno-exceptions"]) + \
+           (["-pedantic"] if pedantic else [])
 
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
@@ -42,7 +44,7 @@ def _default_features():
         "//conditions:default": ["treat_warnings_as_errors"],
     })
 
-def swift_cc_library(**kwargs):
+def swift_cc_library(exceptions = False, **kwargs):
     """Wraps cc_library to enforce standards for a production library.
 
     Primarily this consists of a default set of compiler options and
@@ -51,6 +53,7 @@ def swift_cc_library(**kwargs):
     Production targets (swift_cc*), are compiled with the -pedantic flag.
 
     Args:
+        exceptions: Bool flag that indicates if exceptions are enabled. Default False.
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
             The following additional attributes are supported:
@@ -66,7 +69,7 @@ def swift_cc_library(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
-    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = _common_c_opts(nocopts, exceptions, pedantic = True)
     copts = local_includes + copts
     kwargs["copts"] = copts + kwargs.get("copts", [])
 
@@ -76,7 +79,7 @@ def swift_cc_library(**kwargs):
 
     native.cc_library(**kwargs)
 
-def swift_cc_tool_library(**kwargs):
+def swift_cc_tool_library(exceptions = False, **kwargs):
     """Wraps cc_library to enforce standards for a non-production library.
 
     Primarily this consists of a default set of compiler options and
@@ -86,6 +89,7 @@ def swift_cc_tool_library(**kwargs):
     -pedantic flag.
 
     Args:
+        exceptions: Bool flag that indicates if exceptions are enabled. Default False.
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
             The following additional attributes are supported:
@@ -101,7 +105,7 @@ def swift_cc_tool_library(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = _common_c_opts(nocopts, exceptions, pedantic = False)
     copts = local_includes + copts
     kwargs["copts"] = copts + kwargs.get("copts", [])
 
@@ -109,7 +113,7 @@ def swift_cc_tool_library(**kwargs):
 
     native.cc_library(**kwargs)
 
-def swift_cc_binary(**kwargs):
+def swift_cc_binary(exceptions = False, **kwargs):
     """Wraps cc_binary to enforce standards for a production binary.
 
     Primarily this consists of a default set of compiler options and
@@ -118,6 +122,7 @@ def swift_cc_binary(**kwargs):
     Production targets (swift_cc*), are compiled with the -pedantic flag.
 
     Args:
+        exceptions: Bool flag that indicates if exceptions are enabled. Default False.
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
 
             The following additional attributes are supported:
@@ -133,7 +138,7 @@ def swift_cc_binary(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = _common_c_opts(nocopts, exceptions, pedantic = True)
     copts = local_includes + copts
     kwargs["copts"] = copts + kwargs.get("copts", [])
 
@@ -143,7 +148,7 @@ def swift_cc_binary(**kwargs):
 
     native.cc_binary(**kwargs)
 
-def swift_cc_tool(**kwargs):
+def swift_cc_tool(exceptions = False, **kwargs):
     """Wraps cc_binary to enforce standards for a non-production binary.
 
     Primarily this consists of a default set of compiler options and
@@ -153,6 +158,7 @@ def swift_cc_tool(**kwargs):
     -pedantic flag.
 
     Args:
+        exceptions: Bool flag that indicates if exceptions are enabled. Default False.
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
 
             The following additional attributes are supported:
@@ -166,17 +172,18 @@ def swift_cc_tool(**kwargs):
     """
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = _common_c_opts(nocopts, exceptions, pedantic = False)
     kwargs["copts"] = copts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_binary(**kwargs)
 
-def swift_cc_test_library(**kwargs):
+def swift_cc_test_library(exceptions = False, **kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
 
     Args:
+        exceptions: Bool flag that indicates if exceptions are enabled. Default False.
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
 
             The following additional attributes are supported:
@@ -186,12 +193,13 @@ def swift_cc_test_library(**kwargs):
             be relative to the package this macro is called from.
     """
 
-    _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
+    nocopts = kwargs.pop("nocopts", [])
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", [])
-
+    copts = _common_c_opts(nocopts, exceptions, pedantic = False)
+    copts = local_includes + copts
+    kwargs["copts"] = copts + kwargs.get("copts", [])
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
