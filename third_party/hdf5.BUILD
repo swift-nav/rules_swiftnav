@@ -45,7 +45,7 @@ cc_library(
         "src",
         "src/H5FDsubfiling",
     ],
-    linkopts = [],
+    linkopts = ["-ldl"],
     visibility = ["//visibility:public"],
     deps = [
         ":header",
