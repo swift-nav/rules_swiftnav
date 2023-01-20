@@ -137,7 +137,12 @@ def _clang_tidy_aspect_impl(target, ctx):
     compilation_contexts = _get_compilation_contexts(target, ctx)
 
     srcs = _rule_sources(ctx)
-    outputs = [_run_tidy(ctx, wrapper, exe, additional_deps, config, final_flags, compilation_contexts, src, target.label.name) for src in srcs]
+    unsupported_ext = ["inc"]
+    outputs = []
+    for src in srcs:
+        if src.extension not in unsupported_ext:
+            outputs.append(_run_tidy(ctx, wrapper, exe, additional_deps, config, final_flags, compilation_contexts, src, target.label.name))
+
     return [
         OutputGroupInfo(report = depset(direct = outputs)),
     ]
