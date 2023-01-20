@@ -51,9 +51,14 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
         else:
             args.add("-I" + i)
 
-    args.add_all(_flatten([compilation_context.quote_includes.to_list() for compilation_context in compilation_contexts]), before_each = "-iquote")
-
-    args.add_all(_flatten([compilation_context.system_includes.to_list() for compilation_context in compilation_contexts]), before_each = "-isystem")
+    for compilation_context in compilation_contexts:
+        for path in compilation_context.quote_includes.to_list() + compilation_context.system_includes.to_list():
+            if path.startswith("external/") or path.find("/bin/external/") != -1:
+                args.add("-isystem")
+                args.add(path)
+            else:
+                args.add("-I")
+                args.add(path)
 
     ctx.actions.run(
         inputs = inputs,
@@ -100,6 +105,7 @@ def _safe_flags(flags):
         "-fstack-usage",
         "-Wno-free-nonheap-object",
         "-Wunused-but-set-parameter",
+        "-Wno-stringop-overflow",
     ]
 
     return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("--sysroot") and not "-std=" in flag]
