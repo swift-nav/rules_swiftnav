@@ -5,6 +5,7 @@ def _check_format(ctx, exe, config, infile, clang_format_bin):
 
     args.add("check_file")
     args.add(clang_format_bin.path)
+    args.add(config.path)
     args.add(infile.path)
     args.add(output.path)
 

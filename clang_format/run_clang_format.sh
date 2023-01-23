@@ -1,7 +1,7 @@
 #! /bin/bash
 # Usages:
 # run_clang_format format_all <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG>
-# run_clang_format check_file <CLANG_FORMAT_BIN> <INPUT> <OUTPUT>
+# run_clang_format check_file <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG> <INPUT> <OUTPUT>
 set -ue
 
 format_all() {
@@ -18,8 +18,14 @@ format_all() {
 }
 
 check_file() {
-    INPUT=$1
-    OUTPUT=$2
+    CONFIG=$1
+    INPUT=$2
+    OUTPUT=$3
+
+    # .clang-format config file has to be placed in the current working directory
+    if [ ! -f ".clang-format" ]; then
+        ln -s $CONFIG .clang-format
+    fi
 
     $CLANG_FORMAT_BIN $INPUT --dry-run -Werror > $OUTPUT
 }
