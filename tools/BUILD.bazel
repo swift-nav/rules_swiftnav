@@ -8,7 +8,30 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("//tools:get_coverage_files.bzl", "get_cov_files_rules")
+
 exports_files(
     glob(["*.bzl"]) + ["qac_compile_commands.sh"],
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "dummy",
+)
+
+label_flag(
+    name = "cov_target",
+    build_setting_default = ":dummy",
+    visibility = ["//visibility:public"],
+)
+
+get_cov_files_rules(
+    name = "cov_files",
+    testonly = 1,
+    deps = [":cov_target"],
+)
+
+sh_binary(
+    name = "gen_sonar_config",
+    srcs = ["gen_sonar_config.sh"],
 )
