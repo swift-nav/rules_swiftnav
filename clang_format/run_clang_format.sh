@@ -1,7 +1,7 @@
 #! /bin/bash
 # Usages:
 # run_clang_format format_all <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG>
-# run_clang_format check_file <CLANG_FORMAT_BIN> <CONFIG> <INPUT> <OUTPUT>
+# run_clang_format check_file <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG> <INPUT> <OUTPUT>
 set -ue
 
 format_all() {
