@@ -34,6 +34,14 @@ def _common_c_opts(nocopts, pedantic = False):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
+def _default_features():
+    return select({
+        # treat_warnings_as_errors passes the option -fatal-warnings
+        # to the linker which ld on mac does not understand.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["treat_warnings_as_errors"],
+    })
+
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
 
@@ -60,8 +68,11 @@ def swift_cc_library(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
-    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
-    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [LIBRARY]
+    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
+
+    kwargs["tags"] = kwargs.get("tags", []) + [LIBRARY]
 
     native.cc_library(**kwargs)
 
@@ -92,7 +103,9 @@ def swift_cc_tool_library(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = False)
     copts = local_includes + copts
-    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
+    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_library(**kwargs)
 
@@ -122,8 +135,11 @@ def swift_cc_binary(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
-    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
-    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [BINARY]
+    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
+
+    kwargs["tags"] = kwargs.get("tags", []) + [BINARY]
 
     native.cc_binary(**kwargs)
 
@@ -151,7 +167,9 @@ def swift_cc_tool(**kwargs):
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
-    kwargs["copts"] = copts + (kwargs["copts"] if "copts" in kwargs else [])
+    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_binary(**kwargs)
 
@@ -172,7 +190,8 @@ def swift_cc_test_library(**kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    kwargs["copts"] = local_includes + kwargs.get("copts", [])
+
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
@@ -201,7 +220,7 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    kwargs["copts"] = local_includes + kwargs.get("copts", [])
     kwargs["name"] = name
-    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type]
+    kwargs["tags"] = [type] + kwargs.get("tags", [])
     native.cc_test(**kwargs)
