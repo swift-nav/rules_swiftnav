@@ -35,7 +35,12 @@ def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
 def _default_features():
-    return ["treat_warnings_as_errors"]
+    return select({
+        # treat_warnings_as_errors passes the option -fatal-warnings
+        # to the linker which ld on mac does not understand.
+        "@platforms//os:macos": [],
+        "//conditions:default": ["treat_warnings_as_errors"],
+    })
 
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
