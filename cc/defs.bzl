@@ -25,6 +25,12 @@ LIBRARY = "library"
 # Name for swift_cc_binary
 BINARY = "binary"
 
+# Name for swift_cc_test_library
+TEST_LIBRARY = "test_library"
+
+# Name for swift_cc_test
+TEST = "test"
+
 def _common_c_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
@@ -172,7 +178,7 @@ def swift_cc_test_library(**kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes + [TEST_LIBRARY]
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
@@ -201,7 +207,7 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes + [TEST]
     kwargs["name"] = name
     kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type]
     native.cc_test(**kwargs)
