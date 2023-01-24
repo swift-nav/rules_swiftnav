@@ -221,6 +221,7 @@ def swift_cc_test(name, type, **kwargs):
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
     kwargs["tags"] = [type] + kwargs.get("tags", [])
     native.cc_test(**kwargs)
