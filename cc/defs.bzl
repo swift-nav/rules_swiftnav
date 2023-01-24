@@ -178,7 +178,8 @@ def swift_cc_test_library(**kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes + [TEST_LIBRARY]
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
+    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [TEST_LIBRARY]
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
@@ -207,7 +208,7 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes + [TEST]
+    kwargs["copts"] = (kwargs["copts"] if "copts" in kwargs else []) + local_includes
     kwargs["name"] = name
-    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type]
+    kwargs["tags"] = (kwargs["tags"] if "tags" in kwargs else []) + [type] + [TEST]
     native.cc_test(**kwargs)
