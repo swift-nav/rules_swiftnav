@@ -143,7 +143,10 @@ def _clang_tidy_aspect_impl(target, ctx):
     compilation_contexts = _get_compilation_contexts(target, ctx)
 
     srcs = _rule_sources(ctx)
-    unsupported_ext = ["inc"]
+
+    # We exclude headers because we shouldn't run clang-tidy directly with them.
+    # Headers will be linted if included in a source file.
+    unsupported_ext = ["inc", "h", "hpp"]
     outputs = []
     for src in srcs:
         if src.extension not in unsupported_ext:
