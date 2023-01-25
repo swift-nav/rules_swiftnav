@@ -1,4 +1,4 @@
-load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST", "TEST_LIBRARY")
+load("//cc:defs.bzl", "LIBRARY", "TEST_LIBRARY")
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 
 FilesInfo = provider(

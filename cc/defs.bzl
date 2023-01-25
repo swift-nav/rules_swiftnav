@@ -78,7 +78,7 @@ def swift_cc_library(**kwargs):
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
-    kwargs["tags"] = kwargs.get("tags", []) + [LIBRARY]
+    kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
 
@@ -145,7 +145,7 @@ def swift_cc_binary(**kwargs):
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
-    kwargs["tags"] = kwargs.get("tags", []) + [BINARY]
+    kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     native.cc_binary(**kwargs)
 
@@ -197,7 +197,9 @@ def swift_cc_test_library(**kwargs):
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
+
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
+
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
