@@ -31,6 +31,9 @@ TEST_LIBRARY = "test_library"
 # Name for swift_cc_test
 TEST = "test"
 
+# Name for test sources
+TEST_SRCS = "test_srcs"
+
 def _common_c_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
@@ -202,6 +205,18 @@ def swift_cc_test(name, type, **kwargs):
     """
 
     _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
+
+    srcs_name = name + "_srcs"
+    srcs = kwargs.get("srcs", [])
+
+    native.filegroup(
+        name = srcs_name,
+        srcs = srcs,
+        visibility = ["//visibility:public"],
+        tags = [TEST_SRCS],
+    )
+
+    kwargs["srcs"] = [":" + srcs_name]
 
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")

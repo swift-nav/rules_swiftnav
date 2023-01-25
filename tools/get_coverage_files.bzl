@@ -14,10 +14,7 @@ def _get_cov_files_impl(target, ctx):
         return [FilesInfo(files = [])]
 
     tags = getattr(ctx.rule.attr, "tags", [])
-    if not LIBRARY in tags and \
-       not BINARY in tags and \
-       not TEST_LIBRARY in tags and \
-       not TEST in tags:
+    if not LIBRARY in tags and not TEST_LIBRARY in tags:
         return [FilesInfo(files = [])]
 
     if hasattr(ctx.rule.attr, "srcs"):
@@ -36,8 +33,6 @@ def _get_cov_files_impl(target, ctx):
 
 _get_cov_files = aspect(
     implementation = _get_cov_files_impl,
-    attr_aspects = ["deps"],
-    attrs = {},
 )
 
 def _gen_sonar_cfg_impl(ctx):
@@ -45,8 +40,8 @@ def _gen_sonar_cfg_impl(ctx):
     all_files = []
 
     for target in ctx.attr.targets:
-        for file in target[FilesInfo].files:
-            if file not in all_files:
+        for file in target[FilesInfo].files + ctx.files.test_srcs:
+            if file.path not in all_files:
                 all_files_bash += file.path
                 all_files_bash += " "
                 all_files.append(file.path)
@@ -81,6 +76,7 @@ gen_sonar_cfg = rule(
     implementation = _gen_sonar_cfg_impl,
     attrs = {
         "targets": attr.label_list(aspects = [_get_cov_files]),
+        "test_srcs": attr.label_list(),
         "root_dir": attr.label(default = Label("//tools:root_dir")),
     },
 )
