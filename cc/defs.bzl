@@ -205,6 +205,9 @@ def swift_cc_test_library(**kwargs):
 def swift_cc_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
 
+    This rule creates a test target along with a target that contains the sources
+    of the test. The name of the sources is created with the '_src' suffix.
+
     Args:
         name: A unique name for this rule.
         type: Specifies whether the test is a unit or integration test.

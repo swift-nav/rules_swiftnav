@@ -1,4 +1,4 @@
-load("//cc:defs.bzl", "LIBRARY", "TEST_LIBRARY")
+load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY")
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 
 FilesInfo = provider(
@@ -7,14 +7,14 @@ FilesInfo = provider(
     },
 )
 
-def _get_cov_files_impl(target, ctx):
+def _get_target_files_impl(target, ctx):
     files = []
 
     if not CcInfo in target:
         return [FilesInfo(files = [])]
 
     tags = getattr(ctx.rule.attr, "tags", [])
-    if not LIBRARY in tags and not TEST_LIBRARY in tags:
+    if not LIBRARY in tags and not TEST_LIBRARY in tags and not BINARY in tags:
         return [FilesInfo(files = [])]
 
     if hasattr(ctx.rule.attr, "srcs"):
@@ -31,8 +31,8 @@ def _get_cov_files_impl(target, ctx):
 
     return [FilesInfo(files = files)]
 
-_get_cov_files = aspect(
-    implementation = _get_cov_files_impl,
+_get_target_files = aspect(
+    implementation = _get_target_files_impl,
 )
 
 def _gen_sonar_cfg_impl(ctx):
@@ -75,7 +75,7 @@ def _gen_sonar_cfg_impl(ctx):
 gen_sonar_cfg = rule(
     implementation = _gen_sonar_cfg_impl,
     attrs = {
-        "targets": attr.label_list(aspects = [_get_cov_files]),
+        "targets": attr.label_list(aspects = [_get_target_files]),
         "test_srcs": attr.label_list(),
         "root_dir": attr.label(default = Label("//tools:root_dir")),
     },
