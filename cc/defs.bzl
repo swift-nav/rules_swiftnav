@@ -25,6 +25,12 @@ LIBRARY = "library"
 # Name for swift_cc_binary
 BINARY = "binary"
 
+# Name for swift_cc_test_library
+TEST_LIBRARY = "test_library"
+
+# Name for test sources
+TEST_SRCS = "test_srcs"
+
 def _common_c_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
@@ -72,7 +78,7 @@ def swift_cc_library(**kwargs):
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
-    kwargs["tags"] = kwargs.get("tags", []) + [LIBRARY]
+    kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
 
@@ -139,7 +145,7 @@ def swift_cc_binary(**kwargs):
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
-    kwargs["tags"] = kwargs.get("tags", []) + [BINARY]
+    kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     native.cc_binary(**kwargs)
 
@@ -192,10 +198,15 @@ def swift_cc_test_library(**kwargs):
 
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
 
+    kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
+
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
+
+    This rule creates a test target along with a target that contains the sources
+    of the test. The name of the sources is created with the '_src' suffix.
 
     Args:
         name: A unique name for this rule.
@@ -214,6 +225,18 @@ def swift_cc_test(name, type, **kwargs):
     """
 
     _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
+
+    srcs_name = name + "_srcs"
+    srcs = kwargs.get("srcs", [])
+
+    native.filegroup(
+        name = srcs_name,
+        srcs = srcs,
+        visibility = ["//visibility:public"],
+        tags = [TEST_SRCS],
+    )
+
+    kwargs["srcs"] = [":" + srcs_name]
 
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
