@@ -8,6 +8,8 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("//tools:gen_sonar_cfg.bzl", "FilesInfo", "get_target_files")
+
 def qac_compile_commands(name, tool, **kwargs):
     """Replaces -isystem with -I in a compile_commands.json file.
 
@@ -26,3 +28,51 @@ def qac_compile_commands(name, tool, **kwargs):
         data = [tool],
         **kwargs
     )
+
+def _run_qac_impl(ctx):
+    out = ctx.actions.declare_directory("qac-projects")
+
+    target_files = []
+
+    for target in ctx.attr.targets:
+        target_files.extend(target[FilesInfo].files)
+
+    ctx.actions.run_shell(
+        inputs = target_files +
+                 ctx.files.test_srcs +
+                 ctx.files.compile_commands +
+                 ctx.files.qac_config,
+        outputs = [out],
+        command = """
+        set -ex
+
+        export GIT_TAG=dummy
+        export QAC_PROJECT_NAME={qac_project_name}
+        export QAC_PROJECT_DIR={qac_project_dir}/$QAC_PROJECT_NAME
+        export QAC_RCF_PATH={qac_config}
+        export BUILD_ROOT=$(dirname {compile_commands}) # compile_commands_path
+
+        # CHECK IF COMPILE COMMANDS AND CONFIG IN THE ROOT!!!!!!!!!!!!!!
+
+        PATH=$PATH:/opt/Perforce/Helix-QAC-2020.1/common/bin
+        PATH=$PATH qac || true
+        """.format(
+            compile_commands = ctx.files.compile_commands[0].path,
+            qac_project_dir = out.path,
+            qac_config = ctx.files.qac_config[0].path,
+            qac_project_name = ctx.attr.qac_project_name,
+        ),
+    )
+
+    return [DefaultInfo(files = depset([out]))]
+
+run_qac = rule(
+    implementation = _run_qac_impl,
+    attrs = {
+        "targets": attr.label_list(aspects = [get_target_files]),
+        "test_srcs": attr.label_list(),
+        "compile_commands": attr.label(),
+        "qac_config": attr.label(),
+        "qac_project_name": attr.string(),
+    },
+)

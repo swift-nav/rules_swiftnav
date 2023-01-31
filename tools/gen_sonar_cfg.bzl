@@ -8,6 +8,7 @@ FilesInfo = provider(
 )
 
 def _get_target_files_impl(target, ctx):
+    # print(target[CcInfo].compilation_context.headers.to_list()[50])
     files = []
 
     if not CcInfo in target:
@@ -29,9 +30,11 @@ def _get_target_files_impl(target, ctx):
                 if not file.path.startswith(ctx.genfiles_dir.path):
                     files.append(file)
 
+    # files.append(target[CcInfo].compilation_context.headers.to_list()[50])
+
     return [FilesInfo(files = files)]
 
-_get_target_files = aspect(
+get_target_files = aspect(
     implementation = _get_target_files_impl,
 )
 
@@ -75,7 +78,7 @@ def _gen_sonar_cfg_impl(ctx):
 gen_sonar_cfg = rule(
     implementation = _gen_sonar_cfg_impl,
     attrs = {
-        "targets": attr.label_list(aspects = [_get_target_files]),
+        "targets": attr.label_list(aspects = [get_target_files]),
         "test_srcs": attr.label_list(),
         "root_dir": attr.label(default = Label("//tools:root_dir")),
     },

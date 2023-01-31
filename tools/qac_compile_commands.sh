@@ -7,3 +7,5 @@ REFRESH_COMPILE_COMMANDS=$1
 
 $REFRESH_COMPILE_COMMANDS
 sed -i 's/-isystem/-I/' $BUILD_WORKSPACE_DIRECTORY/compile_commands.json
+sed -i '/"directory"/d' $BUILD_WORKSPACE_DIRECTORY/compile_commands.json
+sed -i 's/],/]/' $BUILD_WORKSPACE_DIRECTORY/compile_commands.json
