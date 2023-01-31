@@ -62,6 +62,9 @@ def _run_qac_impl(ctx):
         # echo $PWD
         # qacli admin --set-user-data-location $PWD/config
 
+        echo $HOME
+
+        find /home/jenkins/ | grep messages.xml
         find .
 
         PATH=$PATH qac setup_license_server
