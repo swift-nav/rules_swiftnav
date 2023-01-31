@@ -48,9 +48,10 @@ def _run_qac_impl(ctx):
 
         export GIT_TAG=dummy
         export QAC_PROJECT_NAME={qac_project_name}
-        export QAC_PROJECT_DIR={qac_project_dir}/$QAC_PROJECT_NAME
+        export QAC_PROJECTS_ROOT_DIR={qac_project_dir}
         export QAC_RCF_PATH={qac_config}
-        export BUILD_ROOT=$(dirname {compile_commands}) # compile_commands_path
+        export COMPILE_COMMANDS_PATH={compile_commands}
+        export QAC_USER_MESSAGES_PATH=$PWD/.config/Perforce/Helix-QAC-2020.1/user_library/user_messages/messages.xml
 
         # CHECK IF COMPILE COMMANDS AND CONFIG IN THE ROOT!!!!!!!!!!!!!!
 
