@@ -57,12 +57,12 @@ def _run_qac_impl(ctx):
 
         PATH=$PATH:/opt/Perforce/Helix-QAC-2020.1/common/bin
 
-        # mkdir config
+        mkdir new-config
         # ls -l $PWD
         # echo $PWD
         # qacli admin --set-user-data-location $PWD/config
 
-        find . | grep messages.xml
+        find .
 
         PATH=$PATH qac setup_license_server
         PATH=$PATH qac create_project
