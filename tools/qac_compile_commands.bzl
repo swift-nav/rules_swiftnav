@@ -66,8 +66,7 @@ def _run_qac_impl(ctx):
 
         PATH=$PATH qac setup_license_server
 
-        find /home/jenkins/ | grep messages.xml
-        find .
+        find . | grep messages.xml
 
         PATH=$PATH qac create_project
 
