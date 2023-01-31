@@ -62,7 +62,10 @@ def _run_qac_impl(ctx):
         # echo $PWD
         # qacli admin --set-user-data-location $PWD/config
 
-        PATH=$PATH qac || true
+        PATH=$PATH qac setup_license_server
+        PATH=$PATH qac create_project
+
+        # PATH=$PATH qac || true
         """.format(
             compile_commands = ctx.files.compile_commands[0].path,
             qac_project_dir = out.path,
