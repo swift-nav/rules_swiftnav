@@ -56,10 +56,10 @@ def _run_qac_impl(ctx):
 
         PATH=$PATH:/opt/Perforce/Helix-QAC-2020.1/common/bin
 
-        mkdir config
-        ls -l $PWD
-        echo $PWD
-        qacli admin --set-user-data-location $PWD/config
+        # mkdir config
+        # ls -l $PWD
+        # echo $PWD
+        # qacli admin --set-user-data-location $PWD/config
 
         PATH=$PATH qac || true
         """.format(
