@@ -55,6 +55,10 @@ def _run_qac_impl(ctx):
         # CHECK IF COMPILE COMMANDS AND CONFIG IN THE ROOT!!!!!!!!!!!!!!
 
         PATH=$PATH:/opt/Perforce/Helix-QAC-2020.1/common/bin
+
+        mkdir config
+        qacli admin --set-user-data-location $PWD/config
+
         PATH=$PATH qac || true
         """.format(
             compile_commands = ctx.files.compile_commands[0].path,
