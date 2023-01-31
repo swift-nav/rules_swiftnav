@@ -62,6 +62,8 @@ def _run_qac_impl(ctx):
         # echo $PWD
         # qacli admin --set-user-data-location $PWD/config
 
+        find . | grep messages.xml
+
         PATH=$PATH qac setup_license_server
         PATH=$PATH qac create_project
 
