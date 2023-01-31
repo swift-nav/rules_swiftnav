@@ -64,10 +64,11 @@ def _run_qac_impl(ctx):
 
         echo $HOME
 
+        PATH=$PATH qac setup_license_server
+
         find /home/jenkins/ | grep messages.xml
         find .
 
-        PATH=$PATH qac setup_license_server
         PATH=$PATH qac create_project
 
         # PATH=$PATH qac || true
