@@ -51,26 +51,9 @@ def _run_qac_impl(ctx):
         export QAC_PROJECTS_ROOT_DIR={qac_project_dir}
         export QAC_RCF_PATH={qac_config}
         export COMPILE_COMMANDS_PATH={compile_commands}
-        export QAC_USER_MESSAGES_PATH=\\$PWD/.config/Perforce/Helix-QAC-2020.1/user_library/user_messages/messages.xml
-
-        # CHECK IF COMPILE COMMANDS AND CONFIG IN THE ROOT!!!!!!!!!!!!!!
 
         PATH=$PATH:/opt/Perforce/Helix-QAC-2020.1/common/bin
-
-        mkdir new-config
-        # ls -l $PWD
-        # echo $PWD
-        # qacli admin --set-user-data-location $PWD/config
-
-        echo $HOME
-
-        PATH=$PATH qac setup_license_server
-
-        find . | grep messages.xml
-
-        PATH=$PATH qac create_project
-
-        # PATH=$PATH qac || true
+        HOME=$PWD PATH=$PATH qac || true
         """.format(
             compile_commands = ctx.files.compile_commands[0].path,
             qac_project_dir = out.path,
