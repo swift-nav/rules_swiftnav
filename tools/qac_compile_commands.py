@@ -16,7 +16,7 @@ with open(workspace_dir + "/compile_commands.json", "r+") as compile_commands_fi
         for i in range(len(args)):
             if (args[i] == "-iquote" or args[i] == "-I") and is_external(args[i+1]):
                 args[i] = "-isystem"
-            elif args[i] == "-isystem" and not is_external(args[i+1]):
+            elif (args[i] == "-isystem" or args[i] == "-iquote") and not is_external(args[i+1]):
                 args[i] = "-I"
 
     compile_commands_file.truncate(0)
