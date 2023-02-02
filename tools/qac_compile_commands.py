@@ -1,7 +1,7 @@
 import sys, subprocess, json, os
 
 
-def is_external(path):
+def _is_external(path):
     return path.startswith("external/") or path.find("/bin/external/") != -1
 
 
@@ -15,13 +15,13 @@ with open(workspace_dir + "/compile_commands.json", "r+") as compile_commands_fi
 
     for compile_command in compile_commands:
         args = compile_command["arguments"]
-        for i in range(len(args)):
-            if i + 1 >= len(args):
-                break
-            if (args[i] == "-iquote" or args[i] == "-I") and is_external(args[i + 1]):
-                args[i] = "-isystem"
-            elif (args[i] == "-isystem") and not is_external(args[i + 1]):
-                args[i] = "-I"
+        for i in range(len(args) - 1):
+            if args[i] == "-iquote" or args[i] == "-I" or args[i] == "-isystem":
+                if args[i + 1].startswith("external/") \
+                   or args[i + 1].find("/bin/external/") != -1:
+                    args[i] = "-isystem"
+                else:
+                    args[i] = "-I"
 
     compile_commands_file.truncate(0)
     compile_commands_file.seek(0)
