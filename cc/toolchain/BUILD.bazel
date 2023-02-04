@@ -1,0 +1,195 @@
+# Copyright 2018 The Bazel Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+package(default_visibility = ["//visibility:public"])
+
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@rules_cc//cc:defs.bzl", "cc_toolchain", "cc_toolchain_suite")
+load("@rules_swiftnav//cc/toolchain:cc_toolchain_config.bzl", "cc_toolchain_config")
+
+# Following filegroup targets are used when not using absolute paths and shared
+# between different toolchains.
+
+# Tools symlinked through this repo. This target is for internal use in the toolchain only.
+filegroup(
+    name = "internal-use-symlinked-tools",
+    srcs = [
+        "bin/clang-cpp",
+        "bin/ld.lld",
+        "bin/llvm-ar",
+        "bin/llvm-dwp",
+        "bin/llvm-profdata",
+        "bin/llvm-cov",
+        "bin/llvm-nm",
+        "bin/llvm-objcopy",
+        "bin/llvm-objdump",
+        "bin/llvm-strip",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+# Tools wrapped through this repo. This target is for internal use in the toolchain only.
+filegroup(
+    name = "internal-use-wrapped-tools",
+    srcs = [
+        "bin/cc_wrapper.sh",
+        "bin/host_libtool_wrapper.sh",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+# All internal use files.
+filegroup(
+    name = "internal-use-files",
+    srcs = [
+        ":internal-use-symlinked-tools",
+        ":internal-use-wrapped-tools",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+
+# CC toolchain for cc-clang-x86_64-linux.
+
+cc_toolchain_config(
+    name = "local-x86_64-linux",
+    host_arch = "x86_64",
+    host_os = "linux",
+    target_arch = "x86_64",
+    target_os = "linux",
+    toolchain_path_prefix = "external/llvm_toolchain_llvm/",
+    tools_path_prefix = "bin/",
+    wrapper_bin_prefix = "bin/",
+    compiler_configuration = {
+      "additional_include_dirs": [],
+      "sysroot_path": "",
+      "stdlib": "builtin-libc++",
+      "cxx_standard": "c++14",
+      "compile_flags": None,
+      "cxx_flags": None,
+      "link_flags": None,
+      "link_libs": None,
+      "opt_compile_flags": None,
+      "opt_link_flags": None,
+      "dbg_compile_flags": None,
+      "coverage_compile_flags": None,
+      "coverage_link_flags": None,
+      "unfiltered_compile_flags": None,
+    },
+    llvm_version = "14.0.0",
+    host_tools_info = {"ld": {"features": {}, "path": "/usr/bin/ld"}, "strip": {"features": {}, "path": "/usr/bin/strip"}},
+)
+
+toolchain(
+    name = "cc-toolchain-x86_64-linux",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+filegroup(
+    name = "sysroot-components-x86_64-linux",
+    srcs = [],
+)
+
+filegroup(
+    name = "compiler-components-x86_64-linux",
+    srcs = [
+        "@llvm_toolchain_llvm//:clang",
+        "@llvm_toolchain_llvm//:include",
+        ":sysroot-components-x86_64-linux",
+    ],
+)
+
+filegroup(
+    name = "linker-components-x86_64-linux",
+    srcs = [
+        "@llvm_toolchain_llvm//:clang",
+        "@llvm_toolchain_llvm//:ld",
+        "@llvm_toolchain_llvm//:ar",
+        "@llvm_toolchain_llvm//:lib",
+        ":sysroot-components-x86_64-linux",
+    ],
+)
+
+filegroup(
+    name = "all-components-x86_64-linux",
+    srcs = [
+        "@llvm_toolchain_llvm//:bin",
+        ":compiler-components-x86_64-linux",
+        ":linker-components-x86_64-linux",
+    ],
+)
+
+filegroup(name = "all-files-x86_64-linux", srcs = [":all-components-x86_64-linux", ":internal-use-files"])
+filegroup(name = "archiver-files-x86_64-linux", srcs = ["@llvm_toolchain_llvm//:ar", ":internal-use-files"])
+filegroup(name = "assembler-files-x86_64-linux", srcs = ["@llvm_toolchain_llvm//:as", ":internal-use-files"])
+filegroup(name = "compiler-files-x86_64-linux", srcs = [":compiler-components-x86_64-linux", ":internal-use-files"])
+filegroup(name = "dwp-files-x86_64-linux", srcs = ["@llvm_toolchain_llvm//:dwp", ":internal-use-files"])
+filegroup(name = "linker-files-x86_64-linux", srcs = [":linker-components-x86_64-linux", ":internal-use-files"])
+filegroup(name = "objcopy-files-x86_64-linux", srcs = ["@llvm_toolchain_llvm//:objcopy", ":internal-use-files"])
+filegroup(name = "strip-files-x86_64-linux", srcs = ["@llvm_toolchain_llvm//:strip", ":internal-use-files"])
+
+cc_toolchain(
+    name = "cc-clang-x86_64-linux",
+    all_files = "all-files-x86_64-linux",
+    ar_files = "archiver-files-x86_64-linux",
+    as_files = "assembler-files-x86_64-linux",
+    compiler_files = "compiler-files-x86_64-linux",
+    dwp_files = "dwp-files-x86_64-linux",
+    linker_files = "linker-files-x86_64-linux",
+    objcopy_files = "objcopy-files-x86_64-linux",
+    strip_files = "strip-files-x86_64-linux",
+    toolchain_config = "local-x86_64-linux",
+)
+
+
+# Convenience targets from the LLVM toolchain.
+
+cc_import(
+    name = "omp",
+    shared_library = "@llvm_toolchain_llvm//:lib/libomp.so",
+)
+
+native_binary(
+    name = "clang-apply-replacements",
+    out = "clang-apply-replacements",
+    src = "@llvm_toolchain_llvm//:bin/clang-apply-replacements",
+)
+
+native_binary(
+    name = "clang-format",
+    out = "clang-format",
+    src = "@llvm_toolchain_llvm//:bin/clang-format",
+)
+
+native_binary(
+    name = "clang-tidy",
+    out = "clang-tidy",
+    src = "@llvm_toolchain_llvm//:bin/clang-tidy",
+)
+
+native_binary(
+    name = "llvm-cov",
+    out = "llvm-cov",
+    src = "@llvm_toolchain_llvm//:bin/llvm-cov",
+)
