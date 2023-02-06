@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-load("//tools:get_files.bzl", "FilesInfo", "get_target_files")
+load("//tools:get_cc_files.bzl", "FilesInfo", "get_cc_target_files")
 
 def _gen_sonar_cfg_impl(ctx):
     all_files_bash = ""
@@ -41,7 +41,7 @@ def _gen_sonar_cfg_impl(ctx):
 gen_sonar_cfg = rule(
     implementation = _gen_sonar_cfg_impl,
     attrs = {
-        "targets": attr.label_list(aspects = [get_target_files]),
+        "targets": attr.label_list(aspects = [get_cc_target_files]),
         "test_srcs": attr.label_list(),
         "root_dir": attr.label(default = Label("//tools:root_dir")),
     },

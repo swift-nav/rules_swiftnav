@@ -26,7 +26,7 @@ def _get_srcs(ctx):
                     files.append(file)
     return files
 
-def _get_target_files_impl(target, ctx):
+def _get_cc_target_files_impl(target, ctx):
     files = []
 
     if not CcInfo in target:
@@ -42,16 +42,16 @@ def _get_target_files_impl(target, ctx):
 
     return [FilesInfo(files = files)]
 
-get_target_files = aspect(
-    implementation = _get_target_files_impl,
+get_cc_target_files = aspect(
+    implementation = _get_cc_target_files_impl,
 )
 
-def _get_target_hdrs_impl(target, ctx):
+def _get_cc_target_hdrs_impl(target, ctx):
     if not CcInfo in target:
         return [FilesInfo(files = [])]
 
     return [FilesInfo(files = _get_hdrs(ctx))]
 
-get_target_hdrs = aspect(
-    implementation = _get_target_hdrs_impl,
+get_cc_target_hdrs = aspect(
+    implementation = _get_cc_target_hdrs_impl,
 )
