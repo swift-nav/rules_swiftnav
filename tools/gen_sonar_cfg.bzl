@@ -1,39 +1,5 @@
-load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY")
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-
-FilesInfo = provider(
-    fields = {
-        "files": "files of the target",
-    },
-)
-
-def _get_target_files_impl(target, ctx):
-    files = []
-
-    if not CcInfo in target:
-        return [FilesInfo(files = [])]
-
-    tags = getattr(ctx.rule.attr, "tags", [])
-    if not LIBRARY in tags and not TEST_LIBRARY in tags and not BINARY in tags:
-        return [FilesInfo(files = [])]
-
-    if hasattr(ctx.rule.attr, "srcs"):
-        for src in ctx.rule.attr.srcs:
-            for file in src.files.to_list():
-                if file.is_source and not file.path.startswith(ctx.genfiles_dir.path):
-                    files.append(file)
-
-    if hasattr(ctx.rule.attr, "hdrs"):
-        for hdr in ctx.rule.attr.hdrs:
-            for file in hdr.files.to_list():
-                if not file.path.startswith(ctx.genfiles_dir.path):
-                    files.append(file)
-
-    return [FilesInfo(files = files)]
-
-_get_target_files = aspect(
-    implementation = _get_target_files_impl,
-)
+load("//tools:get_cc_files.bzl", "FilesInfo", "get_cc_target_files")
 
 def _gen_sonar_cfg_impl(ctx):
     all_files_bash = ""
@@ -75,7 +41,7 @@ def _gen_sonar_cfg_impl(ctx):
 gen_sonar_cfg = rule(
     implementation = _gen_sonar_cfg_impl,
     attrs = {
-        "targets": attr.label_list(aspects = [_get_target_files]),
+        "targets": attr.label_list(aspects = [get_cc_target_files]),
         "test_srcs": attr.label_list(),
         "root_dir": attr.label(default = Label("//tools:root_dir")),
     },
