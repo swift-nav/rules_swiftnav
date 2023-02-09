@@ -50,7 +50,7 @@ def _swift_doxygen_impl(ctx):
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
 
-swift_doxygen = rule(
+_swift_doxygen = rule(
     implementation = _swift_doxygen_impl,
     attrs = {
         "vars": attr.string_dict(),
@@ -63,3 +63,8 @@ swift_doxygen = rule(
         "doxygen_output_directory": attr.string(),
     },
 )
+
+def swift_doxygen(**kwargs):
+    kwargs["tags"] = ["manual"] + kwargs.get("tags", [])
+
+    _swift_doxygen(**kwargs)
