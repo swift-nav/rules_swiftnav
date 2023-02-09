@@ -26,7 +26,7 @@ def _swift_doxygen_impl(ctx):
 
     vars["DOXYGEN_OUTPUT_DIRECTORY"] = doxygen_out.path
 
-    config = configure_file_impl(ctx, vars, "Doxyfile")[0].files.to_list()[0]
+    config = configure_file_impl(ctx, vars, ctx.attr.doxygen_output_directory + "_Doxyfile")[0].files.to_list()[0]
 
     ctx.actions.run_shell(
         inputs = [config] + ctx.files.deps,
