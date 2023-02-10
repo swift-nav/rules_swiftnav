@@ -10,20 +10,23 @@
 
 load("//tools:configure_file.bzl", "configure_file_impl")
 
-def _swift_doxygen_impl(ctx):
-    vars = ctx.attr.vars | {}
-    vars["DOXYGEN_SOURCE_DIRECTORIES"] = ""
-
+def _list_to_string(in_list):
+    string = ""
     first_dir = True
-    for src_dir in ctx.attr.doxygen_source_directories:
+
+    for src_dir in in_list:
         if first_dir:
             first_dir = False
         else:
-            vars["DOXYGEN_SOURCE_DIRECTORIES"] += '" "'
-        vars["DOXYGEN_SOURCE_DIRECTORIES"] += src_dir
+            string += '" "'
+        string += src_dir
+    return string
+
+def _swift_doxygen_impl(ctx):
+    vars = ctx.attr.vars | {}
+    vars["DOXYGEN_SOURCE_DIRECTORIES"] = _list_to_string(ctx.attr.doxygen_source_directories)
 
     doxygen_out = ctx.actions.declare_directory(ctx.attr.doxygen_output_directory)
-
     vars["DOXYGEN_OUTPUT_DIRECTORY"] = doxygen_out.path
 
     config = configure_file_impl(ctx, vars, ctx.attr.doxygen_output_directory + "_Doxyfile")[0].files.to_list()[0]
