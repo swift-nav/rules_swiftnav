@@ -1,8 +1,10 @@
-load("//cc/toolchain/internal:common.bzl",
-     _canonical_dir_path = "canonical_dir_path",
-     _host_or_arch_dict_value = "host_os_arch_dict_value",
-     _pkg_path_from_label = "pkg_path_from_label",
-     _toolchain_tools = "toolchain_tools",
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load(
+    "//cc/toolchain/internal:common.bzl",
+    _canonical_dir_path = "canonical_dir_path",
+    _host_or_arch_dict_value = "host_os_arch_dict_value",
+    _pkg_path_from_label = "pkg_path_from_label",
+    _toolchain_tools = "toolchain_tools",
 )
 
 def _llvm_repo_impl(rctx):
@@ -30,7 +32,7 @@ def _toolchain_impl(rctx):
     print("toolchain_impl is running")
     if rctx.os.name != "linux":
         return
-    
+
     toolchain_root = "@llvm_toolchain_llvm//"
     llvm_dist_label = Label(toolchain_root + ":BUILD.bazel")
     llvm_dist_path_prefix = _pkg_path_from_label(llvm_dist_label)
@@ -61,24 +63,25 @@ def _toolchain_impl(rctx):
     )
 
     return None
-    
 
 llvm = repository_rule(
     local = False,
-    implementation = _llvm_repo_impl
+    implementation = _llvm_repo_impl,
 )
 
 toolchain = repository_rule(
     local = True,
     configure = True,
-    implementation = _toolchain_impl
+    implementation = _toolchain_impl,
 )
 
+LLVM_DISTRIBUTION_URL = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
+
 def swift_cc_toolchain():
-    print("HELLO WORLD")
-    # remember this is hardcoded in the toolchain BUILD file.
-    llvm(name = "llvm_toolchain_llvm")
-    toolchain(name = "llvm_toolchain")
-    native.register_toolchains(
-        "@llvm_toolchain//:cc-toolchain-x86_64-linux",
-    )
+    if "x86_64-linux-gnu-llvm-distribution-14" not in native.existing_rules():
+        http_archive(
+            name = "x86_64-linux-gnu-llvm-distribution-14",
+            build_file = Label("//cc/toolchain:BUILD.llvm_repo"),
+            url = LLVM_DISTRIBUTION_URL,
+            strip_prefix = "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
+        )
