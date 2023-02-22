@@ -3,10 +3,12 @@ load("@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
 )
 
 def cc_toolchain_config(name):
-    # TODO: Explain these variables
+
+    # These variables are passed directly through to unix_cc_toolchain_config 
+    # below. As far as I can tell they are just metadata that doesn't affect 
+    # the build.
     host_system_name = "linux-x86_64"
     toolchain_identifier = "clang-x86_64-linux"
-    target_system_name = "x86_64-unknown-linux-gnu"
     target_cpu = "k8"
     target_libc = "glibc_unknown"
     compiler = "clang"
@@ -19,7 +21,6 @@ def cc_toolchain_config(name):
         "/usr/local/include",
     ]
 
-    # Coverage tools setup is curious
     tool_paths = {
         "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
@@ -34,8 +35,9 @@ def cc_toolchain_config(name):
         "strip": "wrappers/llvm-strip",
     }
 
+    target_system_name = "x86_64-unknown-linux-gnu"
+
     # Default compiler flags:
-    # TODO: Compare these w/ unix_cc_configure.bzl and our own default flags.
     compile_flags = [
         "--target=" + target_system_name,
         # Security
@@ -55,10 +57,10 @@ def cc_toolchain_config(name):
     dbg_compile_flags = ["-g", "-fstandalong-debug"]
 
     opt_compile_flags = [
-        # No debug symbols
+        # No debug symbols.
         "-g0",
 
-        # Aggressive optimizations, can increase binary size
+        # Aggressive optimizations, can increase binary size.
         "-O3",
 
         # Security hardening on by default.
@@ -119,7 +121,8 @@ def cc_toolchain_config(name):
         "-D__DATE__=\"redacted\"",
         "-D__TIMESTAMP__=\"redacted\"",
         "-D__TIME__=\"redacted\"",
-        # FIXME: what is this for?
+        # Grailbio uses this but in not sure it's necessary, given clang seems to respect PWD.
+        # Will need to validate with some testing.
         #"-fdebug-prefix-map={}=__bazel_toolchain_llvm_repo__/".format(toolchain_path_prefix),
     ]
 
@@ -154,5 +157,4 @@ def cc_toolchain_config(name):
         coverage_compile_flags = coverage_compile_flags,
         coverage_link_flags = coverage_link_flags,
         supports_start_end_lib = supports_start_end_lib,
-#        builtin_sysroot = sysroot_path,
     )
