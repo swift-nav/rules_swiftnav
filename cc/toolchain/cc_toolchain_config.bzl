@@ -1,126 +1,159 @@
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
-load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path")
-
-all_link_actions = [
-    ACTION_NAMES.cpp_link_executable,
-    ACTION_NAMES.cpp_link_dynamic_library,
-    ACTION_NAMES.cpp_link_nodeps_dynamic_library,
-]
-
-all_compile_actions = [
-    ACTION_NAMES.assemble,
-    ACTION_NAMES.c_compile,
-    ACTION_NAMES.clif_match,
-    ACTION_NAMES.cpp_compile,
-    ACTION_NAMES.cpp_header_parsing,
-    ACTION_NAMES.cpp_module_codegen,
-    ACTION_NAMES.cpp_module_compile,
-    ACTION_NAMES.linkstamp_compile,
-    ACTION_NAMES.lto_backend,
-    ACTION_NAMES.preprocess_assemble,
-]
-
-def _impl(ctx):
-    tool_paths = [
-        tool_path(
-            name = "ar",
-            path = "wrappers/llvm-ar",
-        ),
-        tool_path(
-            name = "cpp",
-            path = "wrappers/clang-cpp",
-        ),
-        tool_path(
-            name = "gcc",
-            path = "wrappers/clang",
-        ),
-        tool_path(
-            name = "gcov",
-            path = "wrappers/llvm-cov",
-        ),
-        tool_path(
-            name = "ld",
-            path = "wrappers/ld.lld",
-        ),
-        tool_path(
-            name = "nm",
-            path = "wrappers/llvm-nm",
-        ),
-        tool_path(
-            name = "objdump",
-            path = "wrappers/llvm-objdump",
-        ),
-        tool_path(
-            name = "strip",
-            path = "wrappers/llvm-strip",
-        ),
-    ]
-
-    default_compiler_flags = feature(
-        name = "default_compiler_flags",
-        enabled = True,
-        flag_sets = [
-            flag_set(
-                actions = all_compile_actions,
-                flag_groups = [
-                    flag_group(
-                        flags = [
-                            "-no-canonical-prefixes",
-                            "-Wno-builtin-macro-redefined",
-                            "-D__DATE__=\"redacted\"",
-                            "-D__TIMESTAMP__=\"redacted\"",
-                            "-D__TIME__=\"redacted\"",
-                        ],
-                    ),
-                ],
-            ),
-        ],
-    )
-
-    default_linker_flags = feature(
-        name = "default_linker_flags",
-        enabled = True,
-        flag_sets = [
-            flag_set(
-                actions = all_link_actions,
-                flag_groups = ([
-                    flag_group(
-                        flags = [
-                            "-lc++",
-                            "-lm",
-                        ],
-                    ),
-                ]),
-            ),
-        ],
-    )
-
-    features = [
-        default_compiler_flags,
-        default_linker_flags,
-    ]
-
-    return cc_common.create_cc_toolchain_config_info(
-        ctx = ctx,
-        cxx_builtin_include_directories = [
-            "/include",
-            "/usr/include",
-            "/usr/local/include",
-        ],
-        features = features,
-        toolchain_identifier = "llvm-toolchain",
-        host_system_name = "local",
-        target_system_name = "unknown",
-        target_cpu = "unknown",
-        target_libc = "unknown",
-        compiler = "unknown",
-        abi_version = "unknown",
-        abi_libc_version = "unknown",
-        tool_paths = tool_paths,
-    )
-
-cc_toolchain_config = rule(
-    implementation = _impl,
-    attrs = {},
-    provides = [CcToolchainConfigInfo],
+load("@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
+     unix_cc_toolchain_config = "cc_toolchain_config"
 )
+
+def cc_toolchain_config(name):
+    # TODO: Explain these variables
+    host_system_name = "linux-x86_64"
+    toolchain_identifier = "clang-x86_64-linux"
+    target_system_name = "x86_64-unknown-linux-gnu"
+    target_cpu = "k8"
+    target_libc = "glibc_unknown"
+    compiler = "clang"
+    abi_version = "clang"
+    abi_libc_version = "glibc_unknown"
+
+    cxx_builtin_include_directories = [
+        "/include",
+        "/usr/include",
+        "/usr/local/include",
+    ]
+
+    # Coverage tools setup is curious
+    # FIXME: Make sure all these wrappers exist
+    tool_paths = {
+        "ar": "wrappers/llvm-ar",
+        "cpp": "wrappers/clang-cpp",
+        "gcc": "wrappers/clang",
+        "gcov": "wrappers/llvm-profdata",
+        "llvm-cov": "wrappers/llvm-cov",
+        "llvm-profdata": "wrappers/llvm-profdata",
+        "ld": "wrappers/ld.ldd",
+        "nm": "wrappers/llvm-nm",
+        "objcopy": "wrappers/llvm-objcopy",
+        "objdump": "wrappers/llvm-objdump",
+        "strip": "wrappers/llvm-strip",
+    }
+
+    # Default compiler flags:
+    # TODO: Compare these w/ unix_cc_configure.bzl and our own default flags.
+    compile_flags = [
+        "--target=" + target_system_name,
+        # Security
+        "-U_FORTIFY_SOURCE",  # https://github.com/google/sanitizers/issues/247
+        "-fstack-protector",
+        "-fno-omit-frame-pointer",
+        # Diagnostics
+        "-fcolor-diagnostics",
+        "-Wall",
+        "-Wthread-safety",
+        "-Wself-assign",
+    ]
+
+    # -fstandalone-debug disables options that optimize
+    # the size of the debug info.
+    # https://clang.llvm.org/docs/UsersManual.html#cmdoption-fstandalone-debug
+    dbg_compile_flags = ["-g", "-fstandalong-debug"]
+
+    opt_compile_flags = [
+        # No debug symbols
+        "-g0",
+
+        # Aggressive optimizations, can increase binary size
+        "-O3",
+
+        # Security hardening on by default.
+        "-D_FORTIFY_SOURCE=1",
+
+        # Removal of unused code and data at link time (can this increase
+        # binary size in some cases?).
+        "-ffunction-sections",
+        "-fdata-sections",
+    ]
+
+    cxx_flags = [
+        # The whole codebase should build with c++14
+        "-std=c++14",
+        # Use bundled libc++ for hermeticity
+        "-stdlib=libc++",
+    ]
+
+    link_flags = [
+        "--target=" + target_system_name,
+        "-lm",
+        "-no-canonical-prefixes",
+        # Below this line, assumes libc++ & lld
+        "-l:libc++.a",
+        "-l:libc++abi.a",
+        "-l:libunwind.a",
+        # Compiler runtime features.
+        "-rtlib=compiler-rt",
+        # To support libunwind
+        # It's ok to assume posix when using this toolchain
+        "-lpthread",
+        "-ldl",
+    ]
+
+    # linux/lld only!
+    link_flags.extend([
+        "-fuse-ld=lld",
+        "-Wl,--build-id=md5",
+        "-Wl,--hash-style=gnu",
+        "-Wl,-z,relro,-z,now",
+    ])
+
+    # Similar to link_flags, but placed later in the command line such that
+    # unused symbols are not stripped.
+    link_libs = []
+
+    # linux/lld only
+    opt_link_flags = ["-Wl,--gc-sections"]
+
+    # Unfiltered compiler flags; these are placed at the end of the command
+    # line, so take precendence over any user supplied flags through --copts or
+    # such.
+    unfiltered_compile_flags = [
+        # Do not resolve our symlinked resource prefixes to real paths.
+        "-no-canonical-prefixes",
+        # Reproducibility
+        "-Wno-builtin-macro-redefined",
+        "-D__DATE__=\"redacted\"",
+        "-D__TIMESTAMP__=\"redacted\"",
+        "-D__TIME__=\"redacted\"",
+        # FIXME: what is this for?
+        #"-fdebug-prefix-map={}=__bazel_toolchain_llvm_repo__/".format(toolchain_path_prefix),
+    ]
+
+
+    # Coverage flags:
+    coverage_compile_flags = ["-fprofile-instr-generate", "-fcoverage-mapping"]
+    coverage_link_flags = ["-fprofile-instr-generate"]
+
+    # true if using lld
+    supports_start_end_lib = True
+
+    unix_cc_toolchain_config(
+        name = name,
+        cpu = target_cpu,
+        compiler = compiler,
+        toolchain_identifier = toolchain_identifier,
+        host_system_name = host_system_name,
+        target_system_name = target_system_name,
+        target_libc = target_libc,
+        abi_version = abi_version,
+        abi_libc_version = abi_libc_version,
+        cxx_builtin_include_directories = cxx_builtin_include_directories,
+        tool_paths = tool_paths,
+        compile_flags = compile_flags,
+        dbg_compile_flags = dbg_compile_flags,
+        opt_compile_flags = opt_compile_flags,
+        cxx_flags = cxx_flags,
+        link_flags = link_flags,
+        link_libs = link_libs,
+        opt_link_flags = opt_link_flags,
+        unfiltered_compile_flags = unfiltered_compile_flags,
+        coverage_compile_flags = coverage_compile_flags,
+        coverage_link_flags = coverage_link_flags,
+        supports_start_end_lib = supports_start_end_lib,
+#        builtin_sysroot = sysroot_path,
+    )
