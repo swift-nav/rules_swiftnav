@@ -10,6 +10,11 @@
 # when configuring the toolchain, because tool_path only takes a relative path.
 #
 # This is the fairly common workaround to handle this.
+#
+# TODO: [BUILD-549] - Remove need for wrapper files
+#
+# Recent versions of Bazel may have introduced a mechanism that removes
+# the need for this workaround: https://github.com/bazelbuild/bazel/issues/7746
 
 # TODO: Add env variable to toggle -eux
 
