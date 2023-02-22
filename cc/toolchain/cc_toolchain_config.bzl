@@ -20,7 +20,6 @@ def cc_toolchain_config(name):
     ]
 
     # Coverage tools setup is curious
-    # FIXME: Make sure all these wrappers exist
     tool_paths = {
         "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
