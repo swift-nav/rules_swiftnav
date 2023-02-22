@@ -79,7 +79,6 @@ cc_library(
     includes = ["cxx4"],
     visibility = ["//visibility:public"],
     deps = [
-        "@hdf5",
         "@netcdf-c",
     ],
 )
