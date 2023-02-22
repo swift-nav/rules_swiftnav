@@ -80,8 +80,11 @@ LLVM_DISTRIBUTION_URL = "https://github.com/llvm/llvm-project/releases/download/
 def swift_cc_toolchain():
     if "x86_64-linux-gnu-llvm-distribution-14" not in native.existing_rules():
         http_archive(
-            name = "x86_64-linux-gnu-llvm-distribution-14",
-            build_file = Label("//cc/toolchain:BUILD.llvm_repo"),
+            name = "x86_64-linux-llvm-distribution",
+            build_file = Label("//cc/toolchain:BUILD.llvm_distribution"),
             url = LLVM_DISTRIBUTION_URL,
             strip_prefix = "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
         )
+
+def register_llvm_toolchain():
+        native.register_toolchains("@rules_swiftnav//cc/toolchain:cc-toolchain-x86_64-linux")

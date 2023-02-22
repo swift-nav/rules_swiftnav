@@ -1,6 +1,6 @@
-package(default_visibilty = ["//visibility:public"])
+package(default_visibility = ["//visibility:public"])
 
-load("::cc_toolchain_config.bzl", "cc_toolchain_config")
+load(":cc_toolchain_config.bzl", "cc_toolchain_config")
 
 filegroup(name = "empty")
 
@@ -12,115 +12,26 @@ filegroup(
 )
 
 filegroup(
-    name = "compiler-files-x86_64-linux",
+    name = "all_files",
     srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:clang",
-        "@x86_64-linux-gnu-llvm-distribution-14//:include",
-        ":wrappers",
-    ],
-)
-
-filegroup(
-    name = "linker-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:clang",
-        "@x86_64-linux-gnu-llvm-distribution-14//:ld",
-        "@x86_64-linux-gnu-llvm-distribution-14//:ar",
-        "@x86_64-linux-gnu-llvm-distribution-14//:lib",
-        ":wrappers",
-    ],
-)
-    
-filegroup(
-    name = "all-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution//:bin",
-        ":compiler-files-x86_64-linux",
-        "linker-files-x86_64-linux",
-        ":wrappers",
-    ],
-)
-
-filegroup(
-    name = "archiver-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:ar",
-        ":wrappers",
-    ],
-)
-
-filegroup(
-    name = "assembler-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:as",
-        ":wrappers",
-    ],
-)
-
-filegroup(
-    name = "dwp-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:dwp",
-        ":wrappers",
-    ],
-)
-
-filegroup(
-    name = "objcopy-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:objcopy",
-        ":wrappers",
-    ],
-)
-
-filegroup(
-    name = "strip-files-x86_64-linux",
-    srcs = [
-        "@x86_64-linux-gnu-llvm-distribution-14//:strip",
+        "@x86_64-linux-llvm-distribution//:toolchain",
         ":wrappers",
     ],
 )
 
 # CC toolchain for cc-clang-x86_64-linux.
-cc_toolchain_config(
-    name = "local-x86_64-linux",
-    host_arch = "x86_64",
-    host_os = "linux",
-    target_arch = "x86_64",
-    target_os = "linux",
-    toolchain_path_prefix = "external/llvm_toolchain_llvm/",
-    tools_path_prefix = "bin/",
-    wrapper_bin_prefix = "bin/",
-    compiler_configuration = {
-      "additional_include_dirs": [],
-      "sysroot_path": "",
-      "stdlib": "builtin-libc++",
-      "cxx_standard": "c++14",
-      "compile_flags": None,
-      "cxx_flags": None,
-      "link_flags": None,
-      "link_libs": None,
-      "opt_compile_flags": None,
-      "opt_link_flags": None,
-      "dbg_compile_flags": None,
-      "coverage_compile_flags": None,
-      "coverage_link_flags": None,
-      "unfiltered_compile_flags": None,
-    },
-    llvm_version = "14.0.0",
-    host_tools_info = {"ld": {"features": {}, "path": "/usr/bin/ld"}, "strip": {"features": {}, "path": "/usr/bin/strip"}},
-)
+cc_toolchain_config(name = "local-x86_64-linux")
 
 cc_toolchain(
-    name = ":cc-clang-x86_64-linux",
-    all_files = ":all-files-x86_64-linux",
-    ar_files = ":archiver-files-x86_64-linux",
-    as_files = ":assembler-files-x86_64-linux",
-    compiler_files = ":compiler-files-x86_64-linux",
-    dwp_files = ":dwp-files-x86_64-linux",
-    linker_files = ":linker-files-x86_64-linux",
-    objcopy_files = ":objcopy-files-x86_64-linux",
-    strip_files = ":strip-files-x86_64-linux",
+    name = "cc-clang-x86_64-linux",
+    all_files = ":all_files",
+    ar_files = ":all_files",
+    as_files = ":all_files",
+    compiler_files = ":all_files",
+    dwp_files = ":empty",
+    linker_files = ":all_files",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
     toolchain_config = ":local-x86_64-linux",
 )
 
