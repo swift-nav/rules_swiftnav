@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Locates the actual tool paths relative to the location this script is 
 # executed from.
@@ -11,12 +11,19 @@
 #
 # This is the fairly common workaround to handle this.
 #
+# Add
+#
 # TODO: [BUILD-549] - Remove need for wrapper files
 #
 # Recent versions of Bazel may have introduced a mechanism that removes
 # the need for this workaround: https://github.com/bazelbuild/bazel/issues/7746
 
-# TODO: Add env variable to toggle -eux
+set -e
+
+# Use --actionv_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
+if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
+  set -x
+fi
 
 tool_name=$(basename "${BASH_SOURCE[0]}")
 toolchain_bindir=external/llvm-distribution/bin
