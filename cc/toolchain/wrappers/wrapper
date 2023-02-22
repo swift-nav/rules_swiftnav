@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# TODO: Add env variable to toggle -eux
-#
 # Locates the actual tool paths relative to the location this script is 
 # executed from.
 #
@@ -12,6 +10,8 @@
 # when configuring the toolchain, because tool_path only takes a relative path.
 #
 # This is the fairly common workaround to handle this.
+
+# TODO: Add env variable to toggle -eux
 
 tool_name=$(basename "${BASH_SOURCE[0]}")
 toolchain_bindir=external/llvm-distribution/bin
