@@ -1,18 +1,38 @@
 #!/bin/bash
 
 # TODO: Add env variable to toggle -eux
+#
+# Locates the actual tool paths relative to the location this script is 
+# executed from.
+#
+# This is necessary because we download the toolchain using
+# http_archive, which bazel places in _execroot_/external/_repo_name_.
+#
+# Unfortunately we cannot provide this location as the argument of tool_path
+# when configuring the toolchain, because tool_path only takes a relative path.
+#
+# This is the fairly common workaround to handle this.
 
-NAME=$(basename "$0")
-TOOLCHAIN_BINDIR=external/llvm-distribution/bin
+tool_name=$(basename "${BASH_SOURCE[0]}")
+toolchain_bindir=external/llvm-distribution/bin
 
-if [[ -f "${TOOLCHAIN_BINDIR}"/"${NAME}" ]]; then
-  exec "${TOOLCHAIN_BINDIR}"/"${NAME}" "$@"
+if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  exec "${toolchain_bindir}"/"${tool_name}" "$@"
 elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
+  # This branch exists because some users of the toolchain,
+  # namely rules_foreign_cc, will change CWD and call $CC (this script)
+  # with its absolute path.
+  #
+  # To deal with this we find the tool relative to this script, which is at
+  # _execroot_/external/rules_swiftnav/cc/toolchain/wrappers/wrapper.
+  #
+  # If the wrapper is relocated then this line needs to be adjusted.
   execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*}"
-  tool="${execroot_path}/external/llvm-distribution/bin/${NAME}"
+  tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
   exec "${tool}" "${@}"
 else
-  >&2 echo "ERROR: could not find ${NAME}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
+  >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
   exit 5
 fi
 
