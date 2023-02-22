@@ -1,15 +1,15 @@
 #!/bin/bash
 
-set -eux
+# TODO: Add env variable to toggle -eux
 
 NAME=$(basename "$0")
-TOOLCHAIN_BINDIR=external/x86_64-linux-llvm-distribution/bin
+TOOLCHAIN_BINDIR=external/llvm-distribution/bin
 
 if [[ -f "${TOOLCHAIN_BINDIR}"/"${NAME}" ]]; then
   exec "${TOOLCHAIN_BINDIR}"/"${NAME}" "$@"
 elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*}"
-  tool="${execroot_path}/external/x86_64-linux-llvm-distribution/bin/${NAME}"
+  tool="${execroot_path}/external/llvm-distribution/bin/${NAME}"
   exec "${tool}" "${@}"
 else
   >&2 echo "ERROR: could not find ${NAME}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."

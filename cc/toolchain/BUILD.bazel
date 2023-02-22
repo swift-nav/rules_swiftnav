@@ -14,7 +14,7 @@ filegroup(
 filegroup(
     name = "all_files",
     srcs = [
-        "@x86_64-linux-llvm-distribution//:toolchain",
+        "@llvm-distribution//:toolchain",
         ":wrappers",
     ],
 )
