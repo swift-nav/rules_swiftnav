@@ -8,13 +8,14 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
-     unix_cc_toolchain_config = "cc_toolchain_config"
+load(
+    "@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
+    unix_cc_toolchain_config = "cc_toolchain_config",
 )
 
 def cc_toolchain_config(name):
-    # These variables are passed directly through to unix_cc_toolchain_config 
-    # below. As far as I can tell they are just metadata that doesn't affect 
+    # These variables are passed directly through to unix_cc_toolchain_config
+    # below. As far as I can tell they are just metadata that doesn't affect
     # the build.
     host_system_name = "linux-x86_64"
     toolchain_identifier = "clang-x86_64-linux"
@@ -134,7 +135,6 @@ def cc_toolchain_config(name):
         # Will need to validate with some testing.
         #"-fdebug-prefix-map={}=__bazel_toolchain_llvm_repo__/".format(toolchain_path_prefix),
     ]
-
 
     # Coverage flags:
     coverage_compile_flags = ["-fprofile-instr-generate", "-fcoverage-mapping"]

@@ -24,70 +24,70 @@ filegroup(
 filegroup(
     name = "ar_files",
     srcs = [
-        "@llvm-distribution//:ar",
         ":wrappers",
+        "@llvm-distribution//:ar",
     ],
 )
 
 filegroup(
     name = "as_files",
     srcs = [
-        "@llvm-distribution//:as",
         ":wrapppers",
+        "@llvm-distribution//:as",
     ],
 )
 
 filegroup(
     name = "compiler_files",
     srcs = [
+        ":wrappers",
         "@llvm-distribution//:clang",
         "@llvm-distribution//:include",
-        ":wrappers",
     ],
 )
 
 filegroup(
     name = "dwp_files",
     srcs = [
-        "@llvm-distribution//:dwp",
         ":wrappers",
-    ]
+        "@llvm-distribution//:dwp",
+    ],
 )
 
 filegroup(
     name = "linker_files",
     srcs = [
+        ":wrappers",
+        "@llvm-distribution//:ar",
         "@llvm-distribution//:clang",
         "@llvm-distribution//:ld",
-        "@llvm-distribution//:ar",
         "@llvm-distribution//:lib",
-        ":wrappers",
-    ]
+    ],
 )
 
 filegroup(
     name = "objcopy_files",
     srcs = [
-        "@llvm-distribution//:objcopy",
         ":wrappers",
-    ]
+        "@llvm-distribution//:objcopy",
+    ],
 )
 
 filegroup(
     name = "strip_files",
     srcs = [
-        "@llvm-distribution//:strip",
         ":wrappers",
-    ]
+        "@llvm-distribution//:strip",
+    ],
 )
 
 filegroup(
     name = "all_files",
     srcs = [
-        "@llvm-distribution//:bin",
-        ":compiler_files",
         "linker_files",
-    ]
+        ":compiler_files",
+        "@llvm-distribution//:bin",
+    ],
 )
 
 cc_toolchain_config(name = "local-x86_64-linux")
