@@ -19,6 +19,7 @@ filegroup(
     ],
 )
 
+# CC toolchain for cc-clang-x86_64-linux.
 cc_toolchain_config(name = "local-x86_64-linux")
 
 cc_toolchain(
