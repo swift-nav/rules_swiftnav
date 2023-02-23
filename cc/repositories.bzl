@@ -17,7 +17,7 @@ def swift_cc_toolchain():
     maybe(
         http_archive,
         name = "llvm-distribution",
-        build_file = Label("//cc/toolchain:llvm.BUILD"),
+        build_file = Label("//cc/toolchain:llvm.BUILD.bzl"),
         url = LLVM_DISTRIBUTION_URL,
         strip_prefix = "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
         sha256 = "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5",
