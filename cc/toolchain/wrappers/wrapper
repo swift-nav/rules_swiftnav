@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+# Copyright (C) 2022 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
 # Locates the actual tool paths relative to the location this script is 
 # executed from.
 #
@@ -10,8 +20,6 @@
 # when configuring the toolchain, because tool_path only takes a relative path.
 #
 # This is the fairly common workaround to handle this.
-#
-# Add
 #
 # TODO: [BUILD-549] - Remove need for wrapper files
 #

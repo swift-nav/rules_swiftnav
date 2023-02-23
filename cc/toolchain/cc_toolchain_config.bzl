@@ -3,7 +3,6 @@ load("@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
 )
 
 def cc_toolchain_config(name):
-
     # These variables are passed directly through to unix_cc_toolchain_config 
     # below. As far as I can tell they are just metadata that doesn't affect 
     # the build.
