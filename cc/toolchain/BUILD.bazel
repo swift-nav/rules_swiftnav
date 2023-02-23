@@ -12,26 +12,86 @@ filegroup(
 )
 
 filegroup(
-    name = "all_files",
+    name = "ar_files",
     srcs = [
-        "@llvm-distribution//:toolchain",
+        "@llvm-distribution//:ar",
         ":wrappers",
     ],
 )
 
-# CC toolchain for cc-clang-x86_64-linux.
+filegroup(
+    name = "as_files",
+    srcs = [
+        "@llvm-distribution//:as",
+        ":wrapppers",
+    ],
+)
+
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        "@llvm-distribution//:clang",
+        "@llvm-distribution//:include",
+        ":wrappers",
+    ],
+)
+
+filegroup(
+    name = "dwp_files",
+    srcs = [
+        "@llvm-distribution//:dwp",
+        ":wrappers",
+    ]
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        "@llvm-distribution//:clang",
+        "@llvm-distribution//:ld",
+        "@llvm-distribution//:ar",
+        "@llvm-distribution//:lib",
+        ":wrappers",
+    ]
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = [
+        "@llvm-distribution//:objcopy",
+        ":wrappers",
+    ]
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        "@llvm-distribution//:strip",
+        ":wrappers",
+    ]
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        "@llvm-distribution//:bin",
+        ":compiler_files",
+        "linker_files",
+    ]
+)
+
 cc_toolchain_config(name = "local-x86_64-linux")
 
 cc_toolchain(
     name = "cc-clang-x86_64-linux",
     all_files = ":all_files",
-    ar_files = ":all_files",
-    as_files = ":all_files",
-    compiler_files = ":all_files",
-    dwp_files = ":empty",
-    linker_files = ":all_files",
-    objcopy_files = ":empty",
-    strip_files = ":empty",
+    ar_files = ":ar_files",
+    as_files = ":as_files",
+    compiler_files = ":compiler_files",
+    dwp_files = ":dwp_files",
+    linker_files = ":linker_files",
+    objcopy_files = ":objcopy_files",
+    strip_files = ":strip_files",
     toolchain_config = ":local-x86_64-linux",
 )
 
