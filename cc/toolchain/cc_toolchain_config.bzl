@@ -64,7 +64,7 @@ def cc_toolchain_config(name):
     # -fstandalone-debug disables options that optimize
     # the size of the debug info.
     # https://clang.llvm.org/docs/UsersManual.html#cmdoption-fstandalone-debug
-    dbg_compile_flags = ["-g", "-fstandalong-debug"]
+    dbg_compile_flags = ["-g", "-fstandalone-debug"]
 
     opt_compile_flags = [
         # No debug symbols.
