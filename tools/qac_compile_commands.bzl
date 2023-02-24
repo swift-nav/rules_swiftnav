@@ -19,9 +19,9 @@ def qac_compile_commands(name, tool, **kwargs):
 
     """
     arg = "$(location {})".format(tool)
-    native.sh_binary(
+    native.py_binary(
         name = name,
-        srcs = [Label("//tools:qac_compile_commands.sh")],
+        srcs = [Label("//tools:qac_compile_commands.py")],
         args = [arg],
         data = [tool],
         **kwargs
