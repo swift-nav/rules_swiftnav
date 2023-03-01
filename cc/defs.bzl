@@ -28,6 +28,9 @@ BINARY = "binary"
 # Name for swift_cc_test_library
 TEST_LIBRARY = "test_library"
 
+# Name for swift_cc_test
+TEST = "test"
+
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
@@ -246,5 +249,5 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
-    kwargs["tags"] = [type] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
     native.cc_test(**kwargs)
