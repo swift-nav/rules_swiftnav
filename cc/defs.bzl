@@ -43,17 +43,20 @@ def _common_c_opts(nocopts, pedantic = False):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
-def _cross_compile_build():
-    return select({
-        Label("//cc:_cross_compile_build"): ["@platforms//:incompatible"],
-    })
-
 def _default_features():
     return select({
         # treat_warnings_as_errors passes the option -fatal-warnings
         # to the linker which ld on mac does not understand.
         "@platforms//os:macos": [],
         "//conditions:default": ["treat_warnings_as_errors"],
+    })
+
+def _test_compatible_with():
+    """Disable tests when cross compiling or when building on windows"""
+    return select({
+        Label("//cc:_cross_compile_build"): ["@platforms//:incompatible"],
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
     })
 
 def swift_cc_library(**kwargs):
@@ -208,7 +211,7 @@ def swift_cc_test_library(**kwargs):
 
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
 
-    kwargs["target_compatible_with"] = _cross_compile_build() + kwargs.get("target_compatible_with", [])
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
     native.cc_library(**kwargs)
 
@@ -257,5 +260,5 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
-    kwargs["target_compatible_with"] = _cross_compile_build() + kwargs.get("target_compatible_with", [])
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
     native.cc_test(**kwargs)
