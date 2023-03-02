@@ -1,5 +1,8 @@
 def _stamping_impl(ctx):
     file = ctx.version_file
+
+    print(ctx.version_file)
+
     tpl = ctx.file.template
     out = ctx.actions.declare_file(ctx.attr.out)
 
@@ -16,7 +19,7 @@ def _stamping_impl(ctx):
     )
 
     return [DefaultInfo(files = depset([out]))]
-  
+
 stamping = rule(
     implementation = _stamping_impl,
     attrs = {

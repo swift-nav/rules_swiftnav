@@ -23,10 +23,12 @@ def main() -> None:
         args.output, "w"
     ) as out:
         subs = dict(
-            (line.split(" ")[0], line.split(" ")[1]) for line in input.readlines()
+            (line.split(" ")[0], line.split(" ")[1].strip()) for line in input.readlines()
         )
-        s = Template(tpl.read())
-        out.write(s.substitute(subs))
+
+        t = Template(tpl.read())
+        print(t.substitute(subs))
+        out.write(t.substitute(subs))
 
 
 if __name__ == "__main__":
