@@ -8,7 +8,21 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
 exports_files(
     glob(["*.bzl"]),
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
+    name = "cross_compile_build",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_cross_compile_build",
+    flag_values = {":cross_compile_build": "true"},
     visibility = ["//visibility:public"],
 )
