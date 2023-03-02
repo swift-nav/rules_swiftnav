@@ -22,13 +22,14 @@ def main() -> None:
     with open(args.input) as input, open(args.template) as tpl, open(
         args.output, "w"
     ) as out:
-        subs = dict(
-            (line.split(" ")[0], line.split(" ")[1].strip()) for line in input.readlines()
-        )
+        template = tpl.read()
+        for line in input.readlines():
+            print("@"+line.split(" ")[0]+"@")
+            print(line.split(" ")[1].strip())
+            template = template.replace("@"+line.split(" ")[0]+"@", line.split(" ")[1].strip())
 
-        t = Template(tpl.read())
-        print(t.substitute(subs))
-        out.write(t.substitute(subs))
+        print(template)
+        out.write(template)
 
 
 if __name__ == "__main__":
