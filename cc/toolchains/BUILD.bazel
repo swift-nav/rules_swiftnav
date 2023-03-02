@@ -109,11 +109,11 @@ toolchain(
     name = "cc-toolchain-x86_64-linux",
     exec_compatible_with = [
         "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
+        "@platforms//os:macos",
     ],
     target_compatible_with = [
         "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
+        "@platforms//os:macos",
     ],
     target_settings = None,
     toolchain = ":cc-clang-x86_64-linux",
