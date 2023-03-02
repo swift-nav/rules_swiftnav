@@ -16,13 +16,13 @@ exports_files(
 )
 
 bool_flag(
-    name = "cross_compile_build",
+    name = "disable_tests",
     build_setting_default = False,
     visibility = ["//visibility:public"],
 )
 
 config_setting(
-    name = "_cross_compile_build",
-    flag_values = {":cross_compile_build": "true"},
+    name = "_disable_tests",
+    flag_values = {":disable_tests": "true"},
     visibility = ["//visibility:public"],
 )

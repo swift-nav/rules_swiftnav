@@ -52,9 +52,8 @@ def _default_features():
     })
 
 def _test_compatible_with():
-    """Disable tests when cross compiling or when building on windows"""
     return select({
-        Label("//cc:_cross_compile_build"): ["@platforms//:incompatible"],
+        Label("//cc:_disable_tests"): ["@platforms//:incompatible"],
         "@platforms//os:windows": ["@platforms//:incompatible"],
         "//conditions:default": [],
     })
