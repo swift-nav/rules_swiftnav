@@ -51,6 +51,13 @@ def _default_features():
         "//conditions:default": ["treat_warnings_as_errors"],
     })
 
+def _test_compatible_with():
+    return select({
+        Label("//cc:_disable_tests"): ["@platforms//:incompatible"],
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    })
+
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
 
@@ -203,6 +210,8 @@ def swift_cc_test_library(**kwargs):
 
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
 
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+
     native.cc_library(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
@@ -250,4 +259,5 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
     native.cc_test(**kwargs)
