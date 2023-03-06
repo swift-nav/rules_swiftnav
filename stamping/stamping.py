@@ -24,9 +24,7 @@ def main() -> None:
     ) as out:
         template = tpl.read()
         for line in input.readlines():
-            print("@"+line.split(" ")[0]+"@")
-            print(line.split(" ")[1].strip())
-            template = template.replace("@"+line.split(" ")[0]+"@", line.split(" ")[1].strip())
+            template = template.replace("@"+line.split(" ", 1)[0]+"@", line.split(" ", 1)[1].strip())
 
         print(template)
         out.write(template)
