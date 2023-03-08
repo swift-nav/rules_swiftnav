@@ -1,3 +1,5 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 package(default_visibility = ["//visibility:public"])
 
 constraint_setting(name = "compiler")
@@ -5,4 +7,9 @@ constraint_setting(name = "compiler")
 constraint_value(
     name = "gcc-6",
     constraint_setting = ":compiler",
+)
+
+constraint_value(
+    name = "cortexa7t2hf-neon-poky",
+    constraint_setting = "@platforms//cpu",
 )
