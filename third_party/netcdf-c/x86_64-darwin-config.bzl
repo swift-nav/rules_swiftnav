@@ -1,4 +1,4 @@
-config_linux = r"""
+X86_64_DARWIN_CONFIG = r"""
 /*! \file
 
 Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
@@ -177,7 +177,7 @@ are set when opening a binary file on Windows. */
 #define HAVE_BZ2 1
 
 /* Define to 1 if zstd library available. */
-/* #undef HAVE_ZSTD */
+#define HAVE_ZSTD 1
 
 /* Define to 1 if blosc library available. */
 /* #undef HAVE_BLOSC */
@@ -186,28 +186,28 @@ are set when opening a binary file on Windows. */
 /* #undef HDF5_HAS_COLL_METADATA_OPS */
 
 /* Is CURLINFO_RESPONSE_CODE defined */
-/* #undef HAVE_CURLINFO_RESPONSE_CODE */
+#define HAVE_CURLINFO_RESPONSE_CODE 1
 
 /* Is CURLINFO_HTTP_CODE defined */
-/* #undef HAVE_CURLINFO_HTTP_CONNECTCODE */
+#define HAVE_CURLINFO_HTTP_CONNECTCODE 1
 
 /* Is CURLOPT_BUFFERSIZE defined */
-/* #undef HAVE_CURLOPT_BUFFERSIZE */
+#define HAVE_CURLOPT_BUFFERSIZE 1
 
 /* Is CURLOPT_TCP_KEEPALIVE defined */
-/* #undef HAVE_CURLOPT_KEEPALIVE */
+#define HAVE_CURLOPT_KEEPALIVE 1
 
 /* Is CURLOPT_KEYPASSWD defined */
-/* #undef HAVE_CURLOPT_KEYPASSWD */
+#define HAVE_CURLOPT_KEYPASSWD 1
 
 /* Is CURLOPT_PASSWORD defined */
-/* #undef HAVE_CURLOPT_PASSWORD */
+#define HAVE_CURLOPT_PASSWORD 1
 
 /* Is CURLOPT_USERNAME defined */
-/* #undef HAVE_CURLOPT_USERNAME */
+#define HAVE_CURLOPT_USERNAME 1
 
 /* Is LIBCURL version >= 7.66 */
-/* #undef HAVE_LIBCURL_766 */
+#define HAVE_LIBCURL_766 1
 
 /* Define to 1 if you have the declaration of `isfinite', and to 0 if you
    don't. */
@@ -261,7 +261,7 @@ are set when opening a binary file on Windows. */
 /* #undef HAVE_STRUCT_TIMESPEC */
 
 /* Define to 1 if you have the `H5Z_SZIP' function. */
-#define HAVE_H5Z_SZIP 1
+/* #undef HAVE_H5Z_SZIP */
 
 /* Define to 1 if you have libsz */
 #define HAVE_SZ 1
@@ -306,7 +306,7 @@ are set when opening a binary file on Windows. */
 #define HAVE_LONG_LONG_INT 1
 
 /* Define to 1 if you have the <malloc.h> header file. */
-#define HAVE_MALLOC_H 1
+/* #undef HAVE_MALLOC_H */
 
 /* Define to 1 if you have the `memmove' function. */
 #define HAVE_MEMMOVE 1
@@ -324,7 +324,7 @@ are set when opening a binary file on Windows. */
 /* #undef HAVE_MPI_INFO_F2C */
 
 /* Define to 1 if you have the `mremap' function. */
-#define HAVE_MREMAP 1
+/* #undef HAVE_MREMAP */
 
 /* Define to 1 if you have the `random' function. */
 #define HAVE_RANDOM 1
@@ -378,7 +378,7 @@ are set when opening a binary file on Windows. */
 #define HAVE_STRCASECMP
 
 /* Define to 1 if you have the `strlcat' function. */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if you have the `strtoll' function. */
 #define HAVE_STRTOLL 1
@@ -440,7 +440,7 @@ with zip */
 #define HDF5_SUPPORTS_PAR_FILTERS 1
 
 /* if true, HDF5 is at least version 1.10.5 and supports UTF8 paths */
-/* #undef HDF5_UTF8_PATHS */
+#define HDF5_UTF8_PATHS 1
 
 /* if true, include JNA bug fix */
 /* #undef JNA */
@@ -530,7 +530,7 @@ with zip */
 #define SIZEOF_VOIDSTAR 8
 
 /* The size of `short` as computed by sizeof. */
-#define SIZEOF_OFF64_T 8
+/* #undef SIZEOF_OFF64_T */
 
 /* The size of `double', as computed by sizeof. */
 #define SIZEOF_DOUBLE 8
