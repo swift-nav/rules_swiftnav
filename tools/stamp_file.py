@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Usages: stamping.py <status_file> <template_file> <output_file>
+Usages: stamp_file.py <status_file> <template_file> <output_file>
 """
 
 import argparse

@@ -9,6 +9,6 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 exports_files(
-    glob(["*.bzl"]) + ["stamping.py"],
+    glob(["*.bzl"]) + ["stamp_file.py"],
     visibility = ["//visibility:public"],
 )

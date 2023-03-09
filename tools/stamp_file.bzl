@@ -1,6 +1,4 @@
-load("//cc:defs.bzl", "swift_cc_library")
-
-def _stamping_impl(ctx):
+def _stamp_file_impl(ctx):
     status_file = ctx.info_file
     template = ctx.file.template
     out = ctx.actions.declare_file(ctx.attr.out)
@@ -19,8 +17,8 @@ def _stamping_impl(ctx):
 
     return [DefaultInfo(files = depset([out]))]
 
-_stamping = rule(
-    implementation = _stamping_impl,
+stamp_file = rule(
+    implementation = _stamp_file_impl,
     attrs = {
         "out": attr.string(mandatory = True),
         "template": attr.label(
@@ -31,20 +29,7 @@ _stamping = rule(
             executable = True,
             cfg = "exec",
             allow_files = True,
-            default = "//stamping:stamping.py",
+            default = "//tools:stamp_file.py",
         ),
     },
 )
-
-def stamping(name, out, template, hdrs, includes):
-    source_name = name + "_"
-
-    _stamping(name = source_name, out = out, template = template)
-
-    swift_cc_library(
-        name = name,
-        hdrs = hdrs,
-        includes = includes,
-        linkstamp = source_name,
-        visibility = ["//visibility:public"],
-    )
