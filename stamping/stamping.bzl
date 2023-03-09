@@ -1,7 +1,7 @@
 load("//cc:defs.bzl", "swift_cc_library")
 
 def _stamping_impl(ctx):
-    status_file = ctx.version_file
+    status_file = ctx.info_file
     template = ctx.file.template
     out = ctx.actions.declare_file(ctx.attr.out)
 
