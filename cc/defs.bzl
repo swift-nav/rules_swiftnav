@@ -72,6 +72,7 @@ def cc_stamped_library(name, out, template, hdrs, includes):
         hdrs = hdrs,
         includes = includes,
         linkstamp = source_name,
+        #FIXME: Don't default to public visibility. Require users to set it.
         visibility = ["//visibility:public"],
     )
 
