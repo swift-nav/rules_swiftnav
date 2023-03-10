@@ -60,6 +60,9 @@ def _test_compatible_with():
     })
 
 def cc_stamped_library(name, out, template, hdrs, includes):
+    """Creates a cc_library stamped with non-hermetic build metadata.
+    """
+
     source_name = name + "_"
 
     stamp_file(name = source_name, out = out, template = template)
