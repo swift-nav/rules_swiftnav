@@ -10,6 +10,7 @@
 
 """Swift wrappers for native cc rules."""
 
+load("//tools:stamp_file.bzl", "stamp_file")
 load(":utils.bzl", "construct_local_include")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
 
@@ -57,6 +58,23 @@ def _test_compatible_with():
         "@platforms//os:windows": ["@platforms//:incompatible"],
         "//conditions:default": [],
     })
+
+def cc_stamped_library(name, out, template, hdrs, includes):
+    """Creates a cc_library stamped with non-hermetic build metadata.
+    """
+
+    source_name = name + "_"
+
+    stamp_file(name = source_name, out = out, template = template)
+
+    swift_cc_library(
+        name = name,
+        hdrs = hdrs,
+        includes = includes,
+        linkstamp = source_name,
+        #FIXME: Don't default to public visibility. Require users to set it.
+        visibility = ["//visibility:public"],
+    )
 
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
