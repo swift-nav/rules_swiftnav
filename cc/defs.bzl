@@ -12,6 +12,10 @@
 
 load(":utils.bzl", "construct_local_include")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
+load("//tools:cc_static_library.bzl", _cc_static_library = "cc_static_library")
+
+# reexport cc_static_library
+cc_static_library = _cc_static_library
 
 # Name for a unit test
 UNIT = "unit"
