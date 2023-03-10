@@ -1,10 +1,12 @@
 def _stamp_file_impl(ctx):
     status_file = ctx.info_file
+    status_default = json.encode(ctx.attr.status_default)
     template = ctx.file.template
     out = ctx.actions.declare_file(ctx.attr.out)
 
     args = ctx.actions.args()
     args.add(status_file)
+    args.add(status_default)
     args.add(template)
     args.add(out)
 
@@ -25,11 +27,14 @@ stamp_file = rule(
             allow_single_file = [".in"],
             mandatory = True,
         ),
+        "status_default": attr.string_dict(
+            mandatory = True,
+        ),
         "exec": attr.label(
             executable = True,
             cfg = "exec",
             allow_files = True,
-            default = "//tools:stamp_file.py",
+            default = "//tools:stamp_file",
         ),
     },
 )

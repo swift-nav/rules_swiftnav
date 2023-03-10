@@ -59,21 +59,20 @@ def _test_compatible_with():
         "//conditions:default": [],
     })
 
-def cc_stamped_library(name, out, template, hdrs, includes):
+def cc_stamped_library(name, out, status_default, template, hdrs, includes, visibility = None):
     """Creates a cc_library stamped with non-hermetic build metadata.
     """
 
     source_name = name + "_"
 
-    stamp_file(name = source_name, out = out, template = template)
+    stamp_file(name = source_name, out = out, status_default = status_default, template = template)
 
     swift_cc_library(
         name = name,
         hdrs = hdrs,
         includes = includes,
         linkstamp = source_name,
-        #FIXME: Don't default to public visibility. Require users to set it.
-        visibility = ["//visibility:public"],
+        visibility = visibility,
     )
 
 def swift_cc_library(**kwargs):
