@@ -59,13 +59,31 @@ def _test_compatible_with():
         "//conditions:default": [],
     })
 
-def cc_stamped_library(name, out, status_default, template, hdrs, includes, visibility = None):
+def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
     """Creates a cc_library stamped with non-hermetic build metadata.
+
+    Creates a cc_library from the input template with values of the form @VAL@
+    substituted with values from the workspace status program. This typically
+    includes version control information, timestamps, and other similiar
+    data. The output file is only compiled into the final resulting binary.
+
+    Currently only stable status variables are supported.
+
+    See https://bazel.build/docs/user-manual#workspace-status for more.
+
+    Args:
+        name: The name of the target
+        out: The expanded source file
+        template: The input template
+        hdrs: See https://bazel.build/reference/be/c-cpp#cc_library.hdrs
+        includes: See https://bazel.build/reference/be/c-cpp#cc_library.includes
+        defaults: Dict of default values when stamping is not enabled
+        visibility: See https://bazel.build/reference/be/common-definitions#common.visibility
     """
 
     source_name = name + "_"
 
-    stamp_file(name = source_name, out = out, status_default = status_default, template = template)
+    stamp_file(name = source_name, out = out, defaults = defaults, template = template)
 
     swift_cc_library(
         name = name,
