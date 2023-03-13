@@ -7,14 +7,27 @@ def _get_linker_inputs(deps):
     input_depset = depset(transitive = lib_sets)
     return input_depset.to_list()
 
-def _get_libs(linker_inputs):
+def _get_static_libaries(ctx, lib):
+    # This statement checks if path contains "+" and replaces it with "_".
+    # This workaround is needed for the older version of archiver (2.31.1), which doesn't accept paths with "+".
+    if lib.path.find("+") != -1:
+        new_lib = ctx.actions.declare_file(lib.path.replace("+", "_"))
+        ctx.actions.run_shell(
+            command = "cp {} {}".format(lib.path, new_lib.path),
+            inputs = [lib],
+            outputs = [new_lib],
+        )
+        return new_lib
+    return lib
+
+def _get_libs(ctx, linker_inputs):
     libs = []
     for inp in linker_inputs:
         for lib in inp.libraries:
             if lib.pic_static_library:
-                libs.append(lib.pic_static_library)
+                libs.append(_get_static_libaries(ctx, lib.pic_static_library))
             elif lib.static_library:
-                libs.append(lib.static_library)
+                libs.append(_get_static_libaries(ctx, lib.static_library))
     return libs
 
 def _get_commands(output_lib, libs):
@@ -32,7 +45,7 @@ def _cc_static_library_impl(ctx):
 
     linker_inputs = _get_linker_inputs(ctx.attr.deps)
 
-    libs = _get_libs(linker_inputs)
+    libs = _get_libs(ctx, linker_inputs)
 
     script_file = ctx.actions.declare_file("{}.mri".format(ctx.attr.name))
     ctx.actions.write(
