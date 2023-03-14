@@ -4,6 +4,13 @@ load("//cc:defs.bzl", "BINARY", "LIBRARY")
 def _flatten(input_list):
     return [item for sublist in input_list for item in sublist]
 
+def _get_clang_tidy(ctx):
+    cc_toolchain = find_cpp_toolchain(ctx)
+    for file in cc_toolchain.all_files.to_list():
+        if file.path.find("bin/clang-tidy") != -1:
+            return file
+    return None
+
 def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_contexts, infile, discriminator):
     inputs = depset(direct = [infile, config] + additional_deps.files.to_list() + ([exe.files_to_run.executable] if exe.files_to_run.executable else []), transitive = [compilation_context.headers for compilation_context in compilation_contexts])
 
@@ -14,11 +21,15 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
         "bazel_clang_tidy_" + infile.path + "." + discriminator + ".clang-tidy.yaml",
     )
 
+    clang_tidy = _get_clang_tidy(ctx)
+
     # this is consumed by the wrapper script
-    if len(exe.files.to_list()) == 0:
-        args.add("clang-tidy")
-    else:
+    if clang_tidy != None:
+        args.add(clang_tidy.path)
+    elif len(exe.files.to_list()) != 0:
         args.add(exe.files_to_run.executable)
+    else:
+        args.add("clang-tidy")
 
     args.add(config.path)
 
@@ -61,7 +72,7 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
                 args.add(path)
 
     ctx.actions.run(
-        inputs = inputs,
+        inputs = depset(direct = [clang_tidy] if clang_tidy != None else [], transitive = [inputs]),
         outputs = [outfile],
         executable = wrapper,
         arguments = [args],
