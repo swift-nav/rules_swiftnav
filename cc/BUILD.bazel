@@ -26,3 +26,27 @@ config_setting(
     flag_values = {":disable_tests": "true"},
     visibility = ["//visibility:public"],
 )
+
+bool_flag(
+    name = "enable_exceptions",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_exceptions",
+    flag_values = {":enable_exceptions": "true"},
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
+    name = "enable_rtti",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_rtti",
+    flag_values = {":enable_rtti": "true"},
+    visibility = ["//visibility:public"],
+)

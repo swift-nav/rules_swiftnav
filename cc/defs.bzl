@@ -35,11 +35,24 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
+def _c_standard(extensions = False, standard = 99):
+    extensions = "gnu" if extensions else "c"
+    return ["-std={}{}".format(extensions, standard)]
+
 def _common_c_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
     }) + ["-pedantic"] if pedantic else []
+
+def _common_cxx_opts(exceptions = False, rtti = False):
+    return select({
+        Label("//cc:_enable_exceptions"): ["-fexceptions"],
+        "//conditions:default": ["-fno-exceptions" if not exceptions else "-fexceptions"],
+    }) + select({
+        Label("//cc:_enable_rtti"): ["-frtti"],
+        "//conditions:default": ["-fno-rtti" if not rtti else "-frtti"],
+    })
 
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
@@ -94,9 +107,44 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
     )
 
 def swift_c_library(**kwargs):
-    _ = kwargs.pop("extensions", False)
-    _ = kwargs.pop("standard", [])
-    swift_cc_library(**kwargs)
+    """Wraps cc_library to enforce standards for a production c library.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Production targets (swift_cc*), are compiled with the -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
+    """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
+
+    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = local_includes + copts
+
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+
+    c_standard = _c_standard(extensions, standard)
+
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
+
+    kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
+
+    native.cc_library(**kwargs)
 
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
@@ -128,7 +176,10 @@ def swift_cc_library(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
-    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    cxx_opts = _common_cxx_opts(nocopts)
+
+    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
@@ -137,9 +188,43 @@ def swift_cc_library(**kwargs):
     native.cc_library(**kwargs)
 
 def swift_c_tool_library(**kwargs):
-    _ = kwargs.pop("extensions", False)
-    _ = kwargs.pop("standard", [])
-    swift_cc_tool_library(**kwargs)
+    """Wraps cc_library to enforce standards for a non-production c library.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Non-production targets (swift_cc_tool*), are compiled without the
+    -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
+    """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    nocopts = kwargs.pop("nocopts", [])
+
+    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = local_includes + copts
+
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+
+    c_standard = _c_standard(extensions, standard)
+
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
+
+    native.cc_library(**kwargs)
 
 def swift_cc_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production library.
@@ -172,16 +257,57 @@ def swift_cc_tool_library(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = False)
     copts = local_includes + copts
-    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    ## c++ only
+    cxx_opts = _common_cxx_opts(nocopts)
+
+    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_library(**kwargs)
 
 def swift_c_binary(**kwargs):
-    _ = kwargs.pop("extensions", False)
-    _ = kwargs.pop("standard", [])
-    swift_cc_binary(**kwargs)
+    """Wraps cc_binary to enforce standards for a production c binary.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Production targets (swift_cc*), are compiled with the -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
+    """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    nocopts = kwargs.pop("nocopts", [])
+
+    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = local_includes + copts
+
+    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = local_includes + copts
+
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+    c_standard = _c_standard(extensions, standard)
+
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
+
+    kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
+
+    native.cc_binary(**kwargs)
 
 def swift_cc_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production binary.
@@ -213,7 +339,11 @@ def swift_cc_binary(**kwargs):
 
     copts = _common_c_opts(nocopts, pedantic = True)
     copts = local_includes + copts
-    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    ## c++ only
+    cxx_opts = _common_cxx_opts(nocopts)
+
+    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
@@ -222,9 +352,40 @@ def swift_cc_binary(**kwargs):
     native.cc_binary(**kwargs)
 
 def swift_c_tool(**kwargs):
-    _ = kwargs.pop("extensions", False)
-    _ = kwargs.pop("standard", [])
-    swift_cc_tool(**kwargs)
+    """Wraps cc_binary to enforce standards for a non-production c binary.
+
+    Primarily this consists of a default set of compiler options and
+    language standards.
+
+    Non-production targets (swift_cc_tool*), are compiled without the
+    -pedantic flag.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+
+            nocopts: List of flags to remove from the default compile
+            options. Use judiciously.
+    """
+    nocopts = kwargs.pop("nocopts", [])
+
+    copts = _common_c_opts(nocopts, pedantic = False)
+
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+
+    c_standard = _c_standard(extensions, standard)
+
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["features"] = _default_features() + kwargs.get("features", [])
+
+    native.cc_binary(**kwargs)
 
 def swift_cc_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production binary.
@@ -254,7 +415,11 @@ def swift_cc_tool(**kwargs):
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
-    kwargs["copts"] = copts + kwargs.get("copts", [])
+
+    ## c++ only
+    cxx_opts = _common_cxx_opts(nocopts)
+
+    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
