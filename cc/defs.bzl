@@ -14,6 +14,17 @@ load("//tools:stamp_file.bzl", "stamp_file")
 load(":utils.bzl", "construct_local_include")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
 
+CXX_STANDARDS = {
+    98: "-std=c++98",
+    11: "-std=c++11",
+    14: "-std=c++14",
+    17: "-std=c++17",
+    20: "-std=c++20",
+    23: "-std=c++23",
+}
+
+CXX_STANDARD_ERROR = "{} is not a supported c++ standard. Supported options: 98, 11, 14, 17, 20, and 23"
+
 # Name for a unit test
 UNIT = "unit"
 
@@ -35,18 +46,25 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
+# Options for setting the c standard
 def _c_standard(extensions = False, standard = 99):
     extensions = "gnu" if extensions else "c"
     return ["-std={}{}".format(extensions, standard)]
 
+# Options common to both c and c++ code
 def _common_cc_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
     }) + ["-pedantic"] if pedantic else []
 
-def _common_cxx_opts(exceptions = False, rtti = False):
-    return select({
+# Options specific to c++ code (exceptions, rtti, etc..)
+def _common_cxx_opts(exceptions = False, rtti = False, standard = 14):
+    cxx_standard = CXX_STANDARDS.get(standard)
+    if not cxx_standard:
+        fail(CXX_STANDARD_ERROR.format(standard))
+
+    return [cxx_standard] + select({
         Label("//cc:_enable_exceptions"): ["-fexceptions"],
         "//conditions:default": ["-fno-exceptions" if not exceptions else "-fexceptions"],
     }) + select({
@@ -54,9 +72,12 @@ def _common_cxx_opts(exceptions = False, rtti = False):
         "//conditions:default": ["-fno-rtti" if not rtti else "-frtti"],
     })
 
+# Handle various nuances of local include paths
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
+# Some options like -Werror are set using toolchain features
+# See: https://bazel.build/docs/cc-toolchain-config-reference#features
 def _default_features():
     return select({
         # treat_warnings_as_errors passes the option -fatal-warnings
@@ -65,6 +86,7 @@ def _default_features():
         "//conditions:default": ["treat_warnings_as_errors"],
     })
 
+# Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
     return select({
         Label("//cc:_disable_tests"): ["@platforms//:incompatible"],
@@ -166,10 +188,6 @@ def swift_cc_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    _ = kwargs.pop("exceptions", False)
-    _ = kwargs.pop("rtti", False)
-    _ = kwargs.pop("standard", 14)
-
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
@@ -177,7 +195,11 @@ def swift_cc_library(**kwargs):
     copts = _common_cc_opts(nocopts, pedantic = True)
     copts = local_includes + copts
 
-    cxxopts = _common_cxx_opts(nocopts)
+    exceptions = kwargs.pop("exceptions", False)
+    rtti = kwargs.pop("rtti", False)
+    standard = kwargs.pop("standard", 14)
+
+    cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
@@ -247,10 +269,6 @@ def swift_cc_tool_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    _ = kwargs.pop("exceptions", False)
-    _ = kwargs.pop("rtti", False)
-    _ = kwargs.pop("standard", 14)
-
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -258,8 +276,11 @@ def swift_cc_tool_library(**kwargs):
     copts = _common_cc_opts(nocopts, pedantic = False)
     copts = local_includes + copts
 
-    ## c++ only
-    cxxopts = _common_cxx_opts(nocopts)
+    exceptions = kwargs.pop("exceptions", False)
+    rtti = kwargs.pop("rtti", False)
+    standard = kwargs.pop("standard", 14)
+
+    cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
@@ -326,10 +347,6 @@ def swift_cc_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    _ = kwargs.pop("exceptions", False)
-    _ = kwargs.pop("rtti", False)
-    _ = kwargs.pop("standard", 14)
-
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -337,7 +354,11 @@ def swift_cc_binary(**kwargs):
     copts = _common_cc_opts(nocopts, pedantic = True)
     copts = local_includes + copts
 
-    cxxopts = _common_cxx_opts(nocopts)
+    exceptions = kwargs.pop("exceptions", False)
+    rtti = kwargs.pop("rtti", False)
+    standard = kwargs.pop("standard", 14)
+
+    cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
@@ -404,16 +425,15 @@ def swift_cc_tool(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    _ = kwargs.pop("exceptions", False)
-    _ = kwargs.pop("rtti", False)
-    _ = kwargs.pop("standard", 14)
-
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_cc_opts(nocopts, pedantic = False)
 
-    ## c++ only
-    cxxopts = _common_cxx_opts(nocopts)
+    exceptions = kwargs.pop("exceptions", False)
+    rtti = kwargs.pop("rtti", False)
+    standard = kwargs.pop("standard", 14)
+
+    cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
