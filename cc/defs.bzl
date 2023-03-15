@@ -14,17 +14,6 @@ load("//tools:stamp_file.bzl", "stamp_file")
 load(":utils.bzl", "construct_local_include")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
 
-CXX_STANDARDS = {
-    98: "-std=c++98",
-    11: "-std=c++11",
-    14: "-std=c++14",
-    17: "-std=c++17",
-    20: "-std=c++20",
-    23: "-std=c++23",
-}
-
-CXX_STANDARD_ERROR = "{} is not a supported c++ standard. Supported options: 98, 11, 14, 17, 20, and 23"
-
 # Name for a unit test
 UNIT = "unit"
 
@@ -60,11 +49,8 @@ def _common_cc_opts(nocopts, pedantic = False):
 
 # Options specific to c++ code (exceptions, rtti, etc..)
 def _common_cxx_opts(exceptions = False, rtti = False, standard = 14):
-    cxx_standard = CXX_STANDARDS.get(standard)
-    if not cxx_standard:
-        fail(CXX_STANDARD_ERROR.format(standard))
-
-    return [cxx_standard] + select({
+    standard = "-std=c++{}".format(standard)
+    return [standard] + select({
         Label("//cc:_enable_exceptions"): ["-fexceptions"],
         "//conditions:default": ["-fno-exceptions" if not exceptions else "-fexceptions"],
     }) + select({
