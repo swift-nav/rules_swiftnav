@@ -39,7 +39,7 @@ def _c_standard(extensions = False, standard = 99):
     extensions = "gnu" if extensions else "c"
     return ["-std={}{}".format(extensions, standard)]
 
-def _common_c_opts(nocopts, pedantic = False):
+def _common_cc_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
@@ -130,7 +130,7 @@ def swift_c_library(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
-    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = _common_cc_opts(nocopts, pedantic = True)
     copts = local_includes + copts
 
     extensions = kwargs.pop("extensions", False)
@@ -174,12 +174,12 @@ def swift_cc_library(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
-    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = _common_cc_opts(nocopts, pedantic = True)
     copts = local_includes + copts
 
-    cxx_opts = _common_cxx_opts(nocopts)
+    cxxopts = _common_cxx_opts(nocopts)
 
-    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
@@ -212,7 +212,7 @@ def swift_c_tool_library(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = _common_cc_opts(nocopts, pedantic = False)
     copts = local_includes + copts
 
     extensions = kwargs.pop("extensions", False)
@@ -255,13 +255,13 @@ def swift_cc_tool_library(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = _common_cc_opts(nocopts, pedantic = False)
     copts = local_includes + copts
 
     ## c++ only
-    cxx_opts = _common_cxx_opts(nocopts)
+    cxxopts = _common_cxx_opts(nocopts)
 
-    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
@@ -291,10 +291,7 @@ def swift_c_binary(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = True)
-    copts = local_includes + copts
-
-    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = _common_cc_opts(nocopts, pedantic = True)
     copts = local_includes + copts
 
     extensions = kwargs.pop("extensions", False)
@@ -337,13 +334,12 @@ def swift_cc_binary(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = True)
+    copts = _common_cc_opts(nocopts, pedantic = True)
     copts = local_includes + copts
 
-    ## c++ only
-    cxx_opts = _common_cxx_opts(nocopts)
+    cxxopts = _common_cxx_opts(nocopts)
 
-    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
@@ -374,7 +370,7 @@ def swift_c_tool(**kwargs):
     """
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = _common_cc_opts(nocopts, pedantic = False)
 
     extensions = kwargs.pop("extensions", False)
     standard = kwargs.pop("standard", 99)
@@ -414,12 +410,12 @@ def swift_cc_tool(**kwargs):
 
     nocopts = kwargs.pop("nocopts", [])
 
-    copts = _common_c_opts(nocopts, pedantic = False)
+    copts = _common_cc_opts(nocopts, pedantic = False)
 
     ## c++ only
-    cxx_opts = _common_cxx_opts(nocopts)
+    cxxopts = _common_cxx_opts(nocopts)
 
-    kwargs["copts"] = copts + cxx_opts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
