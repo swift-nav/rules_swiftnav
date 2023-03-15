@@ -127,6 +127,11 @@ def swift_c_library(**kwargs):
 
             The following additional attributes are supported:
 
+            extensions: Bool to enable c extensions (-std=gnu).
+
+            standard: Override the default c standard (99). Passed to compiler
+            as -std={gnu/c}{standard}.
+
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
             be relative to the package this macro is called from.
@@ -155,7 +160,7 @@ def swift_c_library(**kwargs):
     native.cc_library(**kwargs)
 
 def swift_cc_library(**kwargs):
-    """Wraps cc_library to enforce standards for a production library.
+    """Wraps cc_library to enforce standards for a production c++ library.
 
     Primarily this consists of a default set of compiler options and
     language standards.
@@ -166,6 +171,13 @@ def swift_cc_library(**kwargs):
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
             The following additional attributes are supported:
+
+            exceptions: Bool to enable building with exceptions.
+
+            rtti: Bool to enable building with rtti.
+
+            standard: Override the default c++ standard (14). Passed to compiler as
+            -std=c++{standard}.
 
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
@@ -209,6 +221,11 @@ def swift_c_tool_library(**kwargs):
 
             The following additional attributes are supported:
 
+            extensions: Bool to enable c extensions (-std=gnu).
+
+            standard: Override the default c standard (99). Passed to compiler
+            as -std={gnu/c}{standard}.
+
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
             be relative to the package this macro is called from.
@@ -235,7 +252,7 @@ def swift_c_tool_library(**kwargs):
     native.cc_library(**kwargs)
 
 def swift_cc_tool_library(**kwargs):
-    """Wraps cc_library to enforce standards for a non-production library.
+    """Wraps cc_library to enforce standards for a non-production c++ library.
 
     Primarily this consists of a default set of compiler options and
     language standards.
@@ -247,6 +264,13 @@ def swift_cc_tool_library(**kwargs):
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
             The following additional attributes are supported:
+
+            exceptions: Bool to enable building with exceptions.
+
+            rtti: Bool to enable building with rtti.
+
+            standard: Override the default c++ standard (14). Passed to compiler as
+            -std=c++{standard}.
 
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
@@ -287,6 +311,11 @@ def swift_c_binary(**kwargs):
 
             The following additional attributes are supported:
 
+            extensions: Bool to enable c extensions (-std=gnu).
+
+            standard: Override the default c standard (99). Passed to compiler
+            as -std={gnu/c}{standard}.
+
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
             be relative to the package this macro is called from.
@@ -314,7 +343,7 @@ def swift_c_binary(**kwargs):
     native.cc_binary(**kwargs)
 
 def swift_cc_binary(**kwargs):
-    """Wraps cc_binary to enforce standards for a production binary.
+    """Wraps cc_binary to enforce standards for a production c++ binary.
 
     Primarily this consists of a default set of compiler options and
     language standards.
@@ -325,6 +354,13 @@ def swift_cc_binary(**kwargs):
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
 
             The following additional attributes are supported:
+
+            exceptions: Bool to enable building with exceptions.
+
+            rtti: Bool to enable building with rtti.
+
+            standard: Override the default c++ standard (14). Passed to compiler as
+            -std=c++{standard}.
 
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
@@ -368,6 +404,11 @@ def swift_c_tool(**kwargs):
 
             The following additional attributes are supported:
 
+            extensions: Bool to enable c extensions (-std=gnu).
+
+            standard: Override the default c standard (99). Passed to compiler
+            as -std={gnu/c}{standard}.
+
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
             be relative to the package this macro is called from.
@@ -391,7 +432,7 @@ def swift_c_tool(**kwargs):
     native.cc_binary(**kwargs)
 
 def swift_cc_tool(**kwargs):
-    """Wraps cc_binary to enforce standards for a non-production binary.
+    """Wraps cc_binary to enforce standards for a non-production c++ binary.
 
     Primarily this consists of a default set of compiler options and
     language standards.
@@ -403,6 +444,13 @@ def swift_cc_tool(**kwargs):
         **kwargs: See https://bazel.build/reference/be/c-cpp#cc_binary
 
             The following additional attributes are supported:
+
+            exceptions: Bool to enable building with exceptions.
+
+            rtti: Bool to enable building with rtti.
+
+            standard: Override the default c++ standard (14). Passed to compiler as
+            -std=c++{standard}.
 
             local_includes: List of local (non-public) include paths. Prefer
             this to passing local includes using copts. Paths are expected to
