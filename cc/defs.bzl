@@ -120,6 +120,7 @@ def swift_cc_library(**kwargs):
     """
     _ = kwargs.pop("exceptions", False)
     _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
@@ -163,6 +164,7 @@ def swift_cc_tool_library(**kwargs):
     """
     _ = kwargs.pop("exceptions", False)
     _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
@@ -203,6 +205,7 @@ def swift_cc_binary(**kwargs):
     """
     _ = kwargs.pop("exceptions", False)
     _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
@@ -246,6 +249,7 @@ def swift_cc_tool(**kwargs):
     """
     _ = kwargs.pop("exceptions", False)
     _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
 
     nocopts = kwargs.pop("nocopts", [])
 
