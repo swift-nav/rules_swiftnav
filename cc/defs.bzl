@@ -35,10 +35,14 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
-# Options for setting the c standard
+# Form the c standard string
 def _c_standard(extensions = False, standard = 99):
     extensions = "gnu" if extensions else "c"
     return ["-std={}{}".format(extensions, standard)]
+
+# Form the c++ standard string.
+def _cxx_standard(default, override):
+    return default if not override else "-std=c++{}".format(override)
 
 # Options common to both c and c++ code
 def _common_cc_opts(nocopts, pedantic = False):
@@ -48,14 +52,18 @@ def _common_cc_opts(nocopts, pedantic = False):
     }) + ["-pedantic"] if pedantic else []
 
 # Options specific to c++ code (exceptions, rtti, etc..)
-def _common_cxx_opts(exceptions = False, rtti = False, standard = 14):
-    standard = "-std=c++{}".format(standard)
-    return [standard] + select({
+def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
+    return select({
         Label("//cc:_enable_exceptions"): ["-fexceptions"],
         "//conditions:default": ["-fno-exceptions" if not exceptions else "-fexceptions"],
     }) + select({
         Label("//cc:_enable_rtti"): ["-frtti"],
         "//conditions:default": ["-fno-rtti" if not rtti else "-frtti"],
+    }) + select({
+        Label("//cc:cxx17"): [_cxx_standard("-std=c++17", standard)],
+        Label("//cc:cxx20"): [_cxx_standard("-std=c++20", standard)],
+        Label("//cc:cxx23"): [_cxx_standard("-std=c++23", standard)],
+        "//conditions:default": [_cxx_standard("-std=c++14", standard)],
     })
 
 # Handle various nuances of local include paths
@@ -195,7 +203,7 @@ def swift_cc_library(**kwargs):
 
     exceptions = kwargs.pop("exceptions", False)
     rtti = kwargs.pop("rtti", False)
-    standard = kwargs.pop("standard", 14)
+    standard = kwargs.pop("standard", None)
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
@@ -288,7 +296,7 @@ def swift_cc_tool_library(**kwargs):
 
     exceptions = kwargs.pop("exceptions", False)
     rtti = kwargs.pop("rtti", False)
-    standard = kwargs.pop("standard", 14)
+    standard = kwargs.pop("standard", None)
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
@@ -378,7 +386,7 @@ def swift_cc_binary(**kwargs):
 
     exceptions = kwargs.pop("exceptions", False)
     rtti = kwargs.pop("rtti", False)
-    standard = kwargs.pop("standard", 14)
+    standard = kwargs.pop("standard", None)
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
@@ -465,7 +473,7 @@ def swift_cc_tool(**kwargs):
 
     exceptions = kwargs.pop("exceptions", False)
     rtti = kwargs.pop("rtti", False)
-    standard = kwargs.pop("standard", 14)
+    standard = kwargs.pop("standard", None)
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 

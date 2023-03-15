@@ -8,13 +8,14 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 exports_files(
     glob(["*.bzl"]),
     visibility = ["//visibility:public"],
 )
 
+# Disable tests and test libraries with --@rules_swiftnav//:disable_test=true
 bool_flag(
     name = "disable_tests",
     build_setting_default = False,
@@ -27,6 +28,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Enable exceptions with --@rules_swiftnav//:enable_exceptions=true
 bool_flag(
     name = "enable_exceptions",
     build_setting_default = False,
@@ -39,6 +41,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Enable rtti with --@rules_swiftnav//:enable_exceptions=true
 bool_flag(
     name = "enable_rtti",
     build_setting_default = False,
@@ -48,5 +51,33 @@ bool_flag(
 config_setting(
     name = "_enable_rtti",
     flag_values = {":enable_rtti": "true"},
+    visibility = ["//visibility:public"],
+)
+
+# Allows us to experiment with building the codebase with different standards.
+string_flag(
+    name = "cxx_standard",
+    build_setting_default = "",  #inactive by default
+    visibility = ["//visibility:public"],
+)
+
+# Enable with --@rules_swiftnav//:cxx_standard=17
+config_setting(
+    name = "cxx17",
+    flag_values = {":cxx_standard": "17"},
+    visibility = ["//visibility:public"],
+)
+
+# Enable with --@rules_swiftnav//:cxx_standard=20
+config_setting(
+    name = "cxx20",
+    flag_values = {":cxx_standard": "20"},
+    visibility = ["//visibility:public"],
+)
+
+# Enable with --@rules_swiftnav//:cxx_standard=23
+config_setting(
+    name = "cxx23",
+    flag_values = {":cxx_standard": "23"},
     visibility = ["//visibility:public"],
 )
