@@ -118,6 +118,9 @@ def swift_cc_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
@@ -158,6 +161,9 @@ def swift_cc_tool_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -195,6 +201,9 @@ def swift_cc_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -235,6 +244,9 @@ def swift_cc_tool(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
