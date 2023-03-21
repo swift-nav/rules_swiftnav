@@ -97,6 +97,11 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         visibility = visibility,
     )
 
+def swift_c_library(**kwargs):
+    _ = kwargs.pop("extensions", False)
+    _ = kwargs.pop("standard", [])
+    swift_cc_library(**kwargs)
+
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production library.
 
@@ -117,6 +122,10 @@ def swift_cc_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
@@ -130,6 +139,11 @@ def swift_cc_library(**kwargs):
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
+
+def swift_c_tool_library(**kwargs):
+    _ = kwargs.pop("extensions", False)
+    _ = kwargs.pop("standard", [])
+    swift_cc_tool_library(**kwargs)
 
 def swift_cc_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production library.
@@ -152,6 +166,10 @@ def swift_cc_tool_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -163,6 +181,11 @@ def swift_cc_tool_library(**kwargs):
     kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_library(**kwargs)
+
+def swift_c_binary(**kwargs):
+    _ = kwargs.pop("extensions", False)
+    _ = kwargs.pop("standard", [])
+    swift_cc_binary(**kwargs)
 
 def swift_cc_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production binary.
@@ -184,6 +207,10 @@ def swift_cc_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -197,6 +224,11 @@ def swift_cc_binary(**kwargs):
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     native.cc_binary(**kwargs)
+
+def swift_c_tool(**kwargs):
+    _ = kwargs.pop("extensions", False)
+    _ = kwargs.pop("standard", [])
+    swift_cc_tool(**kwargs)
 
 def swift_cc_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production binary.
@@ -219,6 +251,10 @@ def swift_cc_tool(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _ = kwargs.pop("exceptions", False)
+    _ = kwargs.pop("rtti", False)
+    _ = kwargs.pop("standard", 14)
+
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_c_opts(nocopts, pedantic = False)
