@@ -22,6 +22,7 @@ filegroup(
         "@platforms//os:linux": ["@llvm-distribution//:clang-format"],
         "//conditions:default": [":clang_format_bin"],
     }),
+    visibility = ["//visibility:public"],
 )
 
 sh_binary(
