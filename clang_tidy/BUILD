@@ -25,7 +25,12 @@ label_flag(
 
 filegroup(
     name = "clang_tidy_executable_default",
-    srcs = [":clang_tidy_bin"],
+    srcs = select(
+        {
+            "@platforms//os:linux": ["@llvm-distribution//:clang-tidy"],
+            "//conditions:default": [":clang_tidy_bin"],
+        },
+    ),
 )
 
 label_flag(
