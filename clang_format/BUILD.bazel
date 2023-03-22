@@ -21,7 +21,7 @@ filegroup(
     srcs = select({
         "@platforms//os:linux": ["@llvm-distribution//:clang-format"],
         "//conditions:default": [":clang_format_bin"],
-    })
+    }),
 )
 
 sh_binary(
