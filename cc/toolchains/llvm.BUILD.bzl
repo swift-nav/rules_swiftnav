@@ -130,3 +130,8 @@ filegroup(
     name = "clang-tidy",
     srcs = ["bin/clang-tidy"],
 )
+
+filegroup(
+    name = "clang-format",
+    srcs = ["bin/clang-format"],
+)
