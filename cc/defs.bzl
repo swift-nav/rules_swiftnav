@@ -15,9 +15,6 @@ load(":utils.bzl", "construct_local_include")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
 load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
 
-# reexport cc_static_library
-cc_static_library = _cc_static_library
-
 # Name for a unit test
 UNIT = "unit"
 
@@ -95,6 +92,17 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         includes = includes,
         linkstamp = source_name,
         visibility = visibility,
+    )
+
+def cc_static_library(name, deps):
+    _cc_static_library(
+        name = name,
+        deps = deps,
+        target_compatible_with = select({
+            # Creating static libraries is not supported by macos yet.
+            "@platforms//os:macos": ["@platforms//:incompatible"],
+            "//conditions:default": [],
+        }),
     )
 
 def swift_c_library(**kwargs):
