@@ -19,6 +19,7 @@ cmake(
     name = "check",
     cache_entries = {
         "CMAKE_C_FLAGS": "-fPIC",
+        "CMAKE_INSTALL_LIBDIR": "lib",
     },
     lib_source = ":srcs",
     linkopts = select({
