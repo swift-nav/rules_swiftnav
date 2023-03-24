@@ -20,6 +20,7 @@ cmake(
     cache_entries = {
         "CMAKE_C_FLAGS": "-fPIC",
         "CMAKE_INSTALL_LIBDIR": "lib",
+        "HAVE_SUBUNIT": "0",
     },
     lib_source = ":srcs",
     linkopts = select({
