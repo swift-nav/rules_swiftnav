@@ -23,6 +23,7 @@ cmake(
     name = "nlopt",
     cache_entries = {
         "CMAKE_C_FLAGS": "-fPIC",
+        "CMAKE_INSTALL_LIBDIR": "lib",
     },
     generate_args = [
         "-DBUILD_SHARED_LIBS=OFF",
