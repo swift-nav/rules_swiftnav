@@ -34,9 +34,10 @@ def _swift_doxygen_impl(ctx):
 
         sed -i "s|@DOXYGEN_DOT_FOUND@|$DOXYGEN_DOT_FOUND|g" {config}
         sed -i "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" {config}
+        sed -i "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" {config}
 
         doxygen {config}
-        """.format(doxygen_out = doxygen_out.path, config = config.path),
+        """.format(config = config.path),
     )
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
