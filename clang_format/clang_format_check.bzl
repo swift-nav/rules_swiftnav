@@ -56,6 +56,6 @@ clang_format_check_aspect = aspect(
     attrs = {
         "_clang_format": attr.label(default = Label("//clang_format:clang_format")),
         "_clang_format_config": attr.label(default = "//clang_format:clang_format_config"),
-        "_clang_format_bin": attr.label(default = Label("//clang_format:clang_format_bin")),
+        "_clang_format_bin": attr.label(default = Label("//clang_format:_clang_format_bin")),
     },
 )
