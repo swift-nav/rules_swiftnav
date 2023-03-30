@@ -11,7 +11,7 @@
 load("//tools:configure_file.bzl", "configure_file_impl")
 
 def _swift_doxygen_impl(ctx):
-    vars = ctx.attr.vars | {}
+    vars = ctx.attr.vars | {}  # copy dict instead of referencing it
     vars["DOXYGEN_SOURCE_DIRECTORIES"] = '" "'.join(ctx.attr.doxygen_source_directories)
 
     doxygen_out = ctx.actions.declare_directory(ctx.attr.name + "_doxygen")
