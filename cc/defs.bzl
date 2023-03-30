@@ -93,16 +93,14 @@ def _create_srcs(**kwargs):
     native.filegroup(
         name = kwargs.get("name") + ".srcs",
         srcs = kwargs.get("srcs", []),
-        visibility = ["//visibility:public"],
-        tags = ["manual"],  # prevent showing in bazel query //...
+        visibility = kwargs.get("visibility", ["//visibility:private"]),
     )
 
 def _create_hdrs(**kwargs):
     native.filegroup(
         name = kwargs.get("name") + ".hdrs",
         srcs = kwargs.get("hdrs", []),
-        visibility = ["//visibility:public"],
-        tags = ["manual"],
+        visibility = kwargs.get("visibility", ["//visibility:private"]),
     )
 
 def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
