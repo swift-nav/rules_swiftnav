@@ -24,4 +24,4 @@ def swift_cc_toolchain():
     )
 
 def register_swift_cc_toolchains():
-    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm:cc-toolchain-x86_64-linux")
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux")
