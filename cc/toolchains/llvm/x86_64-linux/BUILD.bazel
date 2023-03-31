@@ -13,9 +13,17 @@ package(default_visibility = ["//visibility:public"])
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
 
 filegroup(
+    name = "wrappers",
+    srcs = glob([
+        "wrappers/**",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
     name = "ar_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:ar",
     ],
 )
@@ -23,7 +31,7 @@ filegroup(
 filegroup(
     name = "as_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:as",
     ],
 )
@@ -31,7 +39,7 @@ filegroup(
 filegroup(
     name = "compiler_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:include",
     ],
@@ -40,7 +48,7 @@ filegroup(
 filegroup(
     name = "dwp_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:dwp",
     ],
 )
@@ -48,7 +56,7 @@ filegroup(
 filegroup(
     name = "linker_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:ar",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:ld",
@@ -59,7 +67,7 @@ filegroup(
 filegroup(
     name = "objcopy_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:objcopy",
     ],
 )
@@ -67,7 +75,7 @@ filegroup(
 filegroup(
     name = "strip_files",
     srcs = [
-        "//cc/toolchains/llvm:wrappers",
+        ":wrappers",
         "@x86_64-linux-llvm//:strip",
     ],
 )
