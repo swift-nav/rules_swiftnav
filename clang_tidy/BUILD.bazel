@@ -27,7 +27,7 @@ filegroup(
     name = "clang_tidy_executable_default",
     srcs = select(
         {
-            "@platforms//os:linux": ["@llvm-distribution//:clang-tidy"],
+            "@platforms//os:linux": ["@x86_64-linux-llvm//:clang-tidy"],
             "//conditions:default": [":clang_tidy_bin"],
         },
     ),

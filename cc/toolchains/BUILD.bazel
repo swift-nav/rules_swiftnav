@@ -25,7 +25,7 @@ filegroup(
     name = "ar_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:ar",
+        "@x86_64-linux-llvm//:ar",
     ],
 )
 
@@ -33,7 +33,7 @@ filegroup(
     name = "as_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:as",
+        "@x86_64-linux-llvm//:as",
     ],
 )
 
@@ -41,8 +41,8 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:clang",
-        "@llvm-distribution//:include",
+        "@x86_64-linux-llvm//:clang",
+        "@x86_64-linux-llvm//:include",
     ],
 )
 
@@ -50,7 +50,7 @@ filegroup(
     name = "dwp_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:dwp",
+        "@x86_64-linux-llvm//:dwp",
     ],
 )
 
@@ -58,10 +58,10 @@ filegroup(
     name = "linker_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:ar",
-        "@llvm-distribution//:clang",
-        "@llvm-distribution//:ld",
-        "@llvm-distribution//:lib",
+        "@x86_64-linux-llvm//:ar",
+        "@x86_64-linux-llvm//:clang",
+        "@x86_64-linux-llvm//:ld",
+        "@x86_64-linux-llvm//:lib",
     ],
 )
 
@@ -69,7 +69,7 @@ filegroup(
     name = "objcopy_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:objcopy",
+        "@x86_64-linux-llvm//:objcopy",
     ],
 )
 
@@ -77,7 +77,7 @@ filegroup(
     name = "strip_files",
     srcs = [
         ":wrappers",
-        "@llvm-distribution//:strip",
+        "@x86_64-linux-llvm//:strip",
     ],
 )
 
@@ -86,7 +86,7 @@ filegroup(
     srcs = [
         "linker_files",
         ":compiler_files",
-        "@llvm-distribution//:bin",
+        "@x86_64-linux-llvm//:bin",
     ],
 )
 
