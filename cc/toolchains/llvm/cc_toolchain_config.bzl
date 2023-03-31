@@ -13,40 +13,20 @@ load(
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
 
-def cc_toolchain_config(name):
-    # These variables are passed directly through to unix_cc_toolchain_config
-    # below. As far as I can tell they are just metadata that doesn't affect
-    # the build.
-    host_system_name = "linux-x86_64"
-    toolchain_identifier = "clang-x86_64-linux"
-    target_cpu = "k8"
-    target_libc = "glibc_unknown"
-    compiler = "clang"
-    abi_version = "clang"
-    abi_libc_version = "glibc_unknown"
-
-    cxx_builtin_include_directories = [
-        "/include",
-        "/usr/include",
-        "/usr/local/include",
-    ]
-
-    tool_paths = {
-        "ar": "wrappers/llvm-ar",
-        "cpp": "wrappers/clang-cpp",
-        "gcc": "wrappers/clang",
-        "gcov": "wrappers/llvm-profdata",
-        "llvm-cov": "wrappers/llvm-cov",
-        "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "wrappers/ld.ldd",
-        "nm": "wrappers/llvm-nm",
-        "objcopy": "wrappers/llvm-objcopy",
-        "objdump": "wrappers/llvm-objdump",
-        "strip": "wrappers/llvm-strip",
-    }
-
-    target_system_name = "x86_64-unknown-linux-gnu"
-
+def cc_toolchain_config(
+    name,
+    host_system_name,
+    toolchain_identifier,
+    target_cpu,
+    target_libc,
+    compiler,
+    abi_version,
+    abi_libc_version,
+    cxx_builtin_include_directories,
+    tool_paths,
+    target_system_name,
+    is_darwin = False,
+):
     # Default compiler flags:
     compile_flags = [
         "--target=" + target_system_name,
