@@ -1,0 +1,9 @@
+filegroup(
+    name = "excluded_default",
+)
+
+label_flag(
+    name = "excluded",
+    build_setting_default = ":excluded_default",
+    visibility = ["//visibility:public"],
+)
