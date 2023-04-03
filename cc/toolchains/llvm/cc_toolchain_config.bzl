@@ -27,6 +27,10 @@ def cc_toolchain_config(
     target_system_name,
     is_darwin = False,
 ):
+    # Mach-O support in lld is experimental, so on mac
+    # we use the system linker.
+    use_lld = not is_darwin
+
     # Default compiler flags:
     compile_flags = [
         "--target=" + target_system_name,
@@ -73,32 +77,53 @@ def cc_toolchain_config(
         "--target=" + target_system_name,
         "-lm",
         "-no-canonical-prefixes",
-        # Below this line, assumes libc++ & lld
-        "-l:libc++.a",
-        "-l:libc++abi.a",
-        "-l:libunwind.a",
-        # Compiler runtime features.
-        "-rtlib=compiler-rt",
-        # To support libunwind
-        # It's ok to assume posix when using this toolchain
-        "-lpthread",
-        "-ldl",
     ]
-
-    # linux/lld only!
-    link_flags.extend([
-        "-fuse-ld=lld",
-        "-Wl,--build-id=md5",
-        "-Wl,--hash-style=gnu",
-        "-Wl,-z,relro,-z,now",
-    ])
 
     # Similar to link_flags, but placed later in the command line such that
     # unused symbols are not stripped.
     link_libs = []
 
+    if is_darwin:
+        # Mach-O support in lld is experimental, so on mac
+        # we use the system linker.
+        use_lld = False
+        link_flags.extend([
+            "-headerpad_max_install_names",
+            "-undefined",
+            "dynamic_lookup",
+        ])
+    else:
+        use_lld = True
+        link_flags.extend([
+            "-fuse-ld=lld",
+            "-Wl,--build-id=md5",
+            "-Wl,--hash-style=gnu",
+            "-Wl,-z,relro,-z,now",
+        ])
+
+    if use_lld:
+        link_flags.extend([
+            # Below this line, assumes libc++ & lld
+            "-l:libc++.a",
+            "-l:libc++abi.a",
+            "-l:libunwind.a",
+            # Compiler runtime features.
+            "-rtlib=compiler-rt",
+            # To support libunwind
+            # It's ok to assume posix when using this toolchain
+            "-lpthread",
+            "-ldl",
+        ])
+    else:
+        link_flags.extend([
+            "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+            "-lc++",
+            "-lc++abi",
+            "-Lexternal/x86_64-darwin-llvm/" # toolchain_path_prefix
+        ])
+
     # linux/lld only
-    opt_link_flags = ["-Wl,--gc-sections"]
+    opt_link_flags = ["-Wl,--gc-sections"] if not is_darwin else []
 
     # Unfiltered compiler flags; these are placed at the end of the command
     # line, so take precendence over any user supplied flags through --copts or
@@ -120,8 +145,7 @@ def cc_toolchain_config(
     coverage_compile_flags = ["-fprofile-instr-generate", "-fcoverage-mapping"]
     coverage_link_flags = ["-fprofile-instr-generate"]
 
-    # true if using lld
-    supports_start_end_lib = True
+    supports_start_end_lib = use_lld
 
     # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
     # Which defines the rule that actually sets up the cc toolchain.
