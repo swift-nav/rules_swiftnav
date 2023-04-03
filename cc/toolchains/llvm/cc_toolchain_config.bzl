@@ -146,6 +146,8 @@ def cc_toolchain_config(
 
     supports_start_end_lib = use_lld
 
+    builtin_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" if is_darwin else ""
+
     # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
     # Which defines the rule that actually sets up the cc toolchain.
     unix_cc_toolchain_config(
@@ -171,4 +173,5 @@ def cc_toolchain_config(
         coverage_compile_flags = coverage_compile_flags,
         coverage_link_flags = coverage_link_flags,
         supports_start_end_lib = supports_start_end_lib,
+        builtin_sysroot = builtin_sysroot,
     )

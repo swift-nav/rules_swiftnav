@@ -91,19 +91,18 @@ filegroup(
 
 cc_toolchain_config(
     name = "local-x86_64-darwin",
-    abi_libc_version = "glibc_unknown",
-    abi_version = "clang",
+    abi_libc_version = "darwin_x86_64",
+    abi_version = "darwin_x86_64",
     compiler = "clang",
     cxx_builtin_include_directories = [
-        "/include",
-        "/usr/include",
-        "/usr/local/include",
+        "%sysroot%/usr/include",
+        "%sysroot%/System/Library/Frameworks",
     ],
-    host_system_name = "linux-x86_64",
+    host_system_name = "darwin-x86_64",
     is_darwin = True,
-    target_cpu = "k8",
-    target_libc = "glibc_unknown",
-    target_system_name = "x86_64-unknown-linux-gnu",
+    target_cpu = "darwin",
+    target_libc = "macosx",
+    target_system_name = "x86_64-apple-macosx",
     tool_paths = {
         "ar": "/usr/bin/libtool",
         "cpp": "wrappers/clang-cpp",
