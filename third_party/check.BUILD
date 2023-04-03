@@ -157,6 +157,7 @@ cc_library(
     includes = [
         "src",
     ],
+    linkopts = ["-lpthread"],
     local_defines = ["HAVE_PTHREAD"],
     visibility = ["//visibility:public"],
 )
