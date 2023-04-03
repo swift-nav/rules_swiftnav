@@ -91,18 +91,18 @@ filegroup(
 
 cc_toolchain_config(
     name = "local-x86_64-linux",
-    host_system_name = "linux-x86_64",
-    toolchain_identifier = "clang-x86_64-linux",
-    target_cpu = "k8",
-    target_libc = "glibc_unknown",
-    compiler = "clang",
-    abi_version = "clang",
     abi_libc_version = "glibc_unknown",
+    abi_version = "clang",
+    compiler = "clang",
     cxx_builtin_include_directories = [
         "/include",
         "/usr/include",
         "/usr/local/include",
     ],
+    host_system_name = "linux-x86_64",
+    target_cpu = "k8",
+    target_libc = "glibc_unknown",
+    target_system_name = "x86_64-unknown-linux-gnu",
     tool_paths = {
         "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
@@ -116,7 +116,7 @@ cc_toolchain_config(
         "objdump": "wrappers/llvm-objdump",
         "strip": "wrappers/llvm-strip",
     },
-    target_system_name = "x86_64-unknown-linux-gnu",
+    toolchain_identifier = "clang-x86_64-linux",
 )
 
 cc_toolchain(

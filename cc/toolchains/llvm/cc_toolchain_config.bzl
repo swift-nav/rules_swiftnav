@@ -14,19 +14,18 @@ load(
 )
 
 def cc_toolchain_config(
-    name,
-    host_system_name,
-    toolchain_identifier,
-    target_cpu,
-    target_libc,
-    compiler,
-    abi_version,
-    abi_libc_version,
-    cxx_builtin_include_directories,
-    tool_paths,
-    target_system_name,
-    is_darwin = False,
-):
+        name,
+        host_system_name,
+        toolchain_identifier,
+        target_cpu,
+        target_libc,
+        compiler,
+        abi_version,
+        abi_libc_version,
+        cxx_builtin_include_directories,
+        tool_paths,
+        target_system_name,
+        is_darwin = False):
     # Mach-O support in lld is experimental, so on mac
     # we use the system linker.
     use_lld = not is_darwin
@@ -116,10 +115,10 @@ def cc_toolchain_config(
         ])
     else:
         link_flags.extend([
-            "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+            "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib",
             "-lc++",
             "-lc++abi",
-            "-Lexternal/x86_64-darwin-llvm/" # toolchain_path_prefix
+            "-Lexternal/x86_64-darwin-llvm/",  # toolchain_path_prefix
         ])
 
     # linux/lld only
