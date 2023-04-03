@@ -31,6 +31,7 @@ def swift_cc_toolchain():
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = X86_64_DARWIN_LLVM,
         strip_prefix = "clang+llvm-14.0.0-x86_64-apple-darwin",
+        sha256 = "cf5af0f32d78dcf4413ef6966abbfd5b1445fe80bba57f2ff8a08f77e672b9b3",
     )
 
 def register_swift_cc_toolchains():
