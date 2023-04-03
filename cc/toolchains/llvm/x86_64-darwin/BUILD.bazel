@@ -100,6 +100,7 @@ cc_toolchain_config(
         "/usr/local/include",
     ],
     host_system_name = "linux-x86_64",
+    is_darwin = True,
     target_cpu = "k8",
     target_libc = "glibc_unknown",
     target_system_name = "x86_64-unknown-linux-gnu",
@@ -117,7 +118,6 @@ cc_toolchain_config(
         "strip": "wrappers/llvm-strip",
     },
     toolchain_identifier = "clang-x86_64-darwin",
-    is_darwin = True,
 )
 
 cc_toolchain(
