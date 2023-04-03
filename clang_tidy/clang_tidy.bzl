@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//cc:defs.bzl", "BINARY", "LIBRARY")
+load("//tools:get_cc_files.bzl", "get_cc_srcs")
 
 def _flatten(input_list):
     return [item for sublist in input_list for item in sublist]
@@ -71,13 +72,6 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     )
     return outfile
 
-def _rule_sources(ctx):
-    srcs = []
-    if hasattr(ctx.rule.attr, "srcs"):
-        for src in ctx.rule.attr.srcs:
-            srcs += [src for src in src.files.to_list() if src.is_source]
-    return srcs
-
 def _toolchain_flags(ctx):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
@@ -142,7 +136,7 @@ def _clang_tidy_aspect_impl(target, ctx):
     final_flags = _replace_gendir(safe_flags, ctx)
     compilation_contexts = _get_compilation_contexts(target, ctx)
 
-    srcs = _rule_sources(ctx)
+    srcs = get_cc_srcs(ctx)
 
     # We exclude headers because we shouldn't run clang-tidy directly with them.
     # Headers will be linted if included in a source file.

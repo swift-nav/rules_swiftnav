@@ -1,3 +1,5 @@
+load("//tools:get_cc_files.bzl", "get_cc_files")
+
 def _check_format(ctx, exe, config, infile, clang_format_bin):
     output = ctx.actions.declare_file(infile.path + ".clang-format.txt")
 
@@ -19,18 +21,6 @@ def _check_format(ctx, exe, config, infile, clang_format_bin):
     )
     return output
 
-def _extract_files(ctx):
-    files = []
-    if hasattr(ctx.rule.attr, "srcs"):
-        for src in ctx.rule.attr.srcs:
-            files += [src for src in src.files.to_list() if src.is_source]
-
-    if hasattr(ctx.rule.attr, "hdrs"):
-        for hdr in ctx.rule.attr.hdrs:
-            files += [hdr for hdr in hdr.files.to_list() if hdr.is_source]
-
-    return files
-
 def _clang_format_check_aspect_impl(target, ctx):
     # if not a C/C++ target, we are not interested
     if not CcInfo in target:
@@ -39,7 +29,7 @@ def _clang_format_check_aspect_impl(target, ctx):
     exe = ctx.attr._clang_format.files_to_run
     config = ctx.attr._clang_format_config.files.to_list()[0]
     clang_format_bin = ctx.attr._clang_format_bin.files.to_list()[0]
-    files = _extract_files(ctx)
+    files = get_cc_files(ctx)
 
     outputs = []
     for file in files:
