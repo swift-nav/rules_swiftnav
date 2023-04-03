@@ -139,6 +139,7 @@ cc_library(
         "src/check_print.c",
         "src/check_run.c",
         "src/check_str.c",
+        ":config_h",
     ],
     hdrs = [
         "src/check_error.h",
@@ -151,7 +152,6 @@ cc_library(
         "src/check_str.h",
         ":check_h",
         ":check_stdint_h",
-        ":config_h",
     ],
     include_prefix = ".",
     includes = [
