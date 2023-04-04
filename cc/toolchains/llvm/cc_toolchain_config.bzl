@@ -146,7 +146,6 @@ def cc_toolchain_config(
             "-L{}lib".format(toolchain_path_prefix),
         ])
 
-
     # linux/lld only
     opt_link_flags = ["-Wl,--gc-sections"] if not is_darwin else []
 
