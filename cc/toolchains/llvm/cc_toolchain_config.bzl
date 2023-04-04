@@ -167,7 +167,6 @@ def cc_toolchain_config(
 
     supports_start_end_lib = use_lld
 
-
     # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
     # Which defines the rule that actually sets up the cc toolchain.
     unix_cc_toolchain_config(
