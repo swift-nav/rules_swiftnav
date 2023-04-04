@@ -12,7 +12,7 @@
 
 load("//tools:stamp_file.bzl", "stamp_file")
 load(":utils.bzl", "construct_local_include")
-load(":copts.bzl", "DEFAULT_COPTS", "GCC6_COPTS")
+load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
 load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
 
 # Name for a unit test
@@ -49,6 +49,7 @@ def _cxx_standard(default, override):
 def _common_cc_opts(nocopts, pedantic = False):
     return select({
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
+        Label("//cc/constraints:gcc-5"): [copt for copt in GCC5_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
     }) + ["-pedantic"] if pedantic else []
 
