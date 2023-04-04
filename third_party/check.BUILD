@@ -12,7 +12,8 @@ load("@rules_swiftnav//tools:configure_file.bzl", "configure_file")
 
 configure_file(
     name = "config_h",
-    out = "config.h",
+    # check_gendir ensures that files do not leak into the relative path of external targets
+    out = "check_gendir/config.h",
     template = "cmake/config.h.in",
     vars = {
         "HAVE_INT16_T": "1",
@@ -105,7 +106,7 @@ configure_file(
 
 configure_file(
     name = "check_h",
-    out = "check.h",
+    out = "check_gendir/check.h",
     template = "src/check.h.in",
     vars = {
         "CHECK_MAJOR_VERSION": "(0)",
@@ -118,7 +119,7 @@ configure_file(
 
 configure_file(
     name = "check_stdint_h",
-    out = "check_stdint.h",
+    out = "check_gendir/check_stdint.h",
     template = "cmake/check_stdint.h.in",
     vars = {
         "HAVE_STDINT_H": "1",
@@ -153,8 +154,8 @@ cc_library(
         ":check_h",
         ":check_stdint_h",
     ],
-    include_prefix = ".",
     includes = [
+        "check_gendir",
         "src",
     ],
     linkopts = ["-lpthread"],
