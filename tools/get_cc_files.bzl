@@ -6,29 +6,33 @@ FilesInfo = provider(
     },
 )
 
-def _get_hdrs(ctx):
-    files = []
+def get_cc_hdrs(ctx):
+    hdrs = []
 
     if hasattr(ctx.rule.attr, "hdrs"):
         for hdr in ctx.rule.attr.hdrs:
-            for file in hdr.files.to_list():
-                if not file.path.startswith(ctx.genfiles_dir.path):
-                    files.append(file)
-    return files
+            hdrs += [hdr for hdr in hdr.files.to_list() if hdr.is_source]
 
-def _get_srcs(ctx):
-    files = []
+    return hdrs
+
+def get_cc_srcs(ctx):
+    srcs = []
 
     if hasattr(ctx.rule.attr, "srcs"):
         for src in ctx.rule.attr.srcs:
-            for file in src.files.to_list():
-                if file.is_source and not file.path.startswith(ctx.genfiles_dir.path):
-                    files.append(file)
+            srcs += [src for src in src.files.to_list() if src.is_source]
+
+    return srcs
+
+def get_cc_files(ctx):
+    files = []
+
+    files.extend(get_cc_srcs(ctx))
+    files.extend(get_cc_hdrs(ctx))
+
     return files
 
 def _get_cc_target_files_impl(target, ctx):
-    files = []
-
     if not CcInfo in target:
         return [FilesInfo(files = [])]
 
@@ -36,11 +40,7 @@ def _get_cc_target_files_impl(target, ctx):
     if not LIBRARY in tags and not TEST_LIBRARY in tags and not BINARY in tags:
         return [FilesInfo(files = [])]
 
-    files.extend(_get_srcs(ctx))
-
-    files.extend(_get_hdrs(ctx))
-
-    return [FilesInfo(files = files)]
+    return [FilesInfo(files = get_cc_files(ctx))]
 
 get_cc_target_files = aspect(
     implementation = _get_cc_target_files_impl,
@@ -50,7 +50,7 @@ def _get_cc_target_hdrs_impl(target, ctx):
     if not CcInfo in target:
         return [FilesInfo(files = [])]
 
-    return [FilesInfo(files = _get_hdrs(ctx))]
+    return [FilesInfo(files = get_cc_hdrs(ctx))]
 
 get_cc_target_hdrs = aspect(
     implementation = _get_cc_target_hdrs_impl,
