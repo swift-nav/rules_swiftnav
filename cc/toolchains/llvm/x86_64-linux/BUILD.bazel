@@ -117,6 +117,7 @@ cc_toolchain_config(
         "strip": "wrappers/llvm-strip",
     },
     toolchain_identifier = "clang-x86_64-linux",
+    toolchain_path_prefix = "external/x86_64-linux-llvm",
 )
 
 cc_toolchain(
