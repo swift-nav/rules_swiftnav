@@ -27,9 +27,6 @@ def cc_toolchain_config(
         tool_paths,
         target_system_name,
         is_darwin = False):
-    # Mach-O support in lld is experimental, so on mac
-    # we use the system linker.
-    use_lld = not is_darwin
 
     # Default compiler flags:
     compile_flags = [
