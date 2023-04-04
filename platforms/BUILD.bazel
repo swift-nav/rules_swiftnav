@@ -33,4 +33,3 @@ selects.config_setting_group(
         "@platforms//os:linux",
     ],
 )
-
