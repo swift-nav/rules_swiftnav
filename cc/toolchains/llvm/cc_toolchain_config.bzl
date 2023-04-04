@@ -26,6 +26,7 @@ def cc_toolchain_config(
         cxx_builtin_include_directories,
         tool_paths,
         target_system_name,
+        builtin_sysroot = None,
         is_darwin = False):
     # Default compiler flags:
     compile_flags = [
@@ -125,10 +126,9 @@ def cc_toolchain_config(
         # have the sysroot directory on the search path and then add the
         # toolchain directory back after we are done.
         link_flags.extend([
-            "-L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib",
+            "-L{}/usr/lib".format(builtin_sysroot),
             "-lc++",
             "-lc++abi",
-            "-Lexternal/x86_64-darwin-llvm/",  # toolchain_path_prefix
         ])
 
         # Let's provide the path to the toolchain library directory
@@ -139,7 +139,7 @@ def cc_toolchain_config(
         # (unintentionally) lead to static linking of libraries from the
         # toolchain.
         link_flags.extend([
-            "-L{}lib".format(toolchain_path_prefix),
+            "-L{}/lib".format(toolchain_path_prefix),
         ])
 
     # linux/lld only
@@ -167,7 +167,6 @@ def cc_toolchain_config(
 
     supports_start_end_lib = use_lld
 
-    builtin_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk" if is_darwin else ""
 
     # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
     # Which defines the rule that actually sets up the cc toolchain.

@@ -93,6 +93,7 @@ cc_toolchain_config(
     name = "local-x86_64-darwin",
     abi_libc_version = "darwin_x86_64",
     abi_version = "darwin_x86_64",
+    builtin_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
     compiler = "clang",
     cxx_builtin_include_directories = [
         "%sysroot%/usr/include",
