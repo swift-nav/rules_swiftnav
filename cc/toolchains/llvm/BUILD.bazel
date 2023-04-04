@@ -9,11 +9,3 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 package(default_visibility = ["//visibility:public"])
-
-filegroup(
-    name = "wrappers",
-    srcs = glob([
-        "wrappers/**",
-    ]),
-    visibility = ["//visibility:public"],
-)
