@@ -12,7 +12,6 @@
 netcdf-c@4.9.0
 """
 
-load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_swiftnav//tools:configure_file.bzl", "configure_file")
 load("@rules_swiftnav//third_party/netcdf-c:aarch64-darwin-config.bzl", "AARCH64_DARWIN_CONFIG")
 load("@rules_swiftnav//third_party/netcdf-c:x86_64-darwin-config.bzl", "X86_64_DARWIN_CONFIG")
@@ -20,30 +19,6 @@ load("@rules_swiftnav//third_party/netcdf-c:x86_64-linux-config.bzl", "X86_64_LI
 load("@rules_swiftnav//third_party/netcdf-c:attr.bzl", "attr")
 load("@rules_swiftnav//third_party/netcdf-c:ncx.bzl", "ncx")
 load("@rules_swiftnav//third_party/netcdf-c:putget.bzl", "putget")
-
-selects.config_setting_group(
-    name = "aarch64-darwin",
-    match_all = [
-        "@platforms//cpu:aarch64",
-        "@platforms//os:macos",
-    ],
-)
-
-selects.config_setting_group(
-    name = "x86_64-darwin",
-    match_all = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-)
-
-selects.config_setting_group(
-    name = "x86_64-linux",
-    match_all = [
-        "@platforms//cpu:x86_64",
-        "@platforms//os:linux",
-    ],
-)
 
 configure_file(
     name = "netcdf_dispatch",
@@ -157,9 +132,9 @@ genrule(
     outs = ["config.h"],
     cmd = select(
         {
-            ":aarch64-darwin": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
-            ":x86_64-darwin": "cat <<'EOF' > $@ {}EOF".format(X86_64_DARWIN_CONFIG),
-            ":x86_64-linux": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
+            "@rules_swiftnav//platforms:aarch64-darwin": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
+            "@rules_swiftnav//platforms:x86_64-darwin": "cat <<'EOF' > $@ {}EOF".format(X86_64_DARWIN_CONFIG),
+            "@rules_swiftnav//platforms:x86_64-linux": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
         },
         no_match_error = "Currently only aarch64-darwin, x86_64-darwin, and x86_64-linux are supported.",
     ),
