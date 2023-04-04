@@ -124,7 +124,7 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         visibility = visibility,
     )
 
-def cc_static_library(name, deps):
+def cc_static_library(name, deps, visibility):
     _cc_static_library(
         name = name,
         deps = deps,
@@ -133,6 +133,7 @@ def cc_static_library(name, deps):
             "@platforms//os:macos": ["@platforms//:incompatible"],
             "//conditions:default": [],
         }),
+        visibility = visibility,
     )
 
 def swift_c_library(**kwargs):
