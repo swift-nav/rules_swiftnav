@@ -13,40 +13,21 @@ load(
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
 
-def cc_toolchain_config(name):
-    # These variables are passed directly through to unix_cc_toolchain_config
-    # below. As far as I can tell they are just metadata that doesn't affect
-    # the build.
-    host_system_name = "linux-x86_64"
-    toolchain_identifier = "clang-x86_64-linux"
-    target_cpu = "k8"
-    target_libc = "glibc_unknown"
-    compiler = "clang"
-    abi_version = "clang"
-    abi_libc_version = "glibc_unknown"
-
-    cxx_builtin_include_directories = [
-        "/include",
-        "/usr/include",
-        "/usr/local/include",
-    ]
-
-    tool_paths = {
-        "ar": "wrappers/llvm-ar",
-        "cpp": "wrappers/clang-cpp",
-        "gcc": "wrappers/clang",
-        "gcov": "wrappers/llvm-profdata",
-        "llvm-cov": "wrappers/llvm-cov",
-        "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "wrappers/ld.ldd",
-        "nm": "wrappers/llvm-nm",
-        "objcopy": "wrappers/llvm-objcopy",
-        "objdump": "wrappers/llvm-objdump",
-        "strip": "wrappers/llvm-strip",
-    }
-
-    target_system_name = "x86_64-unknown-linux-gnu"
-
+def cc_toolchain_config(
+        name,
+        host_system_name,
+        toolchain_identifier,
+        toolchain_path_prefix,
+        target_cpu,
+        target_libc,
+        compiler,
+        abi_version,
+        abi_libc_version,
+        cxx_builtin_include_directories,
+        tool_paths,
+        target_system_name,
+        builtin_sysroot = None,
+        is_darwin = False):
     # Default compiler flags:
     compile_flags = [
         "--target=" + target_system_name,
@@ -93,32 +74,79 @@ def cc_toolchain_config(name):
         "--target=" + target_system_name,
         "-lm",
         "-no-canonical-prefixes",
-        # Below this line, assumes libc++ & lld
-        "-l:libc++.a",
-        "-l:libc++abi.a",
-        "-l:libunwind.a",
-        # Compiler runtime features.
-        "-rtlib=compiler-rt",
-        # To support libunwind
-        # It's ok to assume posix when using this toolchain
-        "-lpthread",
-        "-ldl",
     ]
-
-    # linux/lld only!
-    link_flags.extend([
-        "-fuse-ld=lld",
-        "-Wl,--build-id=md5",
-        "-Wl,--hash-style=gnu",
-        "-Wl,-z,relro,-z,now",
-    ])
 
     # Similar to link_flags, but placed later in the command line such that
     # unused symbols are not stripped.
     link_libs = []
 
+    if is_darwin:
+        # Mach-O support in lld is experimental, so on mac
+        # we use the system linker.
+        use_lld = False
+        link_flags.extend([
+            "-headerpad_max_install_names",
+            # This will issue a warning on macOS ventura; see:
+            # https://github.com/python/cpython/issues/97524
+            # https://developer.apple.com/forums/thread/719961
+            "-undefined",
+            "dynamic_lookup",
+        ])
+    else:
+        use_lld = True
+        link_flags.extend([
+            "-fuse-ld=lld",
+            "-Wl,--build-id=md5",
+            "-Wl,--hash-style=gnu",
+            "-Wl,-z,relro,-z,now",
+        ])
+
+    if use_lld:
+        link_flags.extend([
+            # Below this line, assumes libc++ & lld
+            "-l:libc++.a",
+            "-l:libc++abi.a",
+            "-l:libunwind.a",
+            # Compiler runtime features.
+            "-rtlib=compiler-rt",
+            # To support libunwind
+            # It's ok to assume posix when using this toolchain
+            "-lpthread",
+            "-ldl",
+        ])
+    else:
+        # The comments below were copied directly from:
+        # https://github.com/grailbio/bazel-toolchain/blob/795d76fd03e0b17c0961f0981a8512a00cba4fa2/toolchain/cc_toolchain_config.bzl#L202
+
+        # The only known mechanism to static link libraries in ld64 is to
+        # not have the corresponding .dylib files in the library search
+        # path. The link time sandbox does not include the .dylib files, so
+        # anything we pick up from the toolchain should be statically
+        # linked. However, several system libraries on macOS dynamically
+        # link libc++ and libc++abi, so static linking them becomes a problem.
+        # We need to ensure that they are dynamic linked from the system
+        # sysroot and not static linked from the toolchain, so explicitly
+        # have the sysroot directory on the search path and then add the
+        # toolchain directory back after we are done.
+        link_flags.extend([
+            "-L{}/usr/lib".format(builtin_sysroot),
+            "-lc++",
+            "-lc++abi",
+        ])
+
+        # Let's provide the path to the toolchain library directory
+        # explicitly as part of the search path to make it easy for a user
+        # to pick up something. This also makes the behavior consistent with
+        # targets when a user explicitly depends on something like
+        # libomp.dylib, which adds this directory to the search path, and would
+        # (unintentionally) lead to static linking of libraries from the
+        # toolchain.
+        link_flags.extend([
+            "-L{}/lib".format(toolchain_path_prefix),
+        ])
+
     # linux/lld only
-    opt_link_flags = ["-Wl,--gc-sections"]
+    opt_link_flags = ["-Wl,--gc-sections"] if not is_darwin else []
 
     # Unfiltered compiler flags; these are placed at the end of the command
     # line, so take precendence over any user supplied flags through --copts or
@@ -140,8 +168,7 @@ def cc_toolchain_config(name):
     coverage_compile_flags = ["-fprofile-instr-generate", "-fcoverage-mapping"]
     coverage_link_flags = ["-fprofile-instr-generate"]
 
-    # true if using lld
-    supports_start_end_lib = True
+    supports_start_end_lib = use_lld
 
     # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
     # Which defines the rule that actually sets up the cc toolchain.
@@ -168,4 +195,5 @@ def cc_toolchain_config(name):
         coverage_compile_flags = coverage_compile_flags,
         coverage_link_flags = coverage_link_flags,
         supports_start_end_lib = supports_start_end_lib,
+        builtin_sysroot = builtin_sysroot,
     )
