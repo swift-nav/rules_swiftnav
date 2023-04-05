@@ -89,6 +89,20 @@ def _test_compatible_with():
         "//conditions:default": [],
     })
 
+def _create_srcs(**kwargs):
+    native.filegroup(
+        name = kwargs.get("name") + ".srcs",
+        srcs = kwargs.get("srcs", []),
+        visibility = kwargs.get("visibility", ["//visibility:private"]),
+    )
+
+def _create_hdrs(**kwargs):
+    native.filegroup(
+        name = kwargs.get("name") + ".hdrs",
+        srcs = kwargs.get("hdrs", []),
+        visibility = kwargs.get("visibility", ["//visibility:private"]),
+    )
+
 def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
     """Creates a cc_library stamped with non-hermetic build metadata.
 
@@ -138,7 +152,9 @@ def swift_c_library(**kwargs):
     """Wraps cc_library to enforce standards for a production c library.
 
     Primarily this consists of a default set of compiler options and
-    language standards.
+    language standards. This rule also creates 'target_name.srcs' and
+    'target_name.hdrs' targets that contain sources and headers,
+    respectively.
 
     Production targets (swift_cc*), are compiled with the -pedantic flag.
 
@@ -159,6 +175,9 @@ def swift_c_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _create_srcs(**kwargs)
+    _create_hdrs(**kwargs)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
@@ -183,7 +202,9 @@ def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production c++ library.
 
     Primarily this consists of a default set of compiler options and
-    language standards.
+    language standards. This rule also creates 'target_name.srcs' and
+    'target_name.hdrs' targets that contain sources and headers,
+    respectively.
 
     Production targets (swift_cc*), are compiled with the -pedantic flag.
 
@@ -206,6 +227,9 @@ def swift_cc_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _create_srcs(**kwargs)
+    _create_hdrs(**kwargs)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
@@ -524,7 +548,7 @@ def swift_cc_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
 
     This rule creates a test target along with a target that contains the sources
-    of the test. The name of the sources is created with the '_src' suffix.
+    of the test. The name of the sources is created with the '.srcs' suffix.
 
     Args:
         name: A unique name for this rule.
@@ -544,7 +568,7 @@ def swift_cc_test(name, type, **kwargs):
 
     _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
 
-    srcs_name = name + "_srcs"
+    srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
 
     native.filegroup(
