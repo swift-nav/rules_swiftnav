@@ -59,7 +59,6 @@ filegroup(
         ":wrappers",
         "@aarch64-darwin-llvm//:ar",
         "@aarch64-darwin-llvm//:clang",
-        "@aarch64-darwin-llvm//:ld",
         "@aarch64-darwin-llvm//:lib",
     ],
 )

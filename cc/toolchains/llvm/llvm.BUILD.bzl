@@ -30,9 +30,9 @@ filegroup(
 
 filegroup(
     name = "ld",
-    srcs = [
+    srcs = glob([
         "bin/ld.lld",
-    ],
+    ]),
 )
 
 filegroup(
