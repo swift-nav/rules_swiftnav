@@ -34,7 +34,7 @@ if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
 fi
 
 tool_name=$(basename "${BASH_SOURCE[0]}")
-toolchain_bindir=external/llvm-distribution/bin
+toolchain_bindir=external/x86_64-linux-llvm/bin
 
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
@@ -45,10 +45,10 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # with its absolute path.
   #
   # To deal with this we find the tool relative to this script, which is at
-  # _execroot_/external/rules_swiftnav/cc/toolchain/wrappers/wrapper.
+  # _execroot_/external/rules_swiftnav/cc/toolchain/llvm/x86_64-linux/wrappers/wrapper.
   #
   # If the wrapper is relocated then this line needs to be adjusted.
-  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*}"
+  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}"
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
   exec "${tool}" "${@}"
 else

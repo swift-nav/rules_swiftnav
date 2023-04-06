@@ -10,7 +10,13 @@
 
 CMAKE_FALSE_CONSTANTS = ["0", "OFF", "NO", "FALSE", "N", "IGNORE", "NOTFOUND"]
 
-def configure_file_impl(ctx, vars):
+def configure_file_impl(ctx, vars = None, out = None):
+    if vars == None:
+        vars = ctx.attr.vars
+
+    if out == None:
+        out = ctx.attr.out
+
     subs = {}
     for (key, val) in vars.items():
         cmake_define_nl = "#cmakedefine {}\n".format(key)
@@ -31,7 +37,7 @@ def configure_file_impl(ctx, vars):
         subs["@{}@".format(key)] = val
         subs["${" + key + "}"] = val
 
-    out = ctx.actions.declare_file(ctx.attr.out)
+    out = ctx.actions.declare_file(out)
     ctx.actions.expand_template(
         output = out,
         template = ctx.file.template,
@@ -39,11 +45,8 @@ def configure_file_impl(ctx, vars):
     )
     return [DefaultInfo(files = depset([out]))]
 
-def _configure_file_impl(ctx):
-    return configure_file_impl(ctx, ctx.attr.vars)
-
 configure_file = rule(
-    implementation = _configure_file_impl,
+    implementation = configure_file_impl,
     attrs = {
         "vars": attr.string_dict(),
         "out": attr.string(),
