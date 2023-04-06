@@ -138,7 +138,7 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         visibility = visibility,
     )
 
-def cc_static_library(name, deps, visibility):
+def cc_static_library(name, deps, visibility = ["//visibility:private"]):
     _cc_static_library(
         name = name,
         deps = deps,
