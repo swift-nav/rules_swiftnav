@@ -11,7 +11,7 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
-AARCH64_DARWIN_LLVM = "https://github.com/swift-nav/swift-toolchains/releases/download/llvm-14.0.0/clang%2Bllvm-14.0.0-arm64-apple-darwin.tar.gz"
+AARCH64_DARWIN_LLVM = "https://github.com/swift-nav/swift-toolchains/releases/download/llvm-14.0.0/clang%2Bllvm-14.0.6-arm64-apple-darwin.tar.gz"
 
 X86_64_DARWIN_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-apple-darwin.tar.xz"
 
@@ -23,7 +23,7 @@ def swift_cc_toolchain():
         name = "aarch64-darwin-llvm",
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = AARCH64_DARWIN_LLVM,
-        strip_prefix = "clang+llvm-14.0.0-arm64-apple-darwin",
+        strip_prefix = "clang+llvm-14.0.6-arm64-apple-darwin",
     )
 
     maybe(
