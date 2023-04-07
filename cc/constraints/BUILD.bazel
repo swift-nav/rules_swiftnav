@@ -5,6 +5,11 @@ package(default_visibility = ["//visibility:public"])
 constraint_setting(name = "compiler")
 
 constraint_value(
+    name = "gcc-5",
+    constraint_setting = ":compiler",
+)
+
+constraint_value(
     name = "gcc-6",
     constraint_setting = ":compiler",
 )
