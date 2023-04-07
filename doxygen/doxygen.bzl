@@ -37,7 +37,7 @@ def _swift_doxygen_impl(ctx):
         sed -i "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" {config}
         sed -i "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" {config}
 
-        doxygen {config}
+        PATH=$PATH doxygen {config}
         """.format(config = config.path),
     )
 
