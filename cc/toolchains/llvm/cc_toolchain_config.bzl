@@ -91,6 +91,7 @@ def cc_toolchain_config(
             # https://developer.apple.com/forums/thread/719961
             "-undefined",
             "dynamic_lookup",
+            "-Wl,-no_fixup_chains",
         ])
     else:
         use_lld = True
