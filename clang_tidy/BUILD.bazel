@@ -27,7 +27,6 @@ filegroup(
     name = "clang_tidy_executable_default",
     srcs = select(
         {
-            "//platforms:aarch64-darwin": ["@aarch64-darwin-llvm//:clang-tidy"],
             "//platforms:x86_64-darwin": ["@x86_64-darwin-llvm//:clang-tidy"],
             "//platforms:x86_64-linux": ["@x86_64-linux-llvm//:clang-tidy"],
             "//conditions:default": [":clang_tidy_bin"],
