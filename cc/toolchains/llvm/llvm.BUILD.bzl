@@ -30,6 +30,8 @@ filegroup(
 
 filegroup(
     name = "ld",
+    # Hack to workaround us not building lld
+    # for aarch64-darwin.
     srcs = glob([
         "bin/ld.lld",
     ]),
