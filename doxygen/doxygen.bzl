@@ -9,6 +9,7 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 load("//tools:configure_file.bzl", "configure_file_impl")
+load("@rules_pkg//pkg:pkg.bzl", "pkg_zip")
 
 def _swift_doxygen_impl(ctx):
     vars = ctx.attr.vars | {}  # copy dict instead of referencing it
@@ -36,7 +37,7 @@ def _swift_doxygen_impl(ctx):
         sed -i "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" {config}
         sed -i "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" {config}
 
-        doxygen {config}
+        PATH=$PATH doxygen {config}
         """.format(config = config.path),
     )
 
@@ -55,7 +56,46 @@ _swift_doxygen = rule(
     },
 )
 
+def _filter_html_impl(ctx):
+    out = ctx.actions.declare_directory(ctx.attr.name)
+    ctx.actions.run_shell(
+        outputs = [out],
+        inputs = ctx.files.srcs,
+        command = """
+            cp -r $(find . -type d -regex ".*{html_path}")/* {out}
+        """.format(out = out.path, html_path = ctx.attr.html_path),
+    )
+    return DefaultInfo(files = depset([out]))
+
+_filter_html = rule(
+    implementation = _filter_html_impl,
+    attrs = {
+        "srcs": attr.label_list(mandatory = True),
+        "html_path": attr.string(mandatory = True),
+    },
+)
+
 def swift_doxygen(**kwargs):
-    kwargs["tags"] = ["manual"] + kwargs.get("tags", [])
+    tags = ["manual"] + kwargs.get("tags", [])
+    name = kwargs["name"]
+    name_html = name + "_html"
+    name_zip = name + "_zip"
+
+    kwargs["tags"] = tags
 
     _swift_doxygen(**kwargs)
+
+    _filter_html(
+        name = name_html,
+        tags = tags,
+        srcs = [name],
+        html_path = name + "_doxygen/html",
+    )
+
+    pkg_zip(
+        name = name_zip,
+        srcs = [name_html],
+        tags = tags,
+        package_file_name = name + ".zip",
+        strip_prefix = name_html,
+    )
