@@ -19,7 +19,7 @@ choose_clang_format(
 filegroup(
     name = "_clang_format_bin",
     srcs = select({
-        "//platforms:aarch64-darwin": ["aarch64-darwin-llvm//:clang-format"],
+        "//platforms:aarch64-darwin": ["@aarch64-darwin-llvm//:clang-format"],
         "//platforms:x86_64-darwin": ["@x86_64-darwin-llvm//:clang-format"],
         "//platforms:x86_64-linux": ["@x86_64-linux-llvm//:clang-format"],
         "//conditions:default": [":clang_format_bin"],
