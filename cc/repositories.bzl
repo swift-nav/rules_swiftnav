@@ -24,6 +24,7 @@ def swift_cc_toolchain():
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = AARCH64_DARWIN_LLVM,
         strip_prefix = "clang+llvm-14.0.0-arm64-apple-darwin",
+        sha256 = "f826ee92c3fedb92bad2f9f834d96f6b9db3192871bfe434124bca848ba9a2a3",
     )
 
     maybe(

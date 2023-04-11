@@ -36,6 +36,9 @@ def cc_toolchain_config(
         "-fstack-protector",
         "-fno-omit-frame-pointer",
         # Math
+        # This controls whether the compiler allows contracting floating point operations.
+        # It was flipped from off to on in clang-14.
+        # For now we'd like to preserve the legacy behavior.
         "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
