@@ -35,6 +35,12 @@ def cc_toolchain_config(
         "-U_FORTIFY_SOURCE",  # https://github.com/google/sanitizers/issues/247
         "-fstack-protector",
         "-fno-omit-frame-pointer",
+        # Math
+        # This controls whether the compiler allows contracting floating point operations.
+        # It was flipped from off to on in clang-14.
+        # For now we'd like to preserve the legacy behavior.
+        # See [BUILD-666] for more details.
+        "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
         "-Wall",
@@ -91,6 +97,7 @@ def cc_toolchain_config(
             # https://developer.apple.com/forums/thread/719961
             "-undefined",
             "dynamic_lookup",
+            "-Wl,-no_fixup_chains",
         ])
     else:
         use_lld = True

@@ -51,6 +51,9 @@ def _common_cc_opts(nocopts, pedantic = False):
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
         Label("//cc/constraints:gcc-5"): [copt for copt in GCC5_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
+    }) + select({
+        Label("//cc:_disable_warnings_as_errors"): [],
+        "//conditions:default": ["-Werror"],
     }) + ["-pedantic"] if pedantic else []
 
 # Options specific to c++ code (exceptions, rtti, etc..)
@@ -71,16 +74,6 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 # Handle various nuances of local include paths
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
-
-# Some options like -Werror are set using toolchain features
-# See: https://bazel.build/docs/cc-toolchain-config-reference#features
-def _default_features():
-    return select({
-        # treat_warnings_as_errors passes the option -fatal-warnings
-        # to the linker which ld on mac does not understand.
-        "@platforms//os:macos": [],
-        "//conditions:default": ["treat_warnings_as_errors"],
-    })
 
 # Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
@@ -194,8 +187,6 @@ def swift_c_library(**kwargs):
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
@@ -247,8 +238,6 @@ def swift_cc_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
@@ -292,8 +281,6 @@ def swift_c_tool_library(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_library(**kwargs)
 
@@ -340,8 +327,6 @@ def swift_cc_tool_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     native.cc_library(**kwargs)
 
 def swift_c_binary(**kwargs):
@@ -381,8 +366,6 @@ def swift_c_binary(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
@@ -430,8 +413,6 @@ def swift_cc_binary(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     native.cc_binary(**kwargs)
@@ -472,8 +453,6 @@ def swift_c_tool(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_binary(**kwargs)
 
@@ -516,8 +495,6 @@ def swift_cc_tool(**kwargs):
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_binary(**kwargs)
 
