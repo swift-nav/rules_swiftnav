@@ -1,0 +1,239 @@
+load(":config.bzl", "config")
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
+filegroup(name = "empty")
+
+filegroup(
+    name = "wrappers",
+    srcs = glob([
+        "wrappers/**",
+    ]),
+)
+
+filegroup(
+    name = "ar_files",
+    srcs = [
+        ":wrappers",
+        "@gcc_arm_embedded_toolchain//:ar",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "as_files",
+    srcs = [
+        ":wrappers",
+        "@gcc_arm_embedded_toolchain//:as",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        ":wrappers",
+        "@gcc_arm_embedded_toolchain//:bin",
+        "@gcc_arm_embedded_toolchain//:include",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        ":wrappers",
+        "@gcc_arm_embedded_toolchain//:ar",
+        "@gcc_arm_embedded_toolchain//:gcc",
+        "@gcc_arm_embedded_toolchain//:ld",
+        "@gcc_arm_embedded_toolchain//:lib",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = [
+        ":wrappers",
+        "@gcc_arm_embedded_toolchain//:objcopy",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        ":wrappers",
+        "@gcc_arm_embedded_toolchain//:strip",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        ":compiler_files",
+        ":linker_files",
+        "@gcc_arm_embedded_toolchain//:bin",
+    ],
+    tags = ["manual"],
+)
+
+constraint_value(
+    name = "cortex-m4",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-m7",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-m3",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-a7",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-a9",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "unspecified_arm",
+    constraint_setting = "@platforms//cpu",
+)
+
+selects.config_setting_group(
+    name = "gcc_arm_cpu",
+    match_any = [
+        ":cortex-m4",
+        ":cortex-m7",
+        ":cortex-m3",
+        ":cortex-a7",
+        ":cortex-a9",
+        ":unspecified_arm",
+    ],
+)
+
+platform(
+    name = "cortex_m4_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        ":cortex-m4",
+    ],
+)
+
+platform(
+    name = "cortex_m7_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        ":cortex-m7",
+    ],
+)
+
+platform(
+    name = "cortex_m3_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        ":cortex-m3",
+    ],
+)
+
+platform(
+    name = "cortex_a7_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        ":cortex-a7",
+    ],
+)
+
+platform(
+    name = "cortex_a9_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        ":cortex-a9",
+    ],
+)
+
+platform(
+    name = "arm_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        ":unspecified_arm",
+    ],
+)
+
+config(
+    name = "config",
+    c_opts = select(
+        {
+            ":cortex-m4": [
+                "-mcpu=cortex-m4",
+                "-march=armv7e-m",
+                "-mthumb",
+                "-mfloat-abi=hard",
+                "-mfpu=fpv4-sp-d16",
+            ],
+            ":cortex-m7": [
+                "-mcpu=cortex-m7",
+                "-mthumb",
+                "-mfpu=fpv5-d16",
+                "-mfloat-abi=hard",
+            ],
+            ":cortex-m3": [
+                "-mcpu=cortex-m3",
+                "-march=armv7-m",
+                "-mthumb",
+                "-msoft-float",
+            ],
+            ":cortex-a7": [
+                "-mcpu=cortex-a7",
+                "-mfloat-abi=hard",
+                "-mfpu=neon-vfpv4",
+            ],
+            ":cortex-a9": [
+                "-mcpu=cortex-a9",
+                "-march=armv7-a",
+                "-mthumb",
+                "-mfloat-abi=hard",
+                "-mfpu=neon",
+            ],
+            "//conditions:default": [],
+        },
+    ),
+)
+
+cc_toolchain(
+    name = "cc_toolchain",
+    all_files = ":all_files",
+    ar_files = ":ar_files",
+    as_files = ":as_files",
+    compiler_files = ":compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":linker_files",
+    objcopy_files = ":objcopy_files",
+    strip_files = ":strip_files",
+    supports_param_files = 0,
+    tags = ["manual"],
+    toolchain_config = ":config",
+    toolchain_identifier = "gcc-arm-embedded",
+)
+
+toolchain(
+    name = "toolchain",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//os:none",
+        ":gcc_arm_cpu",
+    ],
+    toolchain = ":cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
