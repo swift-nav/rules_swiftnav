@@ -39,6 +39,7 @@ def cc_toolchain_config(
         # This controls whether the compiler allows contracting floating point operations.
         # It was flipped from off to on in clang-14.
         # For now we'd like to preserve the legacy behavior.
+        # See [BUILD-666] for more details.
         "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
