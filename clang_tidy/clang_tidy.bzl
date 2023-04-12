@@ -159,7 +159,6 @@ def _clang_tidy_aspect_impl(target, ctx):
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     safe_flags = _safe_flags(toolchain_flags + rule_flags)
     final_flags = _replace_gendir(safe_flags, ctx)
-
     compilation_contexts = _get_compilation_contexts(target, ctx)
 
     # We exclude headers because we shouldn't run clang-tidy directly with them.
