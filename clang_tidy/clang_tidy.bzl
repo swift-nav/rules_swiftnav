@@ -1,6 +1,7 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//cc:defs.bzl", "BINARY", "LIBRARY")
 load("//tools:get_cc_files.bzl", "get_cc_srcs")
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 def _flatten(input_list):
     return [item for sublist in input_list for item in sublist]
@@ -72,7 +73,7 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     )
     return outfile
 
-def _toolchain_flags(ctx):
+def _toolchain_action_flags(ctx, action_name):
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
@@ -83,12 +84,33 @@ def _toolchain_flags(ctx):
         cc_toolchain = cc_toolchain,
         user_compile_flags = ctx.fragments.cpp.cxxopts + ctx.fragments.cpp.copts,
     )
+
     flags = cc_common.get_memory_inefficient_command_line(
         feature_configuration = feature_configuration,
-        action_name = "c++-compile",  # tools/build_defs/cc/action_names.bzl CPP_COMPILE_ACTION_NAME
+        action_name = action_name,
         variables = compile_variables,
     )
+
     return flags
+
+def _toolchain_flags_c(ctx):
+    return _toolchain_action_flags(ctx, ACTION_NAMES.c_compile)
+
+def _toolchain_flags_cpp(ctx):
+    return _toolchain_action_flags(ctx, ACTION_NAMES.cpp_compile)
+
+def _is_c_compilation(srcs):
+    for src in srcs:
+        if src.extension == "c":
+            return True
+
+    return False
+
+def _toolchain_flags(ctx, srcs):
+    if _is_c_compilation(srcs):
+        return _toolchain_flags_c(ctx)
+
+    return _toolchain_flags_cpp(ctx)
 
 def _safe_flags(flags):
     # Some flags might be used by GCC, but not understood by Clang.
@@ -126,17 +148,19 @@ def _clang_tidy_aspect_impl(target, ctx):
     if not LIBRARY in tags and not BINARY in tags:
         return []
 
+    srcs = get_cc_srcs(ctx)
+
     wrapper = ctx.attr._clang_tidy_wrapper.files_to_run
     exe = ctx.attr._clang_tidy_executable
     additional_deps = ctx.attr._clang_tidy_additional_deps
     config = ctx.attr._clang_tidy_config.files.to_list()[0]
-    toolchain_flags = _toolchain_flags(ctx)
+    toolchain_flags = _toolchain_flags(ctx, srcs)
+
     rule_flags = ctx.rule.attr.copts if hasattr(ctx.rule.attr, "copts") else []
     safe_flags = _safe_flags(toolchain_flags + rule_flags)
     final_flags = _replace_gendir(safe_flags, ctx)
-    compilation_contexts = _get_compilation_contexts(target, ctx)
 
-    srcs = get_cc_srcs(ctx)
+    compilation_contexts = _get_compilation_contexts(target, ctx)
 
     # We exclude headers because we shouldn't run clang-tidy directly with them.
     # Headers will be linted if included in a source file.
