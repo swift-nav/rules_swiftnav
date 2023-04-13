@@ -36,7 +36,7 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
-STAMP_RAW_LIB_SUFIX = "_raw"
+STAMPED_LIB_SUFIX = ".stamped"
 
 # Form the c standard string
 def _c_standard(extensions = False, standard = 99):
@@ -107,6 +107,11 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
     includes version control information, timestamps, and other similiar
     data. The output file is only compiled into the final resulting binary.
 
+    Also creates an additional library target appended with ".stamped". This
+    variant has the stamped symbols included directly into the resulting
+    artifact. Its only intended to be used when creating a static archive
+    bundle with cc_static_archive.
+
     Currently only stable status variables are supported.
 
     See https://bazel.build/docs/user-manual#workspace-status for more.
@@ -125,12 +130,14 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
 
     stamp_file(name = source_name, out = out, defaults = defaults, template = template)
 
+    # This variant has the stamped symbols in the archive
     swift_cc_library(
-        name = name + STAMP_RAW_LIB_SUFIX,
+        name = name + STAMPED_LIB_SUFIX,
         srcs = [source_name],
         visibility = visibility,
     )
 
+    # This variant forwards the stamped symbols to the final link
     swift_cc_library(
         name = name,
         hdrs = hdrs,
@@ -139,15 +146,10 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         visibility = visibility,
     )
 
-def cc_static_library(name, deps, stamp_libs = [], visibility = ["//visibility:private"]):
-    stamp_raw_libs = []
-
-    for lib in stamp_libs:
-        stamp_raw_libs.append(lib + STAMP_RAW_LIB_SUFIX)
-
+def cc_static_library(name, deps, visibility = ["//visibility:private"]):
     _cc_static_library(
         name = name,
-        deps = deps + stamp_raw_libs,
+        deps = deps,
         target_compatible_with = select({
             # Creating static libraries is not supported by macos yet.
             "@platforms//os:macos": ["@platforms//:incompatible"],
