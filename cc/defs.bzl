@@ -132,7 +132,7 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
 
     # This variant has the stamped symbols in the archive
     swift_cc_library(
-        name = name + STAMPED_LIB_SUFIX,
+        name = name + STAMPED_LIB_SUFFIX,
         srcs = [source_name],
         visibility = visibility,
     )
