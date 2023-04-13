@@ -36,7 +36,7 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
-STAMPED_LIB_SUFIX = ".stamped"
+STAMPED_LIB_SUFFIX = ".stamped"
 
 # Form the c standard string
 def _c_standard(extensions = False, standard = 99):
