@@ -36,6 +36,8 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
+STAMP_RAW_LIB_SUFIX = "_raw"
+
 # Form the c standard string
 def _c_standard(extensions = False, standard = 99):
     extensions = "gnu" if extensions else "c"
@@ -124,6 +126,12 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
     stamp_file(name = source_name, out = out, defaults = defaults, template = template)
 
     swift_cc_library(
+        name = name + STAMP_RAW_LIB_SUFIX,
+        srcs = [source_name],
+        visibility = visibility,
+    )
+
+    swift_cc_library(
         name = name,
         hdrs = hdrs,
         includes = includes,
@@ -131,10 +139,15 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         visibility = visibility,
     )
 
-def cc_static_library(name, deps, visibility = ["//visibility:private"]):
+def cc_static_library(name, deps, stamp_libs = [], visibility = ["//visibility:private"]):
+    stamp_raw_libs = []
+
+    for lib in stamp_libs:
+        stamp_raw_libs.append(lib + STAMP_RAW_LIB_SUFIX)
+
     _cc_static_library(
         name = name,
-        deps = deps,
+        deps = deps + stamp_raw_libs,
         target_compatible_with = select({
             # Creating static libraries is not supported by macos yet.
             "@platforms//os:macos": ["@platforms//:incompatible"],
