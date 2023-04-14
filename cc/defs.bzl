@@ -36,6 +36,8 @@ TEST = "test"
 # Name for test sources
 TEST_SRCS = "test_srcs"
 
+STAMPED_LIB_SUFFIX = ".stamped"
+
 # Form the c standard string
 def _c_standard(extensions = False, standard = 99):
     extensions = "gnu" if extensions else "c"
@@ -51,6 +53,9 @@ def _common_cc_opts(nocopts, pedantic = False):
         Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
         Label("//cc/constraints:gcc-5"): [copt for copt in GCC5_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
+    }) + select({
+        Label("//cc:_disable_warnings_as_errors"): [],
+        "//conditions:default": ["-Werror"],
     }) + ["-pedantic"] if pedantic else []
 
 # Options specific to c++ code (exceptions, rtti, etc..)
@@ -71,16 +76,6 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 # Handle various nuances of local include paths
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
-
-# Some options like -Werror are set using toolchain features
-# See: https://bazel.build/docs/cc-toolchain-config-reference#features
-def _default_features():
-    return select({
-        # treat_warnings_as_errors passes the option -fatal-warnings
-        # to the linker which ld on mac does not understand.
-        "@platforms//os:macos": [],
-        "//conditions:default": ["treat_warnings_as_errors"],
-    })
 
 # Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
@@ -112,6 +107,11 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
     includes version control information, timestamps, and other similiar
     data. The output file is only compiled into the final resulting binary.
 
+    Also creates an additional library target appended with ".stamped". This
+    variant has the stamped symbols included directly into the resulting
+    artifact. Its only intended to be used when creating a static archive
+    bundle with cc_static_archive.
+
     Currently only stable status variables are supported.
 
     See https://bazel.build/docs/user-manual#workspace-status for more.
@@ -130,6 +130,14 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
 
     stamp_file(name = source_name, out = out, defaults = defaults, template = template)
 
+    # This variant has the stamped symbols in the archive
+    swift_cc_library(
+        name = name + STAMPED_LIB_SUFFIX,
+        srcs = [source_name],
+        visibility = visibility,
+    )
+
+    # This variant forwards the stamped symbols to the final link
     swift_cc_library(
         name = name,
         hdrs = hdrs,
@@ -194,8 +202,6 @@ def swift_c_library(**kwargs):
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
@@ -247,8 +253,6 @@ def swift_cc_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
     native.cc_library(**kwargs)
@@ -292,8 +296,6 @@ def swift_c_tool_library(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_library(**kwargs)
 
@@ -340,8 +342,6 @@ def swift_cc_tool_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     native.cc_library(**kwargs)
 
 def swift_c_binary(**kwargs):
@@ -381,8 +381,6 @@ def swift_c_binary(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
@@ -430,8 +428,6 @@ def swift_cc_binary(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
-
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     native.cc_binary(**kwargs)
@@ -472,8 +468,6 @@ def swift_c_tool(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_binary(**kwargs)
 
@@ -516,8 +510,6 @@ def swift_cc_tool(**kwargs):
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
-
-    kwargs["features"] = _default_features() + kwargs.get("features", [])
 
     native.cc_binary(**kwargs)
 

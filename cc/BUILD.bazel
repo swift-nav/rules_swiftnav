@@ -54,6 +54,19 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Disable warnings as errors with --@rules_swiftnav//cc:warnings_as_errors=false
+bool_flag(
+    name = "warnings_as_errors",
+    build_setting_default = True,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_disable_warnings_as_errors",
+    flag_values = {":warnings_as_errors": "false"},
+    visibility = ["//visibility:public"],
+)
+
 # Allows us to experiment with building the codebase with different standards.
 string_flag(
     name = "cxx_standard",
