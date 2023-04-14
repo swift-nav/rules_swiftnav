@@ -33,3 +33,51 @@ selects.config_setting_group(
         "@platforms//os:linux",
     ],
 )
+
+platform(
+    name = "cortex_m4_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        "//cc/constraints:cortex-m4",
+    ],
+)
+
+platform(
+    name = "cortex_m7_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        "//cc/constraints:cortex-m7",
+    ],
+)
+
+platform(
+    name = "cortex_m3_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        "//cc/constraints:cortex-m3",
+    ],
+)
+
+platform(
+    name = "cortex_a7_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        "//cc/constraints:cortex-a7",
+    ],
+)
+
+platform(
+    name = "cortex_a9_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        "//cc/constraints:cortex-a9",
+    ],
+)
+
+platform(
+    name = "arm_none_eabi",
+    constraint_values = [
+        "@platforms//os:none",
+        "//cc/constraints:unspecified_arm",
+    ],
+)

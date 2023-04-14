@@ -18,3 +18,45 @@ constraint_value(
     name = "cortexa7t2hf-neon-poky",
     constraint_setting = "@platforms//cpu",
 )
+
+constraint_value(
+    name = "cortex-m4",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-m7",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-m3",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-a7",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "cortex-a9",
+    constraint_setting = "@platforms//cpu",
+)
+
+constraint_value(
+    name = "unspecified_arm",
+    constraint_setting = "@platforms//cpu",
+)
+
+selects.config_setting_group(
+    name = "gcc_arm_cpu",
+    match_any = [
+        ":cortex-m4",
+        ":cortex-m7",
+        ":cortex-m3",
+        ":cortex-a7",
+        ":cortex-a9",
+        ":unspecified_arm",
+    ],
+)

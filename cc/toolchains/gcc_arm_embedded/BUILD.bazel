@@ -1,5 +1,4 @@
 load(":config.bzl", "config")
-load("@bazel_skylib//lib:selects.bzl", "selects")
 
 filegroup(name = "empty")
 
@@ -78,125 +77,35 @@ filegroup(
     tags = ["manual"],
 )
 
-constraint_value(
-    name = "cortex-m4",
-    constraint_setting = "@platforms//cpu",
-)
-
-constraint_value(
-    name = "cortex-m7",
-    constraint_setting = "@platforms//cpu",
-)
-
-constraint_value(
-    name = "cortex-m3",
-    constraint_setting = "@platforms//cpu",
-)
-
-constraint_value(
-    name = "cortex-a7",
-    constraint_setting = "@platforms//cpu",
-)
-
-constraint_value(
-    name = "cortex-a9",
-    constraint_setting = "@platforms//cpu",
-)
-
-constraint_value(
-    name = "unspecified_arm",
-    constraint_setting = "@platforms//cpu",
-)
-
-selects.config_setting_group(
-    name = "gcc_arm_cpu",
-    match_any = [
-        ":cortex-m4",
-        ":cortex-m7",
-        ":cortex-m3",
-        ":cortex-a7",
-        ":cortex-a9",
-        ":unspecified_arm",
-    ],
-)
-
-platform(
-    name = "cortex_m4_none_eabi",
-    constraint_values = [
-        "@platforms//os:none",
-        ":cortex-m4",
-    ],
-)
-
-platform(
-    name = "cortex_m7_none_eabi",
-    constraint_values = [
-        "@platforms//os:none",
-        ":cortex-m7",
-    ],
-)
-
-platform(
-    name = "cortex_m3_none_eabi",
-    constraint_values = [
-        "@platforms//os:none",
-        ":cortex-m3",
-    ],
-)
-
-platform(
-    name = "cortex_a7_none_eabi",
-    constraint_values = [
-        "@platforms//os:none",
-        ":cortex-a7",
-    ],
-)
-
-platform(
-    name = "cortex_a9_none_eabi",
-    constraint_values = [
-        "@platforms//os:none",
-        ":cortex-a9",
-    ],
-)
-
-platform(
-    name = "arm_none_eabi",
-    constraint_values = [
-        "@platforms//os:none",
-        ":unspecified_arm",
-    ],
-)
-
 config(
     name = "config",
     c_opts = select(
         {
-            ":cortex-m4": [
+            "//cc/constraints:cortex-m4": [
                 "-mcpu=cortex-m4",
                 "-march=armv7e-m",
                 "-mthumb",
                 "-mfloat-abi=hard",
                 "-mfpu=fpv4-sp-d16",
             ],
-            ":cortex-m7": [
+            "//cc/constraints:cortex-m7": [
                 "-mcpu=cortex-m7",
                 "-mthumb",
                 "-mfpu=fpv5-d16",
                 "-mfloat-abi=hard",
             ],
-            ":cortex-m3": [
+            "//cc/constraints:cortex-m3": [
                 "-mcpu=cortex-m3",
                 "-march=armv7-m",
                 "-mthumb",
                 "-msoft-float",
             ],
-            ":cortex-a7": [
+            "//cc/constraints:cortex-a7": [
                 "-mcpu=cortex-a7",
                 "-mfloat-abi=hard",
                 "-mfpu=neon-vfpv4",
             ],
-            ":cortex-a9": [
+            "//cc/constraints:cortex-a9": [
                 "-mcpu=cortex-a9",
                 "-march=armv7-a",
                 "-mthumb",
@@ -232,7 +141,7 @@ toolchain(
     ],
     target_compatible_with = [
         "@platforms//os:none",
-        ":gcc_arm_cpu",
+        "//cc/constraints:gcc_arm_cpu",
     ],
     toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
