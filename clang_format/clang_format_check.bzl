@@ -1,4 +1,4 @@
-load("//tools:get_cc_files.bzl", "get_cc_files")
+load("//cc_files:get_cc_files.bzl", "get_cc_files")
 
 def _check_format(ctx, exe, config, infile, clang_format_bin):
     output = ctx.actions.declare_file(infile.path + ".clang-format.txt")
