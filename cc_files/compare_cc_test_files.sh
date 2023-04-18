@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script compares the bazel_test_srcs.txt and
-# build/cmake_test_srcs.txt files which contain Bazel and CMake test
+# build/cmake_test_srcs.txt files, which contain Bazel and CMake test
 # source files, respectively.
 # Usage: compare_test_srcs <IGNORED_FILES>
 
@@ -44,4 +44,5 @@ if ! results=$(diff $flags bazel_test_srcs.txt build/cmake_test_srcs.txt); then
             i=$((i+1))
         done
     done
+    exit 1
 fi
