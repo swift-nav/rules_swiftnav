@@ -17,6 +17,8 @@ X86_64_DARWIN_LLVM = "https://github.com/llvm/llvm-project/releases/download/llv
 
 X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
 
+GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
+
 def swift_cc_toolchain():
     maybe(
         http_archive,
@@ -49,3 +51,15 @@ def register_swift_cc_toolchains():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux")
+
+def gcc_arm_embedded_toolchain():
+    http_archive(
+        name = "gcc_arm_embedded_toolchain",
+        build_file = "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
+        sha256 = "97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3",
+        strip_prefix = "gcc-arm-none-eabi-10.3-2021.10",
+        url = GCC_ARM_EMBEDDED,
+    )
+
+def register_gcc_arm_embedded_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain")

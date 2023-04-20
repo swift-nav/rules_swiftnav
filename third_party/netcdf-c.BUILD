@@ -132,9 +132,9 @@ genrule(
     outs = ["config.h"],
     cmd = select(
         {
-            "@rules_swiftnav//platforms:aarch64-darwin": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
-            "@rules_swiftnav//platforms:x86_64-darwin": "cat <<'EOF' > $@ {}EOF".format(X86_64_DARWIN_CONFIG),
-            "@rules_swiftnav//platforms:x86_64-linux": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
+            "@bazel_tools//src/conditions:darwin_arm64": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
+            "@bazel_tools//src/conditions:darwin_x86_64": "cat <<'EOF' > $@ {}EOF".format(X86_64_DARWIN_CONFIG),
+            "@bazel_tools//src/conditions:linux_x86_64": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
         },
         no_match_error = "Currently only aarch64-darwin, x86_64-darwin, and x86_64-linux are supported.",
     ),
