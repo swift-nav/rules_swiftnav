@@ -68,6 +68,7 @@ def _get_cc_test_srcs_impl(target, ctx):
         inputs = [],
         outputs = [output],
         command = """
+            touch {output}
             for s in {srcs}
             do
                 echo $s >> {output}

@@ -27,22 +27,19 @@ do
 done
 
 if ! results=$(diff $flags bazel_test_srcs.txt build/cmake_test_srcs.txt); then
-    for result in "$results"
+    i=0
+    for result in $results
     do
-        i=0
-        for el in $result
-        do
-            if [[ $i -eq 1 ]]; then
-                if [[ "$el" == ">" ]]; then
-                    echo -n "Bazel doesn't have: "
-                else
-                    echo -n "CMake doesn't have: "
-                fi
-            elif [[ $i -eq 2 ]]; then
-                echo $el
+        if [[ $(( i % 3 )) == 1 ]]; then
+            if [[ "$result" == ">" ]]; then
+                echo -n "Bazel doesn't have: "
+            else
+                echo -n "CMake doesn't have: "
             fi
-            i=$((i+1))
-        done
+        elif [[ $(( i % 3 )) == 2 ]]; then
+            echo $result
+        fi
+        i=$((i+1))
     done
     exit 1
 fi
