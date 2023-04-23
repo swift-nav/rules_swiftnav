@@ -76,6 +76,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
+                                "--sysroot=external/arm-linux-musleabihf",
                                 "-no-canonical-prefixes",
                                 "-fno-canonical-system-headers",
                                 "-fno-common",
@@ -105,6 +106,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
+                                "--sysroot=external/arm-linux-musleabihf",
                                 "-Wl,-O1",
                                 "-Wl,--hash-style=gnu",
                                 "-Wl,--as-needed",
