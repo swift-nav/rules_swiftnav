@@ -41,9 +41,9 @@ filegroup(
     name = "lib",
     srcs = glob([
         "arm-linux-musleabihf/lib/**",
-        "arm-linux-musleabihf/**/lib*.a", # ?
+        "arm-linux-musleabihf/**/lib*.a",  # ?
         "lib/gcc/arm-linux-musleabihf/11.2.0/**",
-        "lib/**/lib*.a", # ?
+        "lib/**/lib*.a",  # ?
     ]),
 )
 

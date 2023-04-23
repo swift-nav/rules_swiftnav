@@ -76,4 +76,3 @@ def arm_linux_musleabihf_toolchain():
 
 def register_arm_linux_musleabihf_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/armhf:toolchain")
-
