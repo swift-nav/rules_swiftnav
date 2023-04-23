@@ -19,6 +19,8 @@ X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvm
 
 GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
 
+ARM_LINUX_MUSLEABIHF = "https://github.com/swift-nav/swift-toolchains/releases/download/musl/arm-linux-musleabihf-cross.tar.gz"
+
 def swift_cc_toolchain():
     maybe(
         http_archive,
@@ -63,3 +65,15 @@ def gcc_arm_embedded_toolchain():
 
 def register_gcc_arm_embedded_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain")
+
+def arm_linux_musleabihf_toolchain():
+    http_archive(
+        name = "arm-linux-musleabihf",
+        build_file = "@rules_swiftnav//cc/toolchains/musl.BUILD.bzl",
+        strip_prefix = "output",
+        url = ARM_LINUX_MUSLEABIHF,
+    )
+
+def register_arm_linux_musleahihf_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/armhf:toolchain")
+
