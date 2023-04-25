@@ -1,4 +1,4 @@
-load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY")
+load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY", "TEST_SRCS")
 
 FilesInfo = provider(
     fields = {
@@ -54,4 +54,30 @@ def _get_cc_target_hdrs_impl(target, ctx):
 
 get_cc_target_hdrs = aspect(
     implementation = _get_cc_target_hdrs_impl,
+)
+
+def _get_cc_test_srcs_impl(target, ctx):
+    tags = getattr(ctx.rule.attr, "tags", [])
+    if not TEST_SRCS in tags:
+        return [OutputGroupInfo(report = [])]
+
+    output = ctx.actions.declare_file(ctx.rule.attr.name + "_test_srcs.txt")
+    srcs = " ".join([f.path for f in get_cc_srcs(ctx) if f.extension != "h" and f.extension != "hpp"])
+
+    ctx.actions.run_shell(
+        inputs = [],
+        outputs = [output],
+        command = """
+            touch {output}
+            for s in {srcs}
+            do
+                echo $s >> {output}
+            done
+        """.format(output = output.path, srcs = srcs),
+    )
+
+    return [OutputGroupInfo(report = depset(direct = [output]))]
+
+get_cc_test_srcs = aspect(
+    implementation = _get_cc_test_srcs_impl,
 )

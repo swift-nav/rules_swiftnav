@@ -570,6 +570,7 @@ def swift_cc_test(name, type, **kwargs):
         srcs = srcs,
         visibility = ["//visibility:public"],
         tags = [TEST_SRCS],
+        target_compatible_with = kwargs.get("target_compatible_with", []),
     )
 
     kwargs["srcs"] = [":" + srcs_name]
