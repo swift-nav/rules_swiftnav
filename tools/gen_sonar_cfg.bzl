@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-load("//tools:get_cc_files.bzl", "FilesInfo", "get_cc_target_files")
+load("//cc_files:get_cc_files.bzl", "FilesInfo", "get_cc_target_files")
 
 def _gen_sonar_cfg_impl(ctx):
     all_files_bash = ""
