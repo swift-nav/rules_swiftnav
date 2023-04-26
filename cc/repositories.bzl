@@ -19,7 +19,11 @@ X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvm
 
 GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
 
-ARM_LINUX_MUSLEABIHF = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-beta/arm-linux-musleabihf-cross.tar.gz"
+ARM_LINUX_MUSLEABIHF = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-test-2/arm-linux-musleabihf.tar.gz"
+
+X86_64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-test-2/x86_64-linux-musl.tar.gz"
+
+AARCH64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-test-2/aarch64-linux-musl.tar.gz"
 
 def swift_cc_toolchain():
     maybe(
@@ -69,10 +73,32 @@ def register_gcc_arm_embedded_toolchain():
 def arm_linux_musleabihf_toolchain():
     http_archive(
         name = "arm-linux-musleabihf",
-        build_file = "@rules_swiftnav//cc/toolchains/musl:musl.BUILD.bzl",
+        build_file = "@rules_swiftnav//cc/toolchains/musl/armhf:musl.BUILD.bzl",
         strip_prefix = "output",
         url = ARM_LINUX_MUSLEABIHF,
     )
 
 def register_arm_linux_musleabihf_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/armhf:toolchain")
+
+def x86_64_linux_musl_toolchain():
+    http_archive(
+        name = "x86_64-linux-musl",
+        build_file = "@rules_swiftnav//cc/toolchains/musl/x86_64:musl.BUILD.bzl",
+        strip_prefix = "output",
+        url = X86_64_LINUX_MUSL,
+    )
+
+def register_x86_64_linux_musl_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/x86_64:toolchain")
+
+def aarch64_linux_musl_toolchain():
+    http_archive(
+        name = "aarch64-linux-musl",
+        build_file = "@rules_swiftnav//cc/toolchains/musl/aarch64:musl.BUILD.bzl",
+        strip_prefix = "output",
+        url = AARCH64_LINUX_MUSL,
+    )
+
+def register_aarch64_linux_musl_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/aarch64:toolchain")
