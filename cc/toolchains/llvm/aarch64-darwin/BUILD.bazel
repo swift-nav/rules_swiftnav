@@ -142,6 +142,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//cpu:aarch64",
         "@platforms//os:macos",
+        "//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
     toolchain = ":cc-clang-aarch64-darwin",

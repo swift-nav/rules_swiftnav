@@ -2,9 +2,17 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 
 package(default_visibility = ["//visibility:public"])
 
-constraint_setting(name = "compiler")
+constraint_setting(
+    name = "toolchain",
+    default_constraint_value = ":llvm_toolchain",
+)
 
-constraint_setting(name = "toolchain")
+constraint_value(
+    name = "llvm_toolchain",
+    constraint_setting = ":toolchain",
+)
+
+constraint_setting(name = "compiler")
 
 constraint_value(
     name = "gcc-5",
