@@ -105,4 +105,3 @@ def gcc_arm_embedded_toolchain():
 
 def register_gcc_arm_embedded_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain")
-
