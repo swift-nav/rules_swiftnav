@@ -2,7 +2,7 @@
 # Usages:
 # run_clang_format format_all <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG>
 # run_clang_format check_file <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG> <INPUT> <OUTPUT>
-set -uex
+set -ue
 
 format_all() {
     CLANG_FORMAT_CONFIG=$(realpath $1)
