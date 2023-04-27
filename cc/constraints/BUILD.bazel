@@ -4,6 +4,8 @@ package(default_visibility = ["//visibility:public"])
 
 constraint_setting(name = "compiler")
 
+constraint_setting(name = "libc")
+
 constraint_setting(name = "toolchain")
 
 constraint_value(
@@ -14,6 +16,11 @@ constraint_value(
 constraint_value(
     name = "gcc-6",
     constraint_setting = ":compiler",
+)
+
+constraint_value(
+    name = "musl",
+    constraint_setting = ":libc",
 )
 
 constraint_value(

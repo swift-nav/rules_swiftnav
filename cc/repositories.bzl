@@ -17,6 +17,12 @@ X86_64_DARWIN_LLVM = "https://github.com/llvm/llvm-project/releases/download/llv
 
 X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
 
+AARCH64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/aarch64-linux-musl-cross.tar.gz"
+
+ARM_LINUX_MUSLEABIHF = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/arm-linux-musleabihf-cross.tar.gz"
+
+X86_64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/x86_64-linux-musl-cross.tar.gz"
+
 GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
 
 def swift_cc_toolchain():
@@ -51,6 +57,42 @@ def register_swift_cc_toolchains():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux")
+
+def aarch64_linux_musl_toolchain():
+    http_archive(
+        name = "aarch64-linux-musl",
+        build_file = "@rules_swiftnav//cc/toolchains/musl/aarch64:musl.BUILD.bzl",
+        sha256 = "a6650541dcc778b79add1dd7369869d5d38ddefa9362b7e32d4cc1267fa7977e",
+        strip_prefix = "output",
+        url = AARCH64_LINUX_MUSL,
+    )
+
+def register_aarch64_linux_musl_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/aarch64:toolchain")
+
+def arm_linux_musleabihf_toolchain():
+    http_archive(
+        name = "arm-linux-musleabihf",
+        build_file = "@rules_swiftnav//cc/toolchains/musl/armhf:musl.BUILD.bzl",
+        sha256 = "7b310a8bf70500a4072f87c3292321fc4f7b91cc67a85a31e7cf13508fa24a3c",
+        strip_prefix = "output",
+        url = ARM_LINUX_MUSLEABIHF,
+    )
+
+def register_arm_linux_musleabihf_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/armhf:toolchain")
+
+def x86_64_linux_musl_toolchain():
+    http_archive(
+        name = "x86_64-linux-musl",
+        build_file = "@rules_swiftnav//cc/toolchains/musl/x86_64:musl.BUILD.bzl",
+        sha256 = "594395e60bc93acd7eb049f6d8c28a9c5ad5b6060b230e94f19cd8c005cd3a91",
+        strip_prefix = "output",
+        url = X86_64_LINUX_MUSL,
+    )
+
+def register_x86_64_linux_musl_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/x86_64:toolchain")
 
 def gcc_arm_embedded_toolchain():
     http_archive(
