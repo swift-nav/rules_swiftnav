@@ -107,7 +107,6 @@ def _impl(ctx):
                         flag_group(
                             flags = [
                                 "--sysroot=external/arm-linux-musleabihf",
-                                "-Wl,--gc-sections",
                                 "-Wl,-O1",
                                 "-Wl,--hash-style=gnu",
                                 "-Wl,--as-needed",
