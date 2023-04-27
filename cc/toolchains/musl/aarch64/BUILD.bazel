@@ -1,0 +1,111 @@
+load(":config.bzl", "config")
+
+filegroup(name = "empty")
+
+filegroup(
+    name = "wrappers",
+    srcs = glob([
+        "wrappers/**",
+    ]),
+)
+
+filegroup(
+    name = "ar_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-musl//:ar",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "as_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-musl//:as",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-musl//:bin",
+        "@aarch64-linux-musl//:include",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-musl//:ar",
+        "@aarch64-linux-musl//:gcc",
+        "@aarch64-linux-musl//:ld",
+        "@aarch64-linux-musl//:lib",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-musl//:objcopy",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-musl//:strip",
+    ],
+    tags = ["manual"],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        ":compiler_files",
+        ":linker_files",
+        "@aarch64-linux-musl//:bin",
+    ],
+    tags = ["manual"],
+)
+
+config(name = "config")
+
+cc_toolchain(
+    name = "cc_toolchain",
+    all_files = ":all_files",
+    ar_files = ":ar_files",
+    as_files = ":as_files",
+    compiler_files = ":compiler_files",
+    dwp_files = ":empty",
+    linker_files = ":linker_files",
+    objcopy_files = ":objcopy_files",
+    strip_files = ":strip_files",
+    supports_param_files = 0,
+    tags = ["manual"],
+    toolchain_config = ":config",
+    toolchain_identifier = "aarch64-linux-musl",
+)
+
+toolchain(
+    name = "toolchain",
+    exec_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "//cc/constraints:musl",
+    ],
+    toolchain = ":cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
