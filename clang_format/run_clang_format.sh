@@ -2,7 +2,7 @@
 # Usages:
 # run_clang_format format_all <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG>
 # run_clang_format check_file <CLANG_FORMAT_BIN> <CLANG_FORMAT_CONFIG> <INPUT> <OUTPUT>
-set -ue
+set -uex
 
 format_all() {
     CLANG_FORMAT_CONFIG=$(realpath $1)
@@ -14,7 +14,7 @@ format_all() {
     fi
     git describe --tags --abbrev=0 --always \
     | xargs -I % git diff --diff-filter=ACMRTUXB --name-only --line-prefix=`git rev-parse --show-toplevel`/ % -- '*.[ch]' '*.cpp' '*.cc' '*.hpp' \
-    | xargs clang-format-14 -i
+    | xargs $CLANG_FORMAT_BIN -i
 }
 
 check_file() {
