@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Swift Navigation Inc.
+# Copyright (C) 2023 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
 #
 # This source is subject to the license found in the file 'LICENSE' which must
@@ -8,21 +8,11 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
-bool_flag(
-    name = "enable_mkl",
-    build_setting_default = False,
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "_enable_mkl",
-    flag_values = {":enable_mkl": "true"},
-    visibility = ["//visibility:public"],
-)
-
-exports_files(
-    glob(["*.BUILD"]),
+cc_library(
+    name = "mkl_headers",
+    hdrs = glob(["include/*.h"]),
+    includes = ["include/"],
     visibility = ["//visibility:public"],
 )

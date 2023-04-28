@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Swift Navigation Inc.
+# Copyright (C) 2023 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
 #
 # This source is subject to the license found in the file 'LICENSE' which must
@@ -8,8 +8,18 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
+
 package(
     default_visibility = ["//visibility:public"],
+)
+
+selects.config_setting_group(
+    name = "x86_64-linux_and_mkl",
+    match_all = [
+        "@rules_swiftnav//platforms:x86_64-linux",
+        "@rules_swiftnav//third_party:_enable_mkl",
+    ],
 )
 
 cc_library(
@@ -17,6 +27,13 @@ cc_library(
     hdrs = glob(["Eigen/**"]),
     defines = [
         "EIGEN_NO_DEBUG",
-    ],
+    ] + select({
+        "x86_64-linux_and_mkl": ["EIGEN_USE_MKL_ALL"],
+        "//conditions:default": [],
+    }),
     includes = ["."],
+    deps = select({
+        "x86_64-linux_and_mkl": ["@mkl_libraries"],
+        "//conditions:default": [],
+    }),
 )
