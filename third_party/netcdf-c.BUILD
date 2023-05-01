@@ -132,7 +132,7 @@ genrule(
     outs = ["config.h"],
     cmd = select(
         {
-            "@bazel_tools//src/conditions:darwin_arm64": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
+            "@bazel_tools//src/conditions:darwin_arm64_constraint": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
             "@bazel_tools//src/conditions:darwin_x86_64": "cat <<'EOF' > $@ {}EOF".format(X86_64_DARWIN_CONFIG),
             "@bazel_tools//src/conditions:linux_x86_64": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
         },
