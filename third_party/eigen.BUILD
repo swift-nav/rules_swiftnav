@@ -24,7 +24,7 @@ cc_library(
     }),
     includes = ["."],
     deps = select({
-        "x86_64-linux_and_mkl": ["@mkl_libraries"],
+        "@rules_swiftnav//third_party:_enable_mkl": ["@mkl_libraries"],
         "//conditions:default": [],
     }),
 )
