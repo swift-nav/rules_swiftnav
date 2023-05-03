@@ -8,7 +8,6 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@bazel_skylib//lib:selects.bzl", "selects")
 
 package(
     default_visibility = ["//visibility:public"],
