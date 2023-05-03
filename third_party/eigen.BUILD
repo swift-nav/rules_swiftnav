@@ -20,7 +20,7 @@ cc_library(
     defines = [
         "EIGEN_NO_DEBUG",
     ] + select({
-        "x86_64-linux_and_mkl": ["EIGEN_USE_MKL_ALL"],
+        "@rules_swiftnav//third_party:_enable_mkl": ["EIGEN_USE_MKL_ALL"],
         "//conditions:default": [],
     }),
     includes = ["."],
