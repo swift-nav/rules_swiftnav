@@ -14,14 +14,6 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
-selects.config_setting_group(
-    name = "x86_64-linux_and_mkl",
-    match_all = [
-        "@rules_swiftnav//platforms:x86_64-linux",
-        "@rules_swiftnav//third_party:_enable_mkl",
-    ],
-)
-
 cc_library(
     name = "eigen",
     hdrs = glob(["Eigen/**"]),
