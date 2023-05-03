@@ -13,6 +13,10 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
     name = "mkl_headers",
     hdrs = glob(["include/*.h"]),
-    includes = ["include/"],
+    includes = ["include"],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+     }),
     visibility = ["//visibility:public"],
 )
