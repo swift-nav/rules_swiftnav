@@ -8,7 +8,6 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-
 package(
     default_visibility = ["//visibility:public"],
 )
@@ -24,7 +23,7 @@ cc_library(
     }),
     includes = ["."],
     deps = select({
-        "@rules_swiftnav//third_party:_enable_mkl": ["@mkl_libraries"],
+        "@rules_swiftnav//third_party:_enable_mkl": ["@mkl"],
         "//conditions:default": [],
     }),
 )

@@ -29,7 +29,7 @@ cc_import(
 )
 
 cc_library(
-    name = "mkl_libraries",
+    name = "mkl",
     copts = ["-fopenmp"],
     linkopts = [
         "-l:libgomp.a",

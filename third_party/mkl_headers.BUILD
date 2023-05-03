@@ -17,6 +17,6 @@ cc_library(
     target_compatible_with = select({
         "@platforms//os:linux": [],
         "//conditions:default": ["@platforms//:incompatible"],
-     }),
+    }),
     visibility = ["//visibility:public"],
 )
