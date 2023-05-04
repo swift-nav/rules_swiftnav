@@ -8,22 +8,15 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-package(
-    default_visibility = ["//visibility:public"],
-)
+load("@rules_cc//cc:defs.bzl", "cc_library")
 
 cc_library(
-    name = "eigen",
-    hdrs = glob(["Eigen/**"]),
-    defines = [
-        "EIGEN_NO_DEBUG",
-    ] + select({
-        "@rules_swiftnav//third_party:_enable_mkl": ["EIGEN_USE_MKL_ALL"],
-        "//conditions:default": [],
+    name = "mkl_headers",
+    hdrs = glob(["include/*.h"]),
+    includes = ["include"],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
-    includes = ["."],
-    deps = select({
-        "@rules_swiftnav//third_party:_enable_mkl": ["@mkl"],
-        "//conditions:default": [],
-    }),
+    visibility = ["//visibility:public"],
 )
