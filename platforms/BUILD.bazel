@@ -92,3 +92,13 @@ platform(
         "//cc/constraints:musl",
     ],
 )
+
+platform(
+    name = "gcc_arm_gnu_8_3",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "//cc/toolchains/gcc_arm_gnu_8_3:gcc_arm_gnu_8_3_toolchain",
+    ],
+    visibility = ["//visibility:public"],
+)

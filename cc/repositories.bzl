@@ -105,3 +105,12 @@ def gcc_arm_embedded_toolchain():
 
 def register_gcc_arm_embedded_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain")
+
+def gcc_arm_gnu_8_3_toolchain():
+    http_archive(
+        name = "gcc_arm_gnu_8_3_toolchain",
+        build_file = "@rules_swiftnav//cc/toolchains/gcc_arm_gnu_8_3:toolchain.BUILD",
+        sha256 = "8ce3e7688a47d8cd2d8e8323f147104ae1c8139520eca50ccf8a7fa933002731",
+        strip_prefix = "gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-gnu-8.3/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz",
+    )
