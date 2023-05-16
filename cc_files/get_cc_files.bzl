@@ -3,6 +3,7 @@ load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY", "TEST_SRCS")
 FilesInfo = provider(
     fields = {
         "files": "files of the target",
+        "test_files": "test files of the target",
     },
 )
 
@@ -34,13 +35,17 @@ def get_cc_files(ctx):
 
 def _get_cc_target_files_impl(target, ctx):
     if not CcInfo in target:
-        return [FilesInfo(files = [])]
+        return [FilesInfo(files = [], test_files = [])]
 
     tags = getattr(ctx.rule.attr, "tags", [])
-    if not LIBRARY in tags and not TEST_LIBRARY in tags and not BINARY in tags:
-        return [FilesInfo(files = [])]
 
-    return [FilesInfo(files = get_cc_files(ctx))]
+    if LIBRARY in tags or BINARY in tags:
+        return [FilesInfo(files = get_cc_files(ctx), test_files = [])]
+
+    if TEST_LIBRARY in tags:
+        return [FilesInfo(files = [], test_files = get_cc_files(ctx))]
+
+    return [FilesInfo(files = [], test_files = [])]
 
 get_cc_target_files = aspect(
     implementation = _get_cc_target_files_impl,
