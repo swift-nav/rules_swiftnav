@@ -30,8 +30,18 @@ cc_import(
 
 cc_library(
     name = "mkl",
+    srcs = [
+        "@mkl//:libmkl_core.a",
+        "@mkl//:libmkl_gnu_thread.a",
+        "@mkl//:libmkl_intel_lp64.a",
+    ],
     copts = ["-fopenmp"],
     linkopts = [
+        "-Wl,--start-group",
+        "$(location @mkl//:libmkl_intel_lp64.a)",
+        "$(location @mkl//:libmkl_core.a)",
+        "$(location @mkl//:libmkl_gnu_thread.a)",
+        "-Wl,--end-group",
         "-l:libgomp.a",
     ],
     linkstatic = 1,
