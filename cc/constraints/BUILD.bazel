@@ -14,6 +14,11 @@ constraint_value(
     constraint_setting = ":toolchain",
 )
 
+constraint_value(
+    name = "yocto_generic_toolchain",
+    constraint_setting = ":toolchain",
+)
+
 constraint_setting(name = "compiler")
 
 constraint_value(
