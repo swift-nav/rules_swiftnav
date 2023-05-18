@@ -10,6 +10,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("//cc/toolchains/yocto_generic:yocto_generic.bzl", "yocto_generic")
 
 AARCH64_DARWIN_LLVM = "https://github.com/swift-nav/swift-toolchains/releases/download/llvm-14.0.0/clang%2Bllvm-14.0.0-arm64-apple-darwin.tar.gz"
 
@@ -114,3 +115,9 @@ def gcc_arm_gnu_8_3_toolchain():
         strip_prefix = "gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu",
         url = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-gnu-8.3/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz",
     )
+
+def yocto_generic_toolchain():
+    yocto_generic(name = "yocto_generic")
+
+def register_yocto_generic_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/yocto_generic:toolchain")

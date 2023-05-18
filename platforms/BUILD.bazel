@@ -92,3 +92,12 @@ platform(
         "//cc/constraints:musl",
     ],
 )
+
+platform(
+    name = "yocto_generic",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@rules_swiftnav//cc/constraints:gcc-5",
+        "//cc/constraints:yocto_generic_toolchain",
+    ],
+)

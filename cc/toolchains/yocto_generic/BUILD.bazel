@@ -1,0 +1,42 @@
+load(":config.bzl", "config")
+
+filegroup(name = "empty")
+
+config(
+    name = "config",
+    tags = ["manual"],
+)
+
+cc_toolchain(
+    name = "cc_toolchain",
+    all_files = ":empty",
+    ar_files = ":empty",
+    as_files = ":empty",
+    compiler_files = ":empty",
+    dwp_files = ":empty",
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
+    supports_param_files = 0,
+    tags = ["manual"],
+    toolchain_config = ":config",
+    toolchain_identifier = "yocto-generic",
+)
+
+toolchain(
+    name = "toolchain",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    tags = ["manual"],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        # In this context this constraint implies you
+        # can use this toolchain for gcc-5 and up.
+        "@rules_swiftnav//cc/constraints:gcc-5",
+        "//cc/constraints:yocto_generic_toolchain",
+    ],
+    toolchain = ":cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
