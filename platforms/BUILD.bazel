@@ -101,3 +101,11 @@ platform(
         "//cc/constraints:yocto_generic_toolchain",
     ],
 )
+
+platform(
+    name = "aarch64_linux",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+)

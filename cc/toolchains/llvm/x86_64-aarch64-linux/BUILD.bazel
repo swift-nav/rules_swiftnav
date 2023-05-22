@@ -1,0 +1,157 @@
+# Copyright (C) 2022 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+package(default_visibility = ["//visibility:public"])
+
+load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+
+filegroup(
+    name = "wrappers",
+    srcs = glob([
+        "wrappers/**",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ar_files",
+    srcs = [
+        ":wrappers",
+        "@sysroot",
+        "@x86_64-linux-llvm//:ar",
+    ],
+)
+
+filegroup(
+    name = "as_files",
+    srcs = [
+        ":wrappers",
+        "@sysroot",
+        "@x86_64-linux-llvm//:as",
+    ],
+)
+
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        ":wrappers",
+        "@sysroot",
+        "@x86_64-linux-llvm//:clang",
+        "@x86_64-linux-llvm//:include",
+    ],
+)
+
+filegroup(
+    name = "dwp_files",
+    srcs = [
+        ":wrappers",
+        "@sysroot",
+        "@x86_64-linux-llvm//:dwp",
+    ],
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        ":wrappers",
+        "@sysroot",
+        "@x86_64-linux-llvm//:ar",
+        "@x86_64-linux-llvm//:clang",
+        "@x86_64-linux-llvm//:ld",
+        "@x86_64-linux-llvm//:lib",
+    ],
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = [
+        ":wrappers",
+        "@sysroot",
+        "@x86_64-linux-llvm//:objcopy",
+    ],
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-linux-llvm//:strip",
+    ],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        "linker_files",
+        ":compiler_files",
+        "@sysroot",
+        "@x86_64-linux-llvm//:bin",
+    ],
+)
+
+cc_toolchain_config(
+    name = "local-x86_64-aarch64-linux",
+    abi_libc_version = "glibc_unknown",
+    abi_version = "clang",
+    builtin_sysroot = "external/sysroot",
+    compiler = "clang",
+    cxx_builtin_include_directories = [
+        "%sysroot%/usr/lib/gcc/aarch64-linux-gnu/10/include",
+        "%sysroot%/usr/include",
+    ],
+    host_system_name = "linux-x86_64",
+    target_cpu = "k8",
+    target_libc = "glibc_unknown",
+    target_system_name = "aarch64-unknown-linux-gnu",
+    tool_paths = {
+        "ar": "wrappers/llvm-ar",
+        "cpp": "wrappers/clang-cpp",
+        "gcc": "wrappers/clang",
+        "gcov": "wrappers/llvm-profdata",
+        "llvm-cov": "wrappers/llvm-cov",
+        "llvm-profdata": "wrappers/llvm-profdata",
+        "ld": "wrappers/ld.ldd",
+        "nm": "wrappers/llvm-nm",
+        "objcopy": "wrappers/llvm-objcopy",
+        "objdump": "wrappers/llvm-objdump",
+        "strip": "wrappers/llvm-strip",
+    },
+    toolchain_identifier = "clang-x86_64-linux",
+    toolchain_path_prefix = "external/x86_64-linux-llvm",
+)
+
+cc_toolchain(
+    name = "cc-clang-x86_64-aarch64-linux",
+    all_files = ":all_files",
+    ar_files = ":ar_files",
+    as_files = ":as_files",
+    compiler_files = ":compiler_files",
+    dwp_files = ":dwp_files",
+    linker_files = ":linker_files",
+    objcopy_files = ":objcopy_files",
+    strip_files = ":strip_files",
+    toolchain_config = ":local-x86_64-aarch64-linux",
+)
+
+toolchain(
+    name = "cc-toolchain-x86_64-aarch64-linux",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+        "//cc/constraints:llvm_toolchain",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-aarch64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
