@@ -24,7 +24,7 @@ filegroup(
     name = "ar_files",
     srcs = [
         ":wrappers",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:ar",
     ],
 )
@@ -33,7 +33,7 @@ filegroup(
     name = "as_files",
     srcs = [
         ":wrappers",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:as",
     ],
 )
@@ -42,7 +42,7 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":wrappers",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:include",
     ],
@@ -52,7 +52,7 @@ filegroup(
     name = "dwp_files",
     srcs = [
         ":wrappers",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:dwp",
     ],
 )
@@ -61,7 +61,7 @@ filegroup(
     name = "linker_files",
     srcs = [
         ":wrappers",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:ar",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:ld",
@@ -73,7 +73,7 @@ filegroup(
     name = "objcopy_files",
     srcs = [
         ":wrappers",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:objcopy",
     ],
 )
@@ -91,7 +91,7 @@ filegroup(
     srcs = [
         "linker_files",
         ":compiler_files",
-        "@sysroot",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:bin",
     ],
 )
@@ -100,10 +100,9 @@ cc_toolchain_config(
     name = "local-x86_64-aarch64-linux",
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
-    builtin_sysroot = "external/sysroot",
+    builtin_sysroot = "external/aarch64-sysroot",
     compiler = "clang",
     cxx_builtin_include_directories = [
-        "%sysroot%/usr/lib/gcc/aarch64-linux-gnu/10/include",
         "%sysroot%/usr/include",
     ],
     host_system_name = "linux-x86_64",

@@ -54,6 +54,21 @@ def swift_cc_toolchain():
         sha256 = "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5",
     )
 
+def aarch64_sysroot():
+    maybe(
+        http_archive,
+        name = "aarch64-sysroot",
+        sha256 = "3ca6e598e6f58b2f9dbba2ecb335ba2bf552988bcfeda7677f9ce1291f03028f",
+        build_file_content = """
+filegroup(
+    name = "aarch64-sysroot",
+    srcs = glob(["*/**"]),
+    visibility = ["//visibility:public"],
+)
+    """,
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/aarch64-sysroot-v1/debian_bullseye_arm64_sysroot.tar.xz",
+    )
+
 def register_swift_cc_toolchains():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin")
