@@ -83,10 +83,6 @@ def cc_toolchain_config(
         "-no-canonical-prefixes",
     ]
 
-    link_flags.extend([
-        "-L{}/usr/lib/aarch64-linux-gnu".format(builtin_sysroot),
-    ])
-
     # Similar to link_flags, but placed later in the command line such that
     # unused symbols are not stripped.
     link_libs = []
