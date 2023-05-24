@@ -58,7 +58,7 @@ def aarch64_sysroot():
     maybe(
         http_archive,
         name = "aarch64-sysroot",
-        sha256 = "3ca6e598e6f58b2f9dbba2ecb335ba2bf552988bcfeda7677f9ce1291f03028f",
+        sha256 = "9bd27c7ec6aa4bd3d4df60cd04228669bcf366aec32d4b4dc7b504de2f63121e",
         build_file_content = """
 filegroup(
     name = "aarch64-sysroot",
@@ -66,7 +66,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/aarch64-sysroot-v1/debian_bullseye_arm64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-aarch64-sysroot-v1/debian_bullseye_aarch64_sysroot.tar.xz",
     )
 
 def register_swift_cc_toolchains():
