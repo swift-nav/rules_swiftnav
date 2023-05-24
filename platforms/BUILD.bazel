@@ -8,13 +8,19 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@bazel_skylib//lib:selects.bzl", "selects")
-
 config_setting(
     name = "aarch64_darwin",
     constraint_values = [
         "@platforms//cpu:aarch64",
         "@platforms//os:macos",
+    ],
+)
+
+config_setting(
+    name = "aarch64_linux",
+    constraint_values = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
     ],
 )
 
