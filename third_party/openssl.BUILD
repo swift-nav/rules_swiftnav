@@ -24,9 +24,17 @@ filegroup(
 
 configure_make(
     name = "openssl",
-    configure_command = "config",
+    configure_command = "Configure",
     configure_in_place = True,
-    configure_options = [
+    configure_options = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": ["linux-x86_64"],
+            "@bazel_tools//src/conditions:linux_aarch64": ["linux-aarch64"],
+            "@bazel_tools//src/conditions:darwin_x86_64": ["darwin64-x86_64-cc"],
+            "@rules_swiftnav//platforms:aarch64_darwin": ["darwin64-arm64-cc"],
+        },
+        no_match_error = "Currently only aarch64-darwin, x86_64-darwin, x86_64-linux, and aarch64-linux are supported.",
+    ) + [
         "no-comp",
         "no-idea",
         "no-weak-ssl-ciphers",
