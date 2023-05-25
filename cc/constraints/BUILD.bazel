@@ -37,6 +37,11 @@ constraint_value(
 )
 
 constraint_value(
+    name = "glibc_2_31",
+    constraint_setting = ":libc",
+)
+
+constraint_value(
     name = "cortexa7t2hf-neon-poky",
     constraint_setting = "@platforms//cpu",
 )

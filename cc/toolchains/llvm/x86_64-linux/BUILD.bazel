@@ -11,6 +11,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("//cc/toolchains/llvm:target_triplets.bzl", "X86_64_LINUX")
 
 filegroup(
     name = "wrappers",
@@ -99,10 +100,10 @@ cc_toolchain_config(
         "/usr/include",
         "/usr/local/include",
     ],
-    host_system_name = "linux-x86_64",
+    host_system_name = X86_64_LINUX,
     target_cpu = "k8",
     target_libc = "glibc_unknown",
-    target_system_name = "x86_64-unknown-linux-gnu",
+    target_system_name = X86_64_LINUX,
     tool_paths = {
         "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",

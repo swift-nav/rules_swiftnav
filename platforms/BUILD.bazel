@@ -103,9 +103,10 @@ platform(
 )
 
 platform(
-    name = "aarch64_linux",
+    name = "aarch64_bullseye",
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
+        "//cc/constraints:glibc_2_31",
     ],
 )

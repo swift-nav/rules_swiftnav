@@ -12,6 +12,7 @@ load(
     "@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
+load("//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
 
 def cc_toolchain_config(
         name,
@@ -28,6 +29,12 @@ def cc_toolchain_config(
         target_system_name,
         builtin_sysroot = None,
         is_darwin = False):
+    if not is_target_triplet(host_system_name):
+        fail(host_system_name + " is not a target tripplet")
+
+    if not is_target_triplet(target_system_name):
+        fail(target_system_name + " is not a target tripplet")
+
     cross_compile = host_system_name != target_system_name
 
     # Default compiler flags:
