@@ -30,7 +30,6 @@ filegroup(
     name = "clang_tidy_executable_default",
     srcs = select(
         {
-            "@rules_swiftnav//platforms:aarch64_darwin": ["@aarch64-darwin-llvm//:clang-tidy"],
             "@bazel_tools//src/conditions:darwin_x86_64": ["@x86_64-darwin-llvm//:clang-tidy"],
             "@bazel_tools//src/conditions:linux_x86_64": ["@x86_64-linux-llvm//:clang-tidy"],
             "//conditions:default": [":clang_tidy_bin"],
