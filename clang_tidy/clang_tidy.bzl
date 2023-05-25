@@ -52,7 +52,7 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     for i in _flatten([compilation_context.includes.to_list() for compilation_context in compilation_contexts]):
         if "pb" in i:
             args.add("-isystem" + i)
-        if "gflags" in i:
+        else if "gflags" in i:
             args.add("-isystem" + i)
         else:
             args.add("-I" + i)
