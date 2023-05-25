@@ -33,8 +33,6 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     # start args passed to the compiler
     args.add("--")
 
-    print(flags)
-
     # add args specified by the toolchain, on the command line and rule copts
     args.add_all(flags)
 
@@ -52,7 +50,7 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     for i in _flatten([compilation_context.includes.to_list() for compilation_context in compilation_contexts]):
         if "pb" in i:
             args.add("-isystem" + i)
-        else if "gflags" in i:
+        elif "gflags" in i:
             args.add("-isystem" + i)
         else:
             args.add("-I" + i)
