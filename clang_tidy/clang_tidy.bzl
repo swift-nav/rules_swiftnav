@@ -33,6 +33,8 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     # start args passed to the compiler
     args.add("--")
 
+    print(flags)
+
     # add args specified by the toolchain, on the command line and rule copts
     args.add_all(flags)
 
