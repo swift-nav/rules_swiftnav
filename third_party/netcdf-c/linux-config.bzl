@@ -1,4 +1,4 @@
-X86_64_LINUX_CONFIG = r"""
+LINUX_CONFIG = r"""
 /*! \file
 
 Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
