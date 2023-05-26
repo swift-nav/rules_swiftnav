@@ -15,7 +15,7 @@ netcdf-c@4.9.0
 load("@rules_swiftnav//tools:configure_file.bzl", "configure_file")
 load("@rules_swiftnav//third_party/netcdf-c:aarch64-darwin-config.bzl", "AARCH64_DARWIN_CONFIG")
 load("@rules_swiftnav//third_party/netcdf-c:x86_64-darwin-config.bzl", "X86_64_DARWIN_CONFIG")
-load("@rules_swiftnav//third_party/netcdf-c:x86_64-linux-config.bzl", "X86_64_LINUX_CONFIG")
+load("@rules_swiftnav//third_party/netcdf-c:linux-config.bzl", "LINUX_CONFIG")
 load("@rules_swiftnav//third_party/netcdf-c:attr.bzl", "attr")
 load("@rules_swiftnav//third_party/netcdf-c:ncx.bzl", "ncx")
 load("@rules_swiftnav//third_party/netcdf-c:putget.bzl", "putget")
@@ -133,10 +133,9 @@ genrule(
     cmd = select(
         {
             "@rules_swiftnav//platforms:aarch64_darwin": "cat <<'EOF' > $@ {}EOF".format(AARCH64_DARWIN_CONFIG),
-            # reuse X86_64_LINUX_CONFIG for aarch64_linux
-            "@rules_swiftnav//platforms:aarch64_linux": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
+            "@rules_swiftnav//platforms:aarch64_linux": "cat <<'EOF' > $@ {}EOF".format(LINUX_CONFIG),
             "@bazel_tools//src/conditions:darwin_x86_64": "cat <<'EOF' > $@ {}EOF".format(X86_64_DARWIN_CONFIG),
-            "@bazel_tools//src/conditions:linux_x86_64": "cat <<'EOF' > $@ {}EOF".format(X86_64_LINUX_CONFIG),
+            "@bazel_tools//src/conditions:linux_x86_64": "cat <<'EOF' > $@ {}EOF".format(LINUX_CONFIG),
         },
         no_match_error = "Currently only aarch64-darwin, aarch64-linux, x86_64-darwin and x86_64-linux are supported.",
     ),
