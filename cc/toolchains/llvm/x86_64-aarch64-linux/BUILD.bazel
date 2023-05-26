@@ -11,7 +11,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//cc/toolchains/llvm:target_triplets.bzl", "X86_64_LINUX")
+load("//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX", "X86_64_LINUX")
 
 filegroup(
     name = "wrappers",
@@ -25,6 +25,7 @@ filegroup(
     name = "ar_files",
     srcs = [
         ":wrappers",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:ar",
     ],
 )
@@ -33,6 +34,7 @@ filegroup(
     name = "as_files",
     srcs = [
         ":wrappers",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:as",
     ],
 )
@@ -41,6 +43,7 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":wrappers",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:include",
     ],
@@ -50,6 +53,7 @@ filegroup(
     name = "dwp_files",
     srcs = [
         ":wrappers",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:dwp",
     ],
 )
@@ -58,6 +62,7 @@ filegroup(
     name = "linker_files",
     srcs = [
         ":wrappers",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:ar",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:ld",
@@ -69,6 +74,7 @@ filegroup(
     name = "objcopy_files",
     srcs = [
         ":wrappers",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:objcopy",
     ],
 )
@@ -86,24 +92,24 @@ filegroup(
     srcs = [
         "linker_files",
         ":compiler_files",
+        "@aarch64-sysroot",
         "@x86_64-linux-llvm//:bin",
     ],
 )
 
 cc_toolchain_config(
-    name = "local-x86_64-linux",
+    name = "local-x86_64-aarch64-linux",
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
+    builtin_sysroot = "external/aarch64-sysroot",
     compiler = "clang",
     cxx_builtin_include_directories = [
-        "/include",
-        "/usr/include",
-        "/usr/local/include",
+        "%sysroot%/usr/include",
     ],
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
     target_libc = "glibc_unknown",
-    target_system_name = X86_64_LINUX,
+    target_system_name = AARCH64_LINUX,
     tool_paths = {
         "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
@@ -122,7 +128,7 @@ cc_toolchain_config(
 )
 
 cc_toolchain(
-    name = "cc-clang-x86_64-linux",
+    name = "cc-clang-x86_64-aarch64-linux",
     all_files = ":all_files",
     ar_files = ":ar_files",
     as_files = ":as_files",
@@ -131,21 +137,22 @@ cc_toolchain(
     linker_files = ":linker_files",
     objcopy_files = ":objcopy_files",
     strip_files = ":strip_files",
-    toolchain_config = ":local-x86_64-linux",
+    toolchain_config = ":local-x86_64-aarch64-linux",
 )
 
 toolchain(
-    name = "cc-toolchain-x86_64-linux",
+    name = "cc-toolchain-x86_64-aarch64-linux",
     exec_compatible_with = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
     ],
     target_compatible_with = [
-        "@platforms//cpu:x86_64",
         "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "//cc/constraints:glibc_2_31",
         "//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
-    toolchain = ":cc-clang-x86_64-linux",
+    toolchain = ":cc-clang-x86_64-aarch64-linux",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )

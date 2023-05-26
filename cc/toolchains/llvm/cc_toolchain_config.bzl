@@ -12,6 +12,7 @@ load(
     "@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
+load("//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
 
 def cc_toolchain_config(
         name,
@@ -28,6 +29,14 @@ def cc_toolchain_config(
         target_system_name,
         builtin_sysroot = None,
         is_darwin = False):
+    if not is_target_triplet(host_system_name):
+        fail(host_system_name + " is not a target tripplet")
+
+    if not is_target_triplet(target_system_name):
+        fail(target_system_name + " is not a target tripplet")
+
+    cross_compile = host_system_name != target_system_name
+
     # Default compiler flags:
     compile_flags = [
         "--target=" + target_system_name,
@@ -72,9 +81,8 @@ def cc_toolchain_config(
     cxx_flags = [
         # The whole codebase should build with c++14
         "-std=c++14",
-        # Use bundled libc++ for hermeticity
-        "-stdlib=libc++",
-    ]
+        # Use bundled libc++ for hermeticity if not cross compiling
+    ] + ["-stdlib=libstdc++"] if cross_compile else ["-stdlib=libc++"]
 
     link_flags = [
         "--target=" + target_system_name,
@@ -110,17 +118,26 @@ def cc_toolchain_config(
 
     if use_lld:
         link_flags.extend([
-            # Below this line, assumes libc++ & lld
-            "-l:libc++.a",
-            "-l:libc++abi.a",
-            "-l:libunwind.a",
-            # Compiler runtime features.
-            "-rtlib=compiler-rt",
             # To support libunwind
             # It's ok to assume posix when using this toolchain
             "-lpthread",
             "-ldl",
         ])
+
+        if cross_compile:
+            link_flags.extend([
+                # Use libstdc++ from the sysroot when cross compiling
+                "-l:libstdc++.a",
+            ])
+        else:
+            link_flags.extend([
+                # Below this line, assumes libc++ & lld
+                "-l:libc++.a",
+                "-l:libc++abi.a",
+                "-l:libunwind.a",
+                # Compiler runtime features.
+                "-rtlib=compiler-rt",
+            ])
     else:
         # The comments below were copied directly from:
         # https://github.com/grailbio/bazel-toolchain/blob/795d76fd03e0b17c0961f0981a8512a00cba4fa2/toolchain/cc_toolchain_config.bzl#L202

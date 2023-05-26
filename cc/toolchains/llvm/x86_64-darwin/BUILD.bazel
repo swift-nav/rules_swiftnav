@@ -11,6 +11,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("//cc/toolchains/llvm:target_triplets.bzl", "X86_64_DARWIN")
 
 filegroup(
     name = "wrappers",
@@ -99,11 +100,11 @@ cc_toolchain_config(
         "%sysroot%/usr/include",
         "%sysroot%/System/Library/Frameworks",
     ],
-    host_system_name = "darwin-x86_64",
+    host_system_name = X86_64_DARWIN,
     is_darwin = True,
     target_cpu = "darwin",
     target_libc = "macosx",
-    target_system_name = "x86_64-apple-macosx",
+    target_system_name = X86_64_DARWIN,
     tool_paths = {
         "ar": "/usr/bin/libtool",
         "cpp": "wrappers/clang-cpp",

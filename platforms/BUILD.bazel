@@ -101,3 +101,12 @@ platform(
         "//cc/constraints:yocto_generic_toolchain",
     ],
 )
+
+platform(
+    name = "aarch64_bullseye",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "//cc/constraints:glibc_2_31",
+    ],
+)
