@@ -121,6 +121,16 @@ platform(
 )
 
 platform(
+    name = "x86_64_bullseye",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        "//cc/constraints:glibc_2_31",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+platform(
     name = "aarch64_bullseye",
     constraint_values = [
         "@platforms//os:linux",
