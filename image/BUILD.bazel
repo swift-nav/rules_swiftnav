@@ -1,3 +1,5 @@
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+
 config_setting(
     name = "_stamp",
     values = {"stamp": "1"},
