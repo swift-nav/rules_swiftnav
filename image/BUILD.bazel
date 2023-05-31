@@ -1,0 +1,15 @@
+config_setting(
+    name = "_stamp",
+    values = {"stamp": "1"},
+)
+
+bool_flag(
+    name = "latest_master",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "_latest_master",
+    flag_values = {":latest_master": "true"},
+    values = {"stamp": "1"},
+)
