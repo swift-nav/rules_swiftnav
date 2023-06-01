@@ -33,16 +33,15 @@ def swift_image(name, bin = [], external_data = [], tars = [], **kwargs):
         **kwargs
     )
 
-def swift_image_index(name, image, platforms, tags = [], visibility = None, **kwargs):
-    """Creates a multi-arch image index
+def swift_image_index(name, image, platforms, **kwargs):
+    """
+    Creates a multi-arch image index
 
     Args:
         name: Name of the image target
         image: Label of the image
         platforms: List of platforms
-        tags: Tags
-        visibility: Visibility modifier
-        **kwargs: Arguments passed down to oci_image
+        **kwargs: Arguments passed down to oci_image_index
     """
     transition_name = "{}_transition".format(name)
 
@@ -55,20 +54,37 @@ def swift_image_index(name, image, platforms, tags = [], visibility = None, **kw
     oci_image_index(
         name = name,
         images = [":{}".format(transition_name)],
-        visibility = visibility,
-        tags = tags,
+        **kwargs
     )
 
-def swift_image_tag(name, out):
+def swift_tag(name, value, out):
+    """
+    Creates a tag file from given value
+
+    Args:
+        name: Name of the tag target
+        value: String that will be used as a tag
+        out: Output file
+    """
     native.genrule(
         name = name,
         outs = [out],
-        cmd = select({
-            # Read STABLE_GIT_VERSION's value from stable-status.txt
-            # `(?<=A)B` in regex is a positive lookbehind - finds expression B that's preceded with A
-            "@rules_swiftnav//image:_stamp": "cat bazel-out/stable-status.txt | grep -Po '(?<=STABLE_GIT_VERSION\\s).*' > $@",
-            "@rules_swiftnav//image:_latest_master": "latest-master",
-            "//conditions:default": "echo test > $@",
-        }),
+        cmd = "echo {} > @$".format(value),
+    )
+
+def swift_stamp_tag(name, var, out):
+    """
+    Creates a tag file from a given variable defined in stable-status.txt file
+
+    Args:
+        name: Name of the tag target
+        var: Variable to use as a tag
+        out: Output file
+    """
+    native.genrule(
+        name = name,
+        outs = [out],
+        # `(?<=A)B` in regex is a positive lookbehind - finds expression B that's preceded with A
+        cmd = "cat bazel-out/stable-status.txt | grep -Po '(?<={}\\s).*' > $@".format(var),
         stamp = True,
     )
