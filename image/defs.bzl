@@ -27,7 +27,7 @@ def swift_image_index(name, image, platforms, **kwargs):
 
 def image_tag(name, tag):
     """
-    Creates a tag file from given string 
+    Creates a tag file from given string
 
     Args:
         name: Name of the tag target
