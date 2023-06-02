@@ -1,4 +1,0 @@
-config_setting(
-    name = "_stamp",
-    values = {"stamp": "1"},
-)
