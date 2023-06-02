@@ -14,6 +14,7 @@ config_setting(
         "@platforms//cpu:aarch64",
         "@platforms//os:macos",
     ],
+    visibility = ["//visibility:public"],
 )
 
 config_setting(
@@ -22,6 +23,7 @@ config_setting(
         "@platforms//cpu:aarch64",
         "@platforms//os:linux",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -30,6 +32,7 @@ platform(
         "@platforms//os:none",
         "//cc/constraints:cortex-m4",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -38,6 +41,7 @@ platform(
         "@platforms//os:none",
         "//cc/constraints:cortex-m7",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -46,6 +50,7 @@ platform(
         "@platforms//os:none",
         "//cc/constraints:cortex-m3",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -54,6 +59,7 @@ platform(
         "@platforms//os:none",
         "//cc/constraints:cortex-a7",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -62,6 +68,7 @@ platform(
         "@platforms//os:none",
         "//cc/constraints:cortex-a9",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -70,6 +77,7 @@ platform(
         "@platforms//os:none",
         "//cc/constraints:unspecified_arm",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -79,6 +87,7 @@ platform(
         "@platforms//cpu:aarch64",
         "//cc/constraints:musl",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -88,6 +97,7 @@ platform(
         "@platforms//cpu:arm",
         "//cc/constraints:musl",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -97,6 +107,7 @@ platform(
         "@platforms//cpu:x86_64",
         "//cc/constraints:musl",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -106,6 +117,17 @@ platform(
         "@rules_swiftnav//cc/constraints:gcc-5",
         "//cc/constraints:yocto_generic_toolchain",
     ],
+    visibility = ["//visibility:public"],
+)
+
+platform(
+    name = "x86_64_bullseye",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+        "//cc/constraints:glibc_2_31",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
@@ -115,4 +137,5 @@ platform(
         "@platforms//cpu:aarch64",
         "//cc/constraints:glibc_2_31",
     ],
+    visibility = ["//visibility:public"],
 )

@@ -10,7 +10,7 @@
 
 """Swift wrappers for native cc rules."""
 
-load("//tools:stamp_file.bzl", "stamp_file")
+load("//stamp:stamp_file.bzl", "stamp_file")
 load(":utils.bzl", "construct_local_include")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
 load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
