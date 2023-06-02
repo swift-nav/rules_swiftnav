@@ -1,4 +1,10 @@
+exports_files(
+    glob(["*.bzl"]) + glob(["*.py"]),
+    visibility = ["//visibility:public"],
+)
+
 config_setting(
     name = "_stamp",
     values = {"stamp": "1"},
+    visibility = ["//visibility:public"],
 )
