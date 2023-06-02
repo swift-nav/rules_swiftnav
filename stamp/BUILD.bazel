@@ -4,7 +4,7 @@ exports_files(
 )
 
 config_setting(
-    name = "_stamp",
+    name = "stamp",
     values = {"stamp": "1"},
     visibility = ["//visibility:public"],
 )
