@@ -8,3 +8,10 @@ config_setting(
     values = {"stamp": "1"},
     visibility = ["//visibility:public"],
 )
+
+py_binary(
+    name = "stamp_file",
+    srcs = ["stamp_file.py"],
+    main = "stamp_file.py",
+    visibility = ["//visibility:public"],
+)
