@@ -34,7 +34,7 @@ stamp_file = rule(
             executable = True,
             cfg = "exec",
             allow_files = True,
-            default = "//tools:stamp_file",
+            default = "//stamp:stamp_file",
         ),
     },
 )
