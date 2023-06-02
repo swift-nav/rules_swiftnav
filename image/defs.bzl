@@ -36,7 +36,7 @@ def image_tag(name, tag):
     native.genrule(
         name = name,
         outs = ["{}.txt".format(name)],
-        cmd = "echo {} > @$".format(tag),
+        cmd = "echo {} > $@".format(tag),
     )
 
 def image_stamp_tag(name, var):
