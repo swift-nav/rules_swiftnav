@@ -37,6 +37,7 @@ def image_tag(name, tag):
         name = name,
         outs = ["{}.txt".format(name)],
         cmd = "echo {} > $@".format(tag),
+        tags = ["manual"]
     )
 
 def image_stamp_tag(name, var):
@@ -53,4 +54,5 @@ def image_stamp_tag(name, var):
         # `(?<=A)B` in regex is a positive lookbehind - finds expression B that's preceded with A
         cmd = "cat bazel-out/stable-status.txt | grep -Po '(?<={}\\s).*' > $@".format(var),
         stamp = True,
+        tags = ["manual"]
     )
