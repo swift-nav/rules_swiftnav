@@ -26,28 +26,31 @@ def swift_image_index(name, image, platforms, **kwargs):
         **kwargs
     )
 
-def image_tag(name, tag):
+def image_tag(name, value, **kwargs):
     """
     Creates a tag file from given string
 
     Args:
         name: Name of the tag target
-        tag: String that will be used as a tag
+        value: String that will be used as a tag
+        **kwargs: Arguments passed to genrule
     """
     native.genrule(
         name = name,
         outs = ["{}.txt".format(name)],
-        cmd = "echo {} > $@".format(tag),
+        cmd = "echo {} > $@".format(value),
         tags = ["manual"],
+        **kwargs
     )
 
-def image_stamp_tag(name, var):
+def image_stamp_tag(name, var, **kwargs):
     """
     Creates a tag file from a given variable defined in stable-status.txt file
 
     Args:
         name: Name of the tag target
         var: Variable to use as a tag
+        **kwargs: Arguments passed to genrule
     """
     native.genrule(
         name = name,
@@ -55,5 +58,5 @@ def image_stamp_tag(name, var):
         # `(?<=A)B` in regex is a positive lookbehind - finds expression B that's preceded with A
         cmd = "cat bazel-out/stable-status.txt | grep -Po '(?<={}\\s).*' > $@".format(var),
         stamp = True,
-        tags = ["manual"],
+        **kwargs
     )
