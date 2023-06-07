@@ -17,6 +17,7 @@ def swift_image_index(name, image, platforms, **kwargs):
         name = transition_name,
         image = image,
         platforms = platforms,
+        tags = ["manual"],
     )
 
     oci_image_index(
