@@ -125,6 +125,7 @@ cc_toolchain_config(
     },
     toolchain_identifier = "clang-x86_64-linux",
     toolchain_path_prefix = "external/x86_64-linux-llvm",
+    extra_copts = ["-mcpu=neoverse-n1"],
 )
 
 cc_toolchain(

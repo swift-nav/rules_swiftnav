@@ -27,6 +27,7 @@ def cc_toolchain_config(
         cxx_builtin_include_directories,
         tool_paths,
         target_system_name,
+        extra_copts = [],
         builtin_sysroot = None,
         is_darwin = False):
     if not is_target_triplet(host_system_name):
@@ -55,7 +56,7 @@ def cc_toolchain_config(
         "-Wall",
         "-Wthread-safety",
         "-Wself-assign",
-    ]
+    ] + extra_copts
 
     # -fstandalone-debug disables options that optimize
     # the size of the debug info.
