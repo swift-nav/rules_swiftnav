@@ -94,3 +94,15 @@ config_setting(
     flag_values = {":cxx_standard": "23"},
     visibility = ["//visibility:public"],
 )
+
+bool_flag(
+    name = "enable_sysroot",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_sysroot",
+    flag_values = {":enable_sysroot": "true"},
+    visibility = ["//visibility:public"],
+)
