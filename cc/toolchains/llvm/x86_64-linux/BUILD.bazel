@@ -12,7 +12,6 @@ package(default_visibility = ["//visibility:public"])
 
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("//cc/toolchains/llvm:target_triplets.bzl", "X86_64_LINUX")
-load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 filegroup(
     name = "wrappers",
