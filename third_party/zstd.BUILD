@@ -73,7 +73,6 @@ cc_library(
         "lib/zstd.h",
         "lib/zstd_errors.h",
     ],
-    copts = ["-fpic"],
     defines = [
         "XXH_NAMESPACE=ZSTD_",
         "ZSTD_LEGACY_SUPPORT=0",
