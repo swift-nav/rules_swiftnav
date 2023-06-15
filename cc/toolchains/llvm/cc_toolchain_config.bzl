@@ -35,7 +35,7 @@ def cc_toolchain_config(
     if not is_target_triplet(target_system_name):
         fail(target_system_name + " is not a target tripplet")
 
-    use_bundled_libcpp = builtin_sysroot != None
+    use_bundled_libcpp = builtin_sysroot != None and not is_darwin
 
     # Default compiler flags:
     compile_flags = [

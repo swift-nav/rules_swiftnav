@@ -85,8 +85,10 @@ filegroup(
     srcs = [
         ":wrappers",
         "@x86_64-linux-llvm//:objcopy",
-        "@x86_64-sysroot",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
