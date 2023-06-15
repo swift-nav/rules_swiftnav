@@ -35,7 +35,7 @@ def cc_toolchain_config(
     if not is_target_triplet(target_system_name):
         fail(target_system_name + " is not a target tripplet")
 
-    use_bundled_libcpp = builtin_sysroot != None and not is_darwin
+    use_libstdcpp = builtin_sysroot != None and not is_darwin
 
     # Default compiler flags:
     compile_flags = [
@@ -82,7 +82,7 @@ def cc_toolchain_config(
         # The whole codebase should build with c++14
         "-std=c++14",
         # Use bundled libc++ for hermeticity if not cross compiling
-    ] + ["-stdlib=libstdc++"] if use_bundled_libcpp else ["-stdlib=libc++"]
+    ] + ["-stdlib=libstdc++"] if use_libstdcpp else ["-stdlib=libc++"]
 
     link_flags = [
         "--target=" + target_system_name,
@@ -124,7 +124,7 @@ def cc_toolchain_config(
             "-ldl",
         ])
 
-        if use_bundled_libcpp:
+        if use_libstdcpp:
             link_flags.extend([
                 # Use libstdc++ from the sysroot when cross compiling
                 "-l:libstdc++.a",
