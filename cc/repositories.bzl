@@ -89,6 +89,7 @@ def register_swift_cc_toolchains():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-x86_64-aarch64-linux")
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin-x86_64-linux:cc-toolchain-x86_64-darwin-x86_64-linux")
 
 def aarch64_linux_musl_toolchain():
     http_archive(
