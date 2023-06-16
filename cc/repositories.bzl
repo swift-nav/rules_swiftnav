@@ -69,6 +69,21 @@ filegroup(
         url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-aarch64-sysroot-v1/debian_bullseye_aarch64_sysroot.tar.xz",
     )
 
+def x86_64_sysroot():
+    maybe(
+        http_archive,
+        name = "x86_64-sysroot",
+        sha256 = "a19dd3fe4a61d0e1a18f197be1b0c9a2a06b1deabaff2f1479cfcc2cb0df85d1",
+        build_file_content = """
+filegroup(
+    name = "x86_64-sysroot",
+    srcs = glob(["*/**"]),
+    visibility = ["//visibility:public"],
+)
+    """,
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-x86_64-sysroot-v1/debian_bullseye_x86_64_sysroot.tar.xz",
+    )
+
 def register_swift_cc_toolchains():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin")

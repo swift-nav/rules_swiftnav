@@ -26,7 +26,10 @@ filegroup(
     srcs = [
         ":wrappers",
         "@x86_64-linux-llvm//:ar",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
@@ -34,7 +37,10 @@ filegroup(
     srcs = [
         ":wrappers",
         "@x86_64-linux-llvm//:as",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
@@ -43,7 +49,10 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:include",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
@@ -51,7 +60,10 @@ filegroup(
     srcs = [
         ":wrappers",
         "@x86_64-linux-llvm//:dwp",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
@@ -62,7 +74,10 @@ filegroup(
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:ld",
         "@x86_64-linux-llvm//:lib",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
@@ -70,7 +85,10 @@ filegroup(
     srcs = [
         ":wrappers",
         "@x86_64-linux-llvm//:objcopy",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
@@ -87,19 +105,29 @@ filegroup(
         "linker_files",
         ":compiler_files",
         "@x86_64-linux-llvm//:bin",
-    ],
+    ] + select({
+        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_toolchain_config(
     name = "local-x86_64-linux",
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
+    builtin_sysroot = select({
+        "//cc:_enable_sysroot": "external/x86_64-sysroot",
+        "//conditions:default": None,
+    }),
     compiler = "clang",
-    cxx_builtin_include_directories = [
-        "/include",
-        "/usr/include",
-        "/usr/local/include",
-    ],
+    cxx_builtin_include_directories = select({
+        "//cc:_enable_sysroot": ["%sysroot%/usr/include"],
+        "//conditions:default": [
+            "/include",
+            "/usr/include",
+            "/usr/local/include",
+        ],
+    }),
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
     target_libc = "glibc_unknown",
