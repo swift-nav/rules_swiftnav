@@ -5,23 +5,18 @@ set -ue
 CLANG_TIDY_BIN=$1
 shift
 
-CONFIG=$1
+CLANG_TIDY_CONFIG=$1
 shift
 
-OUTPUT=$1
+CLANG_TIDY_OUTPUT=$1
 shift
-
-# .clang-tidy config file has to be placed in the current working directory
-if [ ! -f ".clang-tidy" ]; then
-    ln -s $CONFIG .clang-tidy
-fi
 
 # clang-tidy doesn't create a patchfile if there are no errors.
 # make sure the output exists, and empty if there are no errors,
 # so the build system will not be confused.
-touch $OUTPUT
-truncate -s 0 $OUTPUT
+touch $CLANG_TIDY_OUTPUT
+truncate -s 0 $CLANG_TIDY_OUTPUT
 
-"${CLANG_TIDY_BIN}" "$@"
+"${CLANG_TIDY_BIN}" --config-file=$CLANG_TIDY_CONFIG "$@"
 
-test ! -s $OUTPUT
+test ! -s $CLANG_TIDY_OUTPUT
