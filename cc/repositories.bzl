@@ -73,7 +73,7 @@ def x86_64_sysroot():
     maybe(
         http_archive,
         name = "x86_64-sysroot",
-        # sha256 = "9bd27c7ec6aa4bd3d4df60cd04228669bcf366aec32d4b4dc7b504de2f63121e",
+        sha256 = "a19dd3fe4a61d0e1a18f197be1b0c9a2a06b1deabaff2f1479cfcc2cb0df85d1",
         build_file_content = """
 filegroup(
     name = "x86_64-sysroot",
