@@ -106,3 +106,15 @@ config_setting(
     flag_values = {":enable_sysroot": "true"},
     visibility = ["//visibility:public"],
 )
+
+bool_flag(
+    name = "use_libstdcpp",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_use_libstdcpp",
+    flag_values = {":use_libstdcpp": "true"},
+    visibility = ["//visibility:public"],
+)
