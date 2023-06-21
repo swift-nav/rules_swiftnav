@@ -28,6 +28,7 @@ def cc_toolchain_config(
         tool_paths,
         target_system_name,
         builtin_sysroot = None,
+        extra_copts = [],
         is_darwin = False):
     if not is_target_triplet(host_system_name):
         fail(host_system_name + " is not a target tripplet")
@@ -55,7 +56,7 @@ def cc_toolchain_config(
         "-Wall",
         "-Wthread-safety",
         "-Wself-assign",
-    ]
+    ] + extra_copts
 
     # -fstandalone-debug disables options that optimize
     # the size of the debug info.
