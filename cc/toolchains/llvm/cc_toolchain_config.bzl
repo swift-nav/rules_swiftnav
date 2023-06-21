@@ -36,7 +36,6 @@ def cc_toolchain_config(
         fail(target_system_name + " is not a target tripplet")
 
     is_cross_compile = host_system_name != target_system_name
-    print(is_cross_compile)
 
     # Default compiler flags:
     compile_flags = [
@@ -84,7 +83,8 @@ def cc_toolchain_config(
         "-std=c++14",
     ] + select({
         "//cc:_use_libstdcpp": ["-stdlib=libstdc++"],
-        "//conditions:default": ["-stdlib=libc++"] if not is_cross_compile else ["-stdlib=libstdc++"],
+        "//cc:_enable_sysroot": ["-stdlib=libstdc++"],
+        "//conditions:default": ["-stdlib=libstdc++"] if is_cross_compile else ["-stdlib=libc++"],
     })
 
     link_flags = [
@@ -215,7 +215,8 @@ def cc_toolchain_config(
         cxx_flags = cxx_flags,
         link_flags = link_flags + select({
             "//cc:_use_libstdcpp": link_libstdcpp,
-            "//conditions:default": link_libcpp if not is_cross_compile else link_libstdcpp,
+            "//cc:_enable_sysroot": link_libstdcpp,
+            "//conditions:default": link_libstdcpp if is_cross_compile else link_libcpp,
         }),
         link_libs = link_libs,
         opt_link_flags = opt_link_flags,
