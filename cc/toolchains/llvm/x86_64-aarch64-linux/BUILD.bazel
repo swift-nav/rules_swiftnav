@@ -106,6 +106,10 @@ cc_toolchain_config(
     cxx_builtin_include_directories = [
         "%sysroot%/usr/include",
     ],
+    extra_copts = select({
+        "//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
+        "//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
+    }),
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
     target_libc = "glibc_unknown",
@@ -125,10 +129,6 @@ cc_toolchain_config(
     },
     toolchain_identifier = "clang-x86_64-linux",
     toolchain_path_prefix = "external/x86_64-linux-llvm",
-    extra_copts = select({
-        "//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
-        "//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
-    }),
 )
 
 cc_toolchain(
