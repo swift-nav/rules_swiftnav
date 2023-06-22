@@ -35,7 +35,7 @@ def cc_toolchain_config(
     if not is_target_triplet(target_system_name):
         fail(target_system_name + " is not a target tripplet")
 
-    use_libstdcpp = builtin_sysroot != None and not is_darwin
+    is_cross_compile = host_system_name != target_system_name
 
     # Default compiler flags:
     compile_flags = [
@@ -81,14 +81,21 @@ def cc_toolchain_config(
     cxx_flags = [
         # The whole codebase should build with c++14
         "-std=c++14",
-        # Use bundled libc++ for hermeticity if not cross compiling
-    ] + ["-stdlib=libstdc++"] if use_libstdcpp else ["-stdlib=libc++"]
+    ] + select({
+        "//cc:_use_libstdcpp": ["-stdlib=libstdc++"],
+        "//cc:_enable_sysroot": ["-stdlib=libstdc++"],
+        "//conditions:default": ["-stdlib=libstdc++"] if is_cross_compile else ["-stdlib=libc++"],
+    })
 
     link_flags = [
         "--target=" + target_system_name,
         "-lm",
         "-no-canonical-prefixes",
     ]
+
+    link_libcpp = []
+
+    link_libstdcpp = ["-l:libstdc++.a"]
 
     # Similar to link_flags, but placed later in the command line such that
     # unused symbols are not stripped.
@@ -124,20 +131,14 @@ def cc_toolchain_config(
             "-ldl",
         ])
 
-        if use_libstdcpp:
-            link_flags.extend([
-                # Use libstdc++ from the sysroot when cross compiling
-                "-l:libstdc++.a",
-            ])
-        else:
-            link_flags.extend([
-                # Below this line, assumes libc++ & lld
-                "-l:libc++.a",
-                "-l:libc++abi.a",
-                "-l:libunwind.a",
-                # Compiler runtime features.
-                "-rtlib=compiler-rt",
-            ])
+        link_libcpp.extend([
+            # Below this line, assumes libc++ & lld
+            "-l:libc++.a",
+            "-l:libc++abi.a",
+            "-l:libunwind.a",
+            # Compiler runtime features.
+            "-rtlib=compiler-rt",
+        ])
     else:
         # The comments below were copied directly from:
         # https://github.com/grailbio/bazel-toolchain/blob/795d76fd03e0b17c0961f0981a8512a00cba4fa2/toolchain/cc_toolchain_config.bzl#L202
@@ -212,7 +213,11 @@ def cc_toolchain_config(
         dbg_compile_flags = dbg_compile_flags,
         opt_compile_flags = opt_compile_flags,
         cxx_flags = cxx_flags,
-        link_flags = link_flags,
+        link_flags = link_flags + select({
+            "//cc:_use_libstdcpp": link_libstdcpp,
+            "//cc:_enable_sysroot": link_libstdcpp,
+            "//conditions:default": link_libstdcpp if is_cross_compile else link_libcpp,
+        }),
         link_libs = link_libs,
         opt_link_flags = opt_link_flags,
         unfiltered_compile_flags = unfiltered_compile_flags,
