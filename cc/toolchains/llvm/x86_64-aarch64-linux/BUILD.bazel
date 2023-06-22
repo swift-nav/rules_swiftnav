@@ -106,6 +106,10 @@ cc_toolchain_config(
     cxx_builtin_include_directories = [
         "%sysroot%/usr/include",
     ],
+    extra_copts = select({
+        "//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
+        "//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
+    }),
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
     target_libc = "glibc_unknown",
@@ -141,7 +145,7 @@ cc_toolchain(
 )
 
 toolchain(
-    name = "cc-toolchain-x86_64-aarch64-linux",
+    name = "cc-toolchain-aarch64-bullseye-graviton2",
     exec_compatible_with = [
         "@platforms//cpu:x86_64",
         "@platforms//os:linux",
@@ -150,6 +154,25 @@ toolchain(
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
         "//cc/constraints:glibc_2_31",
+        "//cc/constraints:graviton2",
+        "//cc/constraints:llvm_toolchain",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-aarch64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+toolchain(
+    name = "cc-toolchain-aarch64-bullseye-graviton3",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "//cc/constraints:glibc_2_31",
+        "//cc/constraints:graviton3",
         "//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
