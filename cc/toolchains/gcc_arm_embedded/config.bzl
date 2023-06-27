@@ -4,6 +4,7 @@ load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 def _impl(ctx):
     SDK_PATH_PREFIX = "wrappers/arm-none-eabi-{}"
 
+    print(ctx.attr.link_opts)
     tool_paths = [
         tool_path(
             name = "ar",
@@ -94,6 +95,27 @@ def _impl(ctx):
             ],
         ),
         feature(
+            name = "default_link_flags",
+            enabled = True,
+            flag_sets = [
+                flag_set(
+                    actions = [
+                        ACTION_NAMES.cpp_link_executable,
+                        ACTION_NAMES.cpp_link_dynamic_library,
+                        ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+                    ],
+                    flag_groups = ([
+                        flag_group(
+                            flags = [
+                                "-lstdc++",
+                                "-lm",
+                            ] + ctx.attr.link_opts,
+                        ),
+                    ]),
+                ),
+            ],
+        ),
+        feature(
             name = "default_strip_flags",
             enabled = True,
             flag_sets = [
@@ -113,6 +135,8 @@ def _impl(ctx):
         ),
     ]
 
+    print(ctx.attr.link_opts)
+    print("link")
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         features = features,
@@ -131,6 +155,7 @@ config = rule(
     implementation = _impl,
     attrs = {
         "c_opts": attr.string_list(),
+        "link_opts": attr.string_list(),
     },
     provides = [CcToolchainConfigInfo],
 )
