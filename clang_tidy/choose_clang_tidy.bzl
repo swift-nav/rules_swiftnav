@@ -4,10 +4,10 @@ def _choose_clang_tidy(ctx):
     ctx.actions.run_shell(
         outputs = [out],
         command = """
-        if command -v clang-tidy-14 &> /dev/null
+        if PATH=$PATH command -v clang-tidy-14 &> /dev/null
         then
             echo clang-tidy-14 \\"\\$@\\" > {0}
-        elif command -v clang-tidy &> /dev/null
+        elif PATH=$PATH command -v clang-tidy &> /dev/null
         then
             echo clang-tidy \\"\\$@\\" > {0}
         else
