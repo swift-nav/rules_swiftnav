@@ -1,4 +1,4 @@
-load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path")
+load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path", "with_feature_set")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 def _impl(ctx):
@@ -55,24 +55,28 @@ def _impl(ctx):
         ),
     ]
 
+    all_compile_actions = [
+        ACTION_NAMES.assemble,
+        ACTION_NAMES.c_compile,
+        ACTION_NAMES.cpp_compile,
+        ACTION_NAMES.cpp_header_parsing,
+        ACTION_NAMES.cpp_module_codegen,
+        ACTION_NAMES.cpp_module_compile,
+        ACTION_NAMES.clif_match,
+        ACTION_NAMES.linkstamp_compile,
+        ACTION_NAMES.lto_backend,
+        ACTION_NAMES.preprocess_assemble,
+    ]
+
+    opt_feature = feature(name = "opt")
+
     features = [
         feature(
             name = "default_compile_actions",
             enabled = True,
             flag_sets = [
                 flag_set(
-                    actions = [
-                        ACTION_NAMES.assemble,
-                        ACTION_NAMES.c_compile,
-                        ACTION_NAMES.cpp_compile,
-                        ACTION_NAMES.cpp_header_parsing,
-                        ACTION_NAMES.cpp_module_codegen,
-                        ACTION_NAMES.cpp_module_compile,
-                        ACTION_NAMES.clif_match,
-                        ACTION_NAMES.linkstamp_compile,
-                        ACTION_NAMES.lto_backend,
-                        ACTION_NAMES.preprocess_assemble,
-                    ],
+                    actions = all_compile_actions,
                     flag_groups = ([
                         flag_group(
                             flags = [
@@ -90,6 +94,15 @@ def _impl(ctx):
                             ] + ctx.attr.c_opts,
                         ),
                     ]),
+                ),
+                flag_set(
+                    actions = all_compile_actions,
+                    flag_groups = ([
+                        flag_group(
+                            flags = ["-O2", "-g"],
+                        ),
+                    ]),
+                    with_features = [with_feature_set(features = ["opt"])],
                 ),
             ],
         ),
@@ -132,6 +145,7 @@ def _impl(ctx):
                 ),
             ],
         ),
+        opt_feature,
     ]
 
     return cc_common.create_cc_toolchain_config_info(
