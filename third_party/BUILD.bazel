@@ -9,6 +9,7 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 
 bool_flag(
     name = "enable_mkl",
@@ -17,9 +18,17 @@ bool_flag(
 )
 
 config_setting(
-    name = "_enable_mkl",
+    name = "enable_mkl_config",
     flag_values = {":enable_mkl": "true"},
     visibility = ["//visibility:public"],
+)
+
+selects.config_setting_group(
+    name = "_enable_mkl",
+    match_all = [
+        ":enable_mkl_config",
+        "@platforms//cpu:x86_64",
+    ],
 )
 
 exports_files(
