@@ -430,6 +430,11 @@ def swift_cc_binary(**kwargs):
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
+    kwargs["env"] = select({
+        Label("//cc:_enable_symbolizer"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
+        "//conditions:default": {},
+    })
+
     native.cc_binary(**kwargs)
 
 def swift_c_tool(**kwargs):
@@ -585,4 +590,13 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["name"] = name
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+    kwargs["env"] = select({
+        Label("//cc:_enable_symbolizer"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"},
+        "//conditions:default": {},
+    })
+    kwargs["data"] = kwargs.get("data", []) + select({
+        Label("//cc:_enable_symbolizer"): ["@x86_64-linux-llvm//:symbolizer"],
+        "//conditions:default": [],
+    })
+
     native.cc_test(**kwargs)

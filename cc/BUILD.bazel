@@ -96,6 +96,18 @@ config_setting(
 )
 
 bool_flag(
+    name = "enable_symbolizer",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_symbolizer",
+    flag_values = {":enable_symbolizer": "true"},
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
     name = "enable_sysroot",
     build_setting_default = False,
     visibility = ["//visibility:public"],
