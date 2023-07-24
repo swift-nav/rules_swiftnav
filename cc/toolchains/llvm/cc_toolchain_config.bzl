@@ -29,7 +29,6 @@ def cc_toolchain_config(
         target_system_name,
         extra_copts = [],
         builtin_sysroot = None,
-        extra_copts = [],
         is_darwin = False):
     if not is_target_triplet(host_system_name):
         fail(host_system_name + " is not a target tripplet")
