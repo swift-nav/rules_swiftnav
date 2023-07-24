@@ -41,6 +41,18 @@ constraint_value(
     constraint_setting = ":libc",
 )
 
+constraint_setting(name = "graviton")
+
+constraint_value(
+    name = "graviton2",
+    constraint_setting = ":graviton",
+)
+
+constraint_value(
+    name = "graviton3",
+    constraint_setting = ":graviton",
+)
+
 constraint_value(
     name = "cortexa7t2hf-neon-poky",
     constraint_setting = "@platforms//cpu",
