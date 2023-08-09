@@ -142,7 +142,7 @@ def gcc_arm_embedded_toolchain():
         name = "darwin_gcc_arm_embedded_toolchain",
         build_file = "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
         strip_prefix = "gcc-arm-none-eabi-10.3-2021.10",
-        url = DARWIN_LINUX_GCC_ARM_EMBEDDED,
+        url = DARWIN_GCC_ARM_EMBEDDED,
     )
 
 def register_gcc_arm_embedded_toolchain():
