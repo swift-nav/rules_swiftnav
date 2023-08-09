@@ -141,6 +141,7 @@ def gcc_arm_embedded_toolchain():
     http_archive(
         name = "darwin_gcc_arm_embedded_toolchain",
         build_file = "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
+        sha256 = "fb613dacb25149f140f73fe9ff6c380bb43328e6bf813473986e9127e2bc283b",
         strip_prefix = "gcc-arm-none-eabi-10.3-2021.10",
         url = DARWIN_GCC_ARM_EMBEDDED,
     )
