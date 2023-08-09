@@ -13,8 +13,8 @@ format_all() {
         cp $CLANG_FORMAT_CONFIG .
     fi
     git describe --tags --abbrev=0 --always \
-    | xargs -I % git diff --diff-filter=ACMRTUXB --name-only --line-prefix=`git rev-parse --show-toplevel`/ % -- '*.[ch]' '*.cpp' '*.cc' '*.hpp' \
-    | xargs $CLANG_FORMAT_BIN -i
+    | xargs -rI % git diff --diff-filter=ACMRTUXB --name-only --line-prefix=`git rev-parse --show-toplevel`/ % -- '*.[ch]' '*.cpp' '*.cc' '*.hpp' \
+    | xargs -r $CLANG_FORMAT_BIN -i
 }
 
 check_file() {
