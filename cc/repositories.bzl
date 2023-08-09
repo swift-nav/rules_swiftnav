@@ -24,7 +24,9 @@ ARM_LINUX_MUSLEABIHF = "https://github.com/swift-nav/swift-toolchains/releases/d
 
 X86_64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/x86_64-linux-musl-cross.tar.gz"
 
-GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
+DARWIN_GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2"
+
+X86_64_LINUX_GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
 
 def swift_cc_toolchain():
     maybe(
@@ -129,11 +131,18 @@ def register_x86_64_linux_musl_toolchain():
 
 def gcc_arm_embedded_toolchain():
     http_archive(
-        name = "gcc_arm_embedded_toolchain",
+        name = "x86_64_linux_gcc_arm_embedded_toolchain",
+        build_file = "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
+        strip_prefix = "gcc-arm-none-eabi-10.3-2021.10",
+        url = X86_64_LINUX_GCC_ARM_EMBEDDED,
+    )
+
+    http_archive(
+        name = "darwin_gcc_arm_embedded_toolchain",
         build_file = "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
         sha256 = "97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3",
         strip_prefix = "gcc-arm-none-eabi-10.3-2021.10",
-        url = GCC_ARM_EMBEDDED,
+        url = X86_64_LINUX_GCC_ARM_EMBEDDED,
     )
 
 def register_gcc_arm_embedded_toolchain():
