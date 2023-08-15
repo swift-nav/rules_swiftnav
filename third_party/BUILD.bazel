@@ -10,6 +10,14 @@
 
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 
+constraint_setting(name = "intel")
+
+constraint_value(
+    name = "intel_mkl",
+    constraint_setting = ":intel",
+    visibility = ["//visibility:public"],
+)
+
 bool_flag(
     name = "enable_mkl",
     build_setting_default = False,

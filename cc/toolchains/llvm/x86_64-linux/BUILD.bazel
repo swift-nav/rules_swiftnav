@@ -177,3 +177,19 @@ toolchain(
     toolchain = ":cc-clang-x86_64-linux",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
+
+toolchain(
+    name = "cc-toolchain-intel-mkl",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+        "//third_party:intel_mkl",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
