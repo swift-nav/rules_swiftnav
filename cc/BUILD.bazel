@@ -110,12 +110,18 @@ config_setting(
 
 selects.config_setting_group(
     name = "_enable_symbolizer_x86_64_linux",
-    match_all = [":_enable_symbolizer", "@platforms//os:linux"],
+    match_all = [
+        ":_enable_symbolizer",
+        "@platforms//os:linux",
+    ],
 )
 
 selects.config_setting_group(
     name = "_enable_symbolizer_x86_64_darwin",
-    match_all = [":_enable_symbolizer", "@platforms//os:macos"],
+    match_all = [
+        ":_enable_symbolizer",
+        "@platforms//os:macos",
+    ],
 )
 
 bool_flag(
