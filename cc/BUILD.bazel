@@ -8,6 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 exports_files(
@@ -105,6 +106,16 @@ config_setting(
     name = "_enable_symbolizer",
     flag_values = {":enable_symbolizer": "true"},
     visibility = ["//visibility:public"],
+)
+
+selects.config_setting_group(
+    name = "_enable_symbolizer_x86_64_linux",
+    match_all = [":_enable_symbolizer", "@platforms//os:linux"],
+)
+
+selects.config_setting_group(
+    name = "_enable_symbolizer_x86_64_darwin",
+    match_all = [":_enable_symbolizer", "@platforms//os:macos"],
 )
 
 bool_flag(
