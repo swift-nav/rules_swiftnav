@@ -384,6 +384,17 @@ def swift_c_binary(**kwargs):
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
+    kwargs["env"] = select({
+        Label("//cc:_enable_symbolizer_x86_64_linux"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"},
+        Label("//cc:_enable_symbolizer_x86_64_darwin"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
+        "//conditions:default": {},
+    })
+
+    kwargs["data"] = kwargs.get("data", []) + select({
+        Label("//cc:_enable_symbolizer"): ["@x86_64-linux-llvm//:symbolizer"],
+        "//conditions:default": [],
+    })
+
     native.cc_binary(**kwargs)
 
 def swift_cc_binary(**kwargs):
@@ -431,8 +442,14 @@ def swift_cc_binary(**kwargs):
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     kwargs["env"] = select({
-        Label("//cc:_enable_symbolizer"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
+        Label("//cc:_enable_symbolizer_x86_64_linux"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"},
+        Label("//cc:_enable_symbolizer_x86_64_darwin"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
         "//conditions:default": {},
+    })
+
+    kwargs["data"] = kwargs.get("data", []) + select({
+        Label("//cc:_enable_symbolizer"): ["@x86_64-linux-llvm//:symbolizer"],
+        "//conditions:default": [],
     })
 
     native.cc_binary(**kwargs)
@@ -473,6 +490,17 @@ def swift_c_tool(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["env"] = select({
+        Label("//cc:_enable_symbolizer_x86_64_linux"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"},
+        Label("//cc:_enable_symbolizer_x86_64_darwin"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
+        "//conditions:default": {},
+    })
+
+    kwargs["data"] = kwargs.get("data", []) + select({
+        Label("//cc:_enable_symbolizer"): ["@x86_64-linux-llvm//:symbolizer"],
+        "//conditions:default": [],
+    })
 
     native.cc_binary(**kwargs)
 
@@ -515,6 +543,17 @@ def swift_cc_tool(**kwargs):
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
+
+    kwargs["env"] = select({
+        Label("//cc:_enable_symbolizer_x86_64_linux"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"},
+        Label("//cc:_enable_symbolizer_x86_64_darwin"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
+        "//conditions:default": {},
+    })
+
+    kwargs["data"] = kwargs.get("data", []) + select({
+        Label("//cc:_enable_symbolizer"): ["@x86_64-linux-llvm//:symbolizer"],
+        "//conditions:default": [],
+    })
 
     native.cc_binary(**kwargs)
 
