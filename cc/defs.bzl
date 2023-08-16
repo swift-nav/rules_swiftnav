@@ -99,15 +99,17 @@ def _create_hdrs(**kwargs):
         visibility = kwargs.get("visibility", ["//visibility:private"]),
     )
 
-def _symbolizer_env():
+def _symbolizer_env(val):
     return select({
-        Label("//cc:_enable_symbolizer_x86_64_linux"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"},
-        Label("//cc:_enable_symbolizer_x86_64_darwin"): {"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"},
+        # The + operator is not supported on dict and select types so we need to be
+        # clever here.
+        Label("//cc:_enable_symbolizer_x86_64_linux"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"}),
+        Label("//cc:_enable_symbolizer_x86_64_darwin"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"}),
         "//conditions:default": {},
     })
 
 def _symbolizer_data():
-    select({
+    return select({
         Label("//cc:_enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
         Label("//cc:_enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
         "//conditions:default": [],
@@ -398,7 +400,7 @@ def swift_c_binary(**kwargs):
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
-    kwargs["env"] = kwargs.get("env", []) + _symbolizer_env()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
@@ -448,7 +450,7 @@ def swift_cc_binary(**kwargs):
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
-    kwargs["env"] = kwargs.get("env", []) + _symbolizer_env()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
@@ -493,7 +495,7 @@ def swift_c_tool(**kwargs):
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
-    kwargs["env"] = kwargs.get("env", []) + _symbolizer_env()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
     native.cc_binary(**kwargs)
 
@@ -539,7 +541,7 @@ def swift_cc_tool(**kwargs):
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
-    kwargs["env"] = kwargs.get("env", []) + _symbolizer_env()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
     native.cc_binary(**kwargs)
 
@@ -612,7 +614,7 @@ def swift_cc_test(name, type, **kwargs):
 
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
-    kwargs["env"] = kwargs.get("env", []) + _symbolizer_env()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
