@@ -103,15 +103,15 @@ def _symbolizer_env(val):
     return select({
         # The + operator is not supported on dict and select types so we need to be
         # clever here.
-        Label("//cc:_enable_symbolizer_x86_64_linux"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"}),
-        Label("//cc:_enable_symbolizer_x86_64_darwin"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"}),
+        Label("//cc:enable_symbolizer_x86_64_linux"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"}),
+        Label("//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"}),
         "//conditions:default": {},
     })
 
 def _symbolizer_data():
     return select({
-        Label("//cc:_enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
-        Label("//cc:_enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
+        Label("//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
+        Label("//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
         "//conditions:default": [],
     })
 
