@@ -117,9 +117,6 @@ def arm_linux_musleabihf_toolchain():
 def register_arm_linux_musleabihf_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/armhf:toolchain")
 
-def register_arm_linux_musleabihf_static_toolchain():
-    native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/armhf_static:toolchain")
-
 def x86_64_linux_musl_toolchain():
     http_archive(
         name = "x86_64-linux-musl",

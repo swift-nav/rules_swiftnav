@@ -101,16 +101,6 @@ platform(
 )
 
 platform(
-    name = "arm_linux_musleabihf_static",
-    constraint_values = [
-        "@platforms//os:linux",
-        "@platforms//cpu:arm",
-        "//cc/constraints:musl-static",
-    ],
-    visibility = ["//visibility:public"],
-)
-
-platform(
     name = "x86_64_linux_musl",
     constraint_values = [
         "@platforms//os:linux",

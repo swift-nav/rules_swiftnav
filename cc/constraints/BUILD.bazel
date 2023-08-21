@@ -37,11 +37,6 @@ constraint_value(
 )
 
 constraint_value(
-    name = "musl-static",
-    constraint_setting = ":libc",
-)
-
-constraint_value(
     name = "glibc_2_31",
     constraint_setting = ":libc",
 )
