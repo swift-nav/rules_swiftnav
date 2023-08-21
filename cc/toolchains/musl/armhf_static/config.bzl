@@ -112,7 +112,9 @@ def _impl(ctx):
                                 "-Wl,--hash-style=gnu",
                                 "-Wl,--as-needed",
                                 "-lstdc++",
-                                "-lm", "-lc", "-latomic"
+                                "-lm",
+                                "-lc",
+                                "-latomic"
                             ],
                         ),
                     ]),
