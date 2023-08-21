@@ -114,7 +114,7 @@ def _impl(ctx):
                                 "-lstdc++",
                                 "-lm",
                                 "-lc",
-                                "-latomic"
+                                "-latomic",
                             ],
                         ),
                     ]),
