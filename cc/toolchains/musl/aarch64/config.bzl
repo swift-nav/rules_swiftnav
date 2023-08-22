@@ -106,6 +106,7 @@ def _impl(ctx):
                 ),
             ],
         ),
+        opt_feature,
         feature(
             name = "default_link_flags",
             enabled = True,
