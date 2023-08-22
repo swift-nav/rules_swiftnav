@@ -7,6 +7,6 @@ if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
 fi
 
 NAME=$(basename "$0")
-TOOLCHAIN_BINDIR=external/gcc_arm_embedded_toolchain/bin
+TOOLCHAIN_BINDIR=external/x86_64_linux_gcc_arm_embedded_toolchain/bin
 
 exec "${TOOLCHAIN_BINDIR}"/"${NAME}" "$@"
