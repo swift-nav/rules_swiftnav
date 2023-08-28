@@ -1,0 +1,4 @@
+Checks: >
+  -*,
+  misc-static-assert
+

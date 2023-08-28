@@ -16,6 +16,30 @@ sh_binary(
 )
 
 filegroup(
+  name = "clang_tidy_config_internal",
+  srcs = [".clang-tidy-internal"],
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "clang_tidy_config_portable",
+  srcs = [".clang-tidy-portable"],
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "clang_tidy_config_prod",
+  srcs = [".clang-tidy-prod"],
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "clang_tidy_config_safe",
+  srcs = [".clang-tidy-safe"],
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
     name = "clang_tidy_config_default",
     srcs = [".clang-tidy"],
 )

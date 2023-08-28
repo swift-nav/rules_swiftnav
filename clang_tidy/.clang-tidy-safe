@@ -1,0 +1,5 @@
+Checks: >
+  -*,
+  misc-static-assert,
+  clang-analyzer-security.FloatLoopCounter
+
