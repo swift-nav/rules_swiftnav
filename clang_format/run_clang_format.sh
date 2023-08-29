@@ -12,6 +12,17 @@ format_all() {
         echo ".clang-format file not found. Bazel will copy the default .clang-format file."
         cp $CLANG_FORMAT_CONFIG .
     fi
+    git ls-files '*.[ch]' '*.cpp' '*.cc' '*.hpp' | xargs -r $CLANG_FORMAT_BIN -i
+}
+
+format_diff() {
+    CLANG_FORMAT_CONFIG=$(realpath $1)
+
+    cd $BUILD_WORKSPACE_DIRECTORY
+    if ! test -f .clang-format; then
+        echo ".clang-format file not found. Bazel will copy the default .clang-format file."
+        cp $CLANG_FORMAT_CONFIG .
+    fi
     git describe --tags --abbrev=0 --always \
     | xargs -rI % git diff --diff-filter=ACMRTUXB --name-only --line-prefix=`git rev-parse --show-toplevel`/ % -- '*.[ch]' '*.cpp' '*.cc' '*.hpp' \
     | xargs -r $CLANG_FORMAT_BIN -i
@@ -34,7 +45,9 @@ ARG=$1
 CLANG_FORMAT_BIN=$(realpath $2)
 shift 2
 
-if [ "$ARG" == "format_all" ]; then
+if [ "$ARG" == "format_diff" ]; then
+    format_diff "$@"
+elif [ "$ARG" == "format_all" ]; then
     format_all "$@"
 elif [ "$ARG" == "check_file" ]; then
     check_file "$@"
