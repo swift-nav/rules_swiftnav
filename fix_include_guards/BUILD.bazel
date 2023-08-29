@@ -1,0 +1,26 @@
+filegroup(
+    name = "_fix_include_guards_bin",
+    srcs = select({
+        "//conditions:default": [":fix_include_guards_bin"],
+    }),
+    visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "fix_include_guards",
+    srcs = [
+        "run_fix_include_guards.sh",
+    ],
+    args = [
+        "check",
+    ],
+    data = [
+        ":_fix_include_guards_bin",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+exports_files(
+    glob(["*.bzl"]) + ["fix_include_guards.py"] + ["run_fix_include_guards.sh"],
+    visibility = ["//visibility:public"],
+)
