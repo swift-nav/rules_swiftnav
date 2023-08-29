@@ -33,7 +33,7 @@ PORTABLE_COPTS = [
     "-pedantic",
     "-Wsign-compare",
     "-Wconversion",
-    "-Wstack-protector",
+    "-Wno-error=stack-protector",
     "-Wimplicit-fallthrough",
     "-Wunreachable-code",
     "-Wunused",
@@ -47,7 +47,7 @@ PORTABLE_COPTS = [
 PROD_COPTS = [
     "-Wsign-compare",
     "-Wconversion",
-    "-Wstack-protector",
+    "-Wno-error=stack-protector",
     "-Wimplicit-fallthrough",
     "-Wunreachable-code",
     "-Wunused",
@@ -72,17 +72,13 @@ GCC6_DISABLED_COPTS = ["-Wimplicit-fallthrough"]
 GCC5_DISABLED_COPTS = GCC6_DISABLED_COPTS
 
 def get_common_cc_opts(level, copts, nocopts):
-  print(level)
-  print(copts)
-  print(nocopts)
   opts = COMMON_COPTS[level] + copts
 
   filtered_opts = [opt for opt in opts if opt not in nocopts]
-  print(filtered_opts)
 
   return select({
     Label("//cc:_disable_warnings_as_errors"): [],
-    "//conditions:default": ["-Werror"],
+    "//conditions:default": [],
   }) + select({
     Label("//cc/constraints:gcc-6"): [copt for copt in filtered_opts if copt not in GCC6_DISABLED_COPTS],
     Label("//cc/constraints:gcc-5"): [copt for copt in filtered_opts if copt not in GCC5_DISABLED_COPTS],

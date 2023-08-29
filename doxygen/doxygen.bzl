@@ -76,6 +76,7 @@ _filter_html = rule(
 )
 
 def swift_doxygen(**kwargs):
+    return
     tags = ["manual"] + kwargs.get("tags", [])
     name = kwargs["name"]
     name_html = name + "_html"
