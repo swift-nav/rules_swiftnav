@@ -33,6 +33,23 @@ sh_binary(
         "run_clang_format.sh",
     ],
     args = [
+        "format_diff",
+        "$(location :_clang_format_bin)",
+        "$(location :clang_format_config)",
+    ],
+    data = [
+        ":_clang_format_bin",
+        ":clang_format_config",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "clang_format_all",
+    srcs = [
+        "run_clang_format.sh",
+    ],
+    args = [
         "format_all",
         "$(location :_clang_format_bin)",
         "$(location :clang_format_config)",
