@@ -9,7 +9,7 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 load(
-    "@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
+    "unix_cc_toolchain_config.bzl",
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
 load("//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
