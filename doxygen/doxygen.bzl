@@ -20,6 +20,10 @@ def _swift_doxygen_impl(ctx):
 
     config = configure_file_impl(ctx, vars, ctx.attr.name + "_Doxyfile")[0].files.to_list()[0]
 
+    input_dir = ""
+    if "PROJECT_SOURCE_DIR" in vars:
+        input_dir = vars["PROJECT_SOURCE_DIR"]
+
     ctx.actions.run_shell(
         inputs = [config] + ctx.files.deps,
         outputs = [doxygen_out],
@@ -36,9 +40,10 @@ def _swift_doxygen_impl(ctx):
         sed -i "s|@DOXYGEN_DOT_FOUND@|$DOXYGEN_DOT_FOUND|g" {config}
         sed -i "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" {config}
         sed -i "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" {config}
+        sed -i "s|@INPUT_DIR@|{input_dir}|g" {config}
 
         PATH=$PATH doxygen {config}
-        """.format(config = config.path),
+        """.format(config = config.path, input_dir = input_dir),
     )
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
