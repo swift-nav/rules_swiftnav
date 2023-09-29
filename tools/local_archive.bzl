@@ -1,7 +1,7 @@
 def _impl(repository_ctx):
     repository_ctx.extract(
         archive = repository_ctx.attr.src,
-        stripPrefix = repository_ctx.attr.strip_prefix
+        stripPrefix = repository_ctx.attr.strip_prefix,
     )
     repository_ctx.file(
         "BUILD.bazel",
