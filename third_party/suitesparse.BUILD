@@ -16,6 +16,8 @@ cc_library(
         "SuiteSparse_config/",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -50,6 +52,8 @@ cc_library(
         "AMD/Include",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -98,6 +102,8 @@ cc_library(
         "CAMD/Include",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -134,6 +140,8 @@ cc_library(
         "COLAMD/Include",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -160,6 +168,8 @@ cc_library(
         "CCOLAMD/Include",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -234,6 +244,8 @@ cc_library(
         "CHOLMOD/SuiteSparse_metis/GKlib",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -300,6 +312,8 @@ cc_library(
         "CHOLMOD/SuiteSparse_metis/include/",
     ],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -389,6 +403,8 @@ cc_library(
     ],
     includes = ["CHOLMOD/Include/"],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
@@ -569,6 +585,8 @@ cc_library(
     ],
     includes = ["SPQR/Include/"],
     linkopts = [
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
