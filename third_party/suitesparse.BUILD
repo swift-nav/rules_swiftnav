@@ -16,13 +16,27 @@ cc_library(
         "SuiteSparse_config/",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+        # The linker needs to be given the explicit search paths when building against a sysroot.
+        # TODO(isaac) - Figure out how we can remove this.
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -52,13 +66,25 @@ cc_library(
         "AMD/Include",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     textual_hdrs = [
         "AMD/Source/amd_1.c",
         "AMD/Source/amd_2.c",
@@ -102,13 +128,25 @@ cc_library(
         "CAMD/Include",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     textual_hdrs = [
         "CAMD/Source/camd_1.c",
         "CAMD/Source/camd_2.c",
@@ -140,13 +178,25 @@ cc_library(
         "COLAMD/Include",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     textual_hdrs = [
         "COLAMD/Source/colamd.c",
     ],
@@ -168,13 +218,25 @@ cc_library(
         "CCOLAMD/Include",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     textual_hdrs = [
         "CCOLAMD/Source/ccolamd.c",
     ],
@@ -244,13 +306,25 @@ cc_library(
         "CHOLMOD/SuiteSparse_metis/GKlib",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     deps = ["suitesparseconfig"],
 )
 
@@ -312,13 +386,25 @@ cc_library(
         "CHOLMOD/SuiteSparse_metis/include/",
     ],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         "GKlib",
         "suitesparseconfig",
@@ -403,13 +489,25 @@ cc_library(
     ],
     includes = ["CHOLMOD/Include/"],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     textual_hdrs = [
         "CHOLMOD/Cholesky/cholmod_amd.c",
         "CHOLMOD/Cholesky/cholmod_analyze.c",
@@ -585,13 +683,25 @@ cc_library(
     ],
     includes = ["SPQR/Include/"],
     linkopts = [
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
-        "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
         "-lm",
         "-lpthread",
         "-lblas",
         "-llapack",
-    ],
+    ] + select({
+        "@rules_swiftnav//cc/constraints:aarch64_debian": [
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/lapack",
+            "-Lexternal/aarch64-sysroot/usr/lib/aarch64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc/constraints:x86_64_debian": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "@rules_swiftnav//cc:_enable_sysroot": [
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
+            "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
+        ],
+        "//conditions:default": [],
+    }),
     deps = [
         "cholmod",
         "suitesparseconfig",

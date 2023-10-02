@@ -99,3 +99,19 @@ selects.config_setting_group(
         ":unspecified_arm",
     ],
 )
+
+selects.config_setting_group(
+    name = "aarch64_debian",
+    match_all = [
+        "@platforms//cpu:aarch64",
+        "glibc_2_31",
+    ],
+)
+
+selects.config_setting_group(
+    name = "x86_64_debian",
+    match_all = [
+        "@platforms//cpu:x86_64",
+        "glibc_2_31",
+    ],
+)
