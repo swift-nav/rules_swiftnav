@@ -220,6 +220,8 @@ def swift_c_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+
     native.cc_library(**kwargs)
 
 def swift_cc_library(**kwargs):
@@ -271,6 +273,8 @@ def swift_cc_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+
     native.cc_library(**kwargs)
 
 def swift_c_tool_library(**kwargs):
@@ -312,6 +316,8 @@ def swift_c_tool_library(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
 
     native.cc_library(**kwargs)
 
@@ -358,6 +364,8 @@ def swift_cc_tool_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+
     native.cc_library(**kwargs)
 
 def swift_c_binary(**kwargs):
@@ -403,6 +411,8 @@ def swift_c_binary(**kwargs):
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
+
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
 
     native.cc_binary(**kwargs)
 
@@ -567,6 +577,8 @@ def swift_cc_test_library(**kwargs):
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
 
     native.cc_library(**kwargs)
 
