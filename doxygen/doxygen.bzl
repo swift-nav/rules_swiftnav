@@ -89,11 +89,14 @@ def swift_doxygen(**kwargs):
     tags = ["manual"] + kwargs.get("tags", [])
     name = kwargs["name"]
     name_html = name + "_html"
+    name_doxygen = name + "_doxygen"
     name_zip = name + "_zip"
 
     kwargs["tags"] = tags
 
     _swift_doxygen(**kwargs)
+
+    print("name_doxygen is: " + name_doxygen)
 
     _filter_html(
         name = name_html,
@@ -104,8 +107,8 @@ def swift_doxygen(**kwargs):
 
     pkg_zip(
         name = name_zip,
-        srcs = [name_html],
+        srcs = [name_doxygen],
         tags = tags,
         package_file_name = name + ".zip",
-        strip_prefix = name_html,
+        strip_prefix = name_doxygen,
     )
