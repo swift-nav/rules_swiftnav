@@ -34,6 +34,8 @@ filegroup(
     # for aarch64-darwin.
     srcs = glob([
         "bin/ld.lld",
+        # Required on mac
+        "bin/ld64.lld",
     ]),
 )
 

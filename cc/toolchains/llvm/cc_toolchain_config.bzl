@@ -105,8 +105,9 @@ def cc_toolchain_config(
     if is_darwin:
         # Mach-O support in lld is experimental, so on mac
         # we use the system linker.
-        use_lld = False
+        use_lld = True
         link_flags.extend([
+            "-fuse-ld=lld",
             "-headerpad_max_install_names",
         ])
     else:
@@ -118,7 +119,7 @@ def cc_toolchain_config(
             "-Wl,-z,relro,-z,now",
         ])
 
-    if use_lld:
+    if not is_darwin:
         link_flags.extend([
             # To support libunwind
             # It's ok to assume posix when using this toolchain
