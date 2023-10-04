@@ -13,7 +13,7 @@ load(
 )
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 
-TOOLCHAIN = "@rules_coverity//coverity/private:toolchain_type"
+TOOLCHAIN = "@rules_swiftnav//coverity/private:toolchain_type"
 
 
 def _gen_script_impl(ctx):
@@ -74,7 +74,7 @@ gen_script = rule(
             default=Label("@bazel_tools//tools/cpp:current_cc_toolchain")
         ),
         "_agent_jar": attr.label(
-            default=Label("@rules_coverity//coverity/private:cov-bazel-agent.jar"),
+            default=Label("@rules_swiftnav//coverity/private:cov-bazel-agent.jar"),
             allow_single_file=True,
         ),
     },
