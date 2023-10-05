@@ -633,6 +633,7 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
+
     # should we just always build test binaries statically?
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
     kwargs["name"] = name
