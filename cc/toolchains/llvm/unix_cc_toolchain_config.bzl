@@ -1449,8 +1449,8 @@ cc_toolchain_config = rule(
         "supports_start_end_lib": attr.bool(),
         "builtin_sysroot": attr.string(),
         "_xcode_config": attr.label(default = configuration_field(
-                fragment = "apple",
-                name = "xcode_config_label",
+            fragment = "apple",
+            name = "xcode_config_label",
         )),
     },
     fragments = ["apple"],
