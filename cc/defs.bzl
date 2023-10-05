@@ -77,6 +77,12 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
+def _link_static(linkstatic):
+    return select({
+        Label("//cc:_enable_shared"): True,
+        "//conditions:default": linkstatic,
+    })
+
 # Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
     return select({
@@ -220,7 +226,7 @@ def swift_c_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -273,7 +279,7 @@ def swift_cc_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -317,7 +323,7 @@ def swift_c_tool_library(**kwargs):
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
 
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -364,7 +370,7 @@ def swift_cc_tool_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -412,7 +418,7 @@ def swift_c_binary(**kwargs):
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_binary(**kwargs)
 
@@ -578,7 +584,7 @@ def swift_cc_test_library(**kwargs):
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -627,7 +633,8 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
-    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    # should we just always build test binaries statically?
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
     kwargs["name"] = name
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()

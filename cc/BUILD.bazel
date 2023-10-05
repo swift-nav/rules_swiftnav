@@ -55,6 +55,18 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "enable_shared",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_shared",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
 # Disable warnings as errors with --@rules_swiftnav//cc:warnings_as_errors=false
 bool_flag(
     name = "warnings_as_errors",
