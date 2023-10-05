@@ -22,6 +22,10 @@ cmake(
         "CMAKE_INSTALL_LIBDIR": "lib",
         "HAVE_SUBUNIT": "0",
     },
+    generate_args = [
+        "-GNinja",
+        "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0",
+    ],
     lib_source = ":srcs",
     linkopts = select({
         "@bazel_tools//src/conditions:darwin": ["-lpthread"],
@@ -30,10 +34,6 @@ cmake(
             "-lrt",
         ],
     }),
-    generate_args = [
-        "-GNinja",
-        "-DCMAKE_OSX_DEPLOYMENT_TARGET=13.0",
-    ],
     out_static_libs = select({
         "@bazel_tools//src/conditions:windows": ["check.lib"],
         "//conditions:default": ["libcheck.a"],
