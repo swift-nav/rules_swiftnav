@@ -63,7 +63,7 @@ bool_flag(
 
 config_setting(
     name = "_enable_shared",
-    build_setting_default = False,
+    flag_values = {":enable_shared": "true"},
     visibility = ["//visibility:public"],
 )
 
