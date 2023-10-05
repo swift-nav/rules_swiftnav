@@ -77,9 +77,9 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
-def _link_static(linkstatic = False):
+def _link_static(linkstatic = True):
     return select({
-        Label("//cc:_enable_shared"): True,
+        Label("//cc:_enable_shared"): False,
         "//conditions:default": linkstatic,
     })
 

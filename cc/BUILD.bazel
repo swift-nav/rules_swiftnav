@@ -16,7 +16,7 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
-# Disable tests and test libraries with --@rules_swiftnav//:disable_test=true
+# Disable tests and test libraries with --@rules_swiftnav///cc:disable_test=true
 bool_flag(
     name = "disable_tests",
     build_setting_default = False,
@@ -29,7 +29,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-# Enable exceptions with --@rules_swiftnav//:enable_exceptions=true
+# Enable exceptions with --@rules_swiftnav//cc:enable_exceptions=true
 bool_flag(
     name = "enable_exceptions",
     build_setting_default = False,
@@ -42,7 +42,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-# Enable rtti with --@rules_swiftnav//:enable_exceptions=true
+# Enable rtti with --@rules_swiftnav//cc:enable_exceptions=true
 bool_flag(
     name = "enable_rtti",
     build_setting_default = False,
@@ -55,6 +55,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Enable shared linking with --@rules_swiftnav//cc:enable_shared=true
 bool_flag(
     name = "enable_shared",
     build_setting_default = False,
@@ -87,21 +88,21 @@ string_flag(
     visibility = ["//visibility:public"],
 )
 
-# Enable with --@rules_swiftnav//:cxx_standard=17
+# Enable with --@rules_swiftnav//cc:cxx_standard=17
 config_setting(
     name = "cxx17",
     flag_values = {":cxx_standard": "17"},
     visibility = ["//visibility:public"],
 )
 
-# Enable with --@rules_swiftnav//:cxx_standard=20
+# Enable with --@rules_swiftnav//cc:cxx_standard=20
 config_setting(
     name = "cxx20",
     flag_values = {":cxx_standard": "20"},
     visibility = ["//visibility:public"],
 )
 
-# Enable with --@rules_swiftnav//:cxx_standard=23
+# Enable with --@rules_swiftnav//cc:cxx_standard=23
 config_setting(
     name = "cxx23",
     flag_values = {":cxx_standard": "23"},
