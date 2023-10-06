@@ -37,9 +37,9 @@ cc_library(
             "/Zc:preprocessor-",
         ],
         "//conditions:default": [
-            "-Wno-error=implicit-function-declaration",
             "-Wno-format",
             "-Wno-incompatible-pointer-types-discards-qualifiers",
+            "-Wno-implicit-function-declerations",
         ],
     }),
     includes = [
