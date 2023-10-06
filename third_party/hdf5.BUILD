@@ -38,6 +38,8 @@ cc_library(
         ],
         "//conditions:default": [
             "-Wno-error=implicit-function-declaration",
+            "-Wno-format",
+            "-Wno-incompatible-pointer-types-discards-qualifiers",
         ],
     }),
     includes = [
