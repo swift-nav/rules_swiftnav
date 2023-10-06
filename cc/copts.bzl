@@ -3,8 +3,8 @@ DEFAULT_COPTS = [
     #    clang only - reenable when we move to features.
     #    "-Wthread-safety",
     #    "-Wunused-but-set-parameter",
+    #    "-Wself-assign",
     "-Wno-free-nonheap-object",
-    "-Wself-assign",
     "-Wcast-align",
     "-Wcast-qual",
     "-Wchar-subscripts",
