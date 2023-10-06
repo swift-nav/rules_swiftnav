@@ -77,6 +77,7 @@ cc_library(
         "cxx4/test_utilities.h",
     ],
     includes = ["cxx4"],
+    copts = ["-Wno-mismatched-new-delete"],
     visibility = ["//visibility:public"],
     deps = [
         "@netcdf-c",
