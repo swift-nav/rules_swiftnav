@@ -13,7 +13,7 @@ shift
 
 # .clang-tidy config file has to be placed in the current working directory
 if [ ! -f ".clang-tidy" ]; then
-    ln -s $CONFIG .clang-tidy
+	ln -s $CONFIG .clang-tidy
 fi
 
 # clang-tidy doesn't create a patchfile if there are no errors.
@@ -22,6 +22,7 @@ fi
 touch $OUTPUT
 truncate -s 0 $OUTPUT
 
-"${CLANG_TIDY_BIN}" "$@"
+"${CLANG_TIDY_BIN}" "$@" | sed "s;.*execroot/[^/]*/;;"
+sed -i "s;.*execroot/[^/]*/;;" $OUTPUT
 
 test ! -s $OUTPUT
