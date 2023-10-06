@@ -90,7 +90,7 @@ swift_no_default_warnings = feature(
                 "-Wno-absolute-value",
                 "-Wno-format",
                 "-Wno-incompatible-pointer-types-discards-qualifiers",
-                "-Wno-implicit-const-in-float-conversion",
+                "-Wno-implicit-const-int-float-conversion",
                 "-Wno-implicit-function-declaration",
                 "-Wno-mismatched-new-delete",
             ],)]
