@@ -299,14 +299,14 @@ cc_library(
     hdrs = [
         "CHOLMOD/SuiteSparse_metis/GKlib/GKlib.h",
     ],
+    copts = [
+        "-Wno-fortify-source",
+    ],
     defines = [
         "LINUX",
     ],
     includes = [
         "CHOLMOD/SuiteSparse_metis/GKlib",
-    ],
-    copts = [
-        "-Wno-fortify-source"
     ],
     linkopts = [
         "-lm",

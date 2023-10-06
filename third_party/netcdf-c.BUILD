@@ -278,6 +278,7 @@ cc_library(
         "liblib/nc_initialize.c",
     ],
     hdrs = hdrs,
+    copts = ["-Wno-implicit-const-int-float-conversion"],
     defines = ["HAVE_CONFIG_H"],
     # Allows including <config.h> with angle brackets
     include_prefix = ".",
@@ -286,7 +287,6 @@ cc_library(
         "libdispatch",
         "libsrc",
     ],
-    copts = ["-Wno-implicit-const-int-float-conversion"],
     textual_hdrs = dispatch_textual_hdrs,
     visibility = ["//visibility:public"],
     deps = [
