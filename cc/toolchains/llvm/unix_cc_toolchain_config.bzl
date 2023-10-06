@@ -28,6 +28,7 @@ load(
     "with_feature_set",
 )
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+load("swift_custom_features.bzl", "swift_no_default_warnings")
 
 def _target_os_version(ctx):
     platform_type = ctx.fragments.apple.single_arch_platform.platform_type
@@ -1252,26 +1253,6 @@ def _impl(ctx):
         ],
     )
 
-    no_default_warnings = feature(
-        name = "no_default_warnings",
-        flag_sets = [
-            flag_set(
-                actions = all_compile_actions,
-                flag_groups = [flag_group(flags = [
-                    "-Wno-fortify-source",
-                    "-Wno-absolute-value",
-                    "-Wno-format",
-                    "-Wno-incompatible-pointer-types-discards-qualifiers",
-                    "-Wno-implicit-const-in-float-conversion",
-                    "-Wno-implicit-function-declaration",
-                    "-Wno-mismatched-new-delete",
-                ],)]
-            )
-        ],
-    )
-            
-
-
     archive_param_file_feature = feature(
         name = "archive_param_file",
         enabled = True,
@@ -1383,7 +1364,10 @@ def _impl(ctx):
             unfiltered_compile_flags_feature,
             treat_warnings_as_errors_feature,
             archive_param_file_feature,
-        ] + layering_check_features(ctx.attr.compiler)
+        ] + layering_check_features(ctx.attr.compiler) + [
+            # append swiftnavs custom features here.
+            swift_no_default_warnings,
+        ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
         # libraries.
@@ -1422,7 +1406,10 @@ def _impl(ctx):
             unfiltered_compile_flags_feature,
             treat_warnings_as_errors_feature,
             archive_param_file_feature,
-        ] + layering_check_features(ctx.attr.compiler)
+        ] + layering_check_features(ctx.attr.compiler) + [
+            # append swiftnavs custom features here
+            swift_no_default_warnings,
+        ]
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
