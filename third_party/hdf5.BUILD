@@ -39,7 +39,7 @@ cc_library(
         "//conditions:default": [
             "-Wno-format",
             "-Wno-incompatible-pointer-types-discards-qualifiers",
-            "-Wno-implicit-function-declerations",
+            "-Wno-implicit-function-declarations",
         ],
     }),
     includes = [
