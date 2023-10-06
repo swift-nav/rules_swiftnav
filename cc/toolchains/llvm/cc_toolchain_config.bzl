@@ -53,9 +53,6 @@ def cc_toolchain_config(
         "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
-        "-Wall",
-        "-Wthread-safety",
-        "-Wself-assign",
     ] + extra_copts
 
     # -fstandalone-debug disables options that optimize
