@@ -989,7 +989,7 @@ def _impl(ctx):
             flag_set(
                 actions = [ACTION_NAMES.cpp_link_static_library],
                 flag_groups = [
-                    flag_group(flags = ["-no_warning_for_no_symbols", "-static", "-s"]),
+                    flag_group(flags = ["-no_warning_for_no_symbols", "-no_warning_for_duplicate_member_name", "-static", "-s"]),
                     flag_group(
                         flags = ["-o", "%{output_execpath}"],
                         expand_if_available = "output_execpath",
