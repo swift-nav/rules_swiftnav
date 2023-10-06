@@ -36,12 +36,9 @@ cc_library(
         "@bazel_tools//src/conditions:windows": [
             "/Zc:preprocessor-",
         ],
-        "//conditions:default": [
-            "-Wno-format",
-            "-Wno-incompatible-pointer-types-discards-qualifiers",
-            "-Wno-implicit-function-declaration",
-        ],
+        "//conditions:default": [],
     }),
+    features = ["no_default_warnings"],
     includes = [
         "config",
         "src",
@@ -61,10 +58,9 @@ cc_library(
         "@bazel_tools//src/conditions:windows": [
             "/Zc:preprocessor-",
         ],
-        "//conditions:default": [
-            "-Wno-error=implicit-function-declaration",
-        ],
+        "//conditions:default": [],
     }),
+    features = ["no_default_warnings"],
     includes = [
         "hl/src",
     ],

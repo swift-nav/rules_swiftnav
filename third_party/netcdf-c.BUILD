@@ -278,8 +278,8 @@ cc_library(
         "liblib/nc_initialize.c",
     ],
     hdrs = hdrs,
-    copts = ["-Wno-implicit-const-int-float-conversion"],
     defines = ["HAVE_CONFIG_H"],
+    features = ["no_default_warnings"],
     # Allows including <config.h> with angle brackets
     include_prefix = ".",
     includes = [

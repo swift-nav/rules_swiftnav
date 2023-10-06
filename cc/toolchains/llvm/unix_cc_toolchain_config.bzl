@@ -1252,6 +1252,26 @@ def _impl(ctx):
         ],
     )
 
+    no_default_warnings = feature(
+        name = "no_default_warnings",
+        flag_sets = [
+            flag_set(
+                actions = all_compile_actions,
+                flag_groups = [flag_group(flags = [
+                    "-Wno-fortify-source",
+                    "-Wno-absolute-value",
+                    "-Wno-format",
+                    "-Wno-incompatible-pointer-types-discards-qualifiers",
+                    "-Wno-implicit-const-in-float-conversion",
+                    "-Wno-implicit-function-declaration",
+                    "-Wno-mismatched-new-delete",
+                ],)]
+            )
+        ],
+    )
+            
+
+
     archive_param_file_feature = feature(
         name = "archive_param_file",
         enabled = True,
