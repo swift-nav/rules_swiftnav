@@ -105,7 +105,7 @@ def cc_toolchain_config(
         use_lld = False
         link_flags.extend([
             "-headerpad_max_install_names",
-            "-Wl,no_warn_duplicate_labels",
+            "-Wl,-no_warn_duplicate_labels",
         ])
     else:
         use_lld = True
