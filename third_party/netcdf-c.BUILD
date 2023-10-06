@@ -286,6 +286,7 @@ cc_library(
         "libdispatch",
         "libsrc",
     ],
+    copts = ["-Wno-implicit-const-int-float-conversion"],
     textual_hdrs = dispatch_textual_hdrs,
     visibility = ["//visibility:public"],
     deps = [
