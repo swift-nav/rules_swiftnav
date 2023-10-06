@@ -2,7 +2,7 @@ DEFAULT_COPTS = [
     "-Wall",
     "-Wthread-safety",
     "-Wunused-but-set-parameter",
-    "-Wno-free-heap-object",
+    "-Wno-free-nonheap-object",
     "-Wself-assign",
     "-Wcast-align",
     "-Wcast-qual",
