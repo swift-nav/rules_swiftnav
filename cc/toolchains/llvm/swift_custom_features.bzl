@@ -19,7 +19,6 @@ load(
     "flag_group",
     "flag_set",
 )
-
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 _all_compile_actions = [
@@ -93,8 +92,7 @@ swift_no_default_warnings = feature(
                 "-Wno-implicit-const-int-float-conversion",
                 "-Wno-implicit-function-declaration",
                 "-Wno-mismatched-new-delete",
-            ],)]
-        )
+            ])],
+        ),
     ],
 )
-
