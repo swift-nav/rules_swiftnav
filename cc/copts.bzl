@@ -1,7 +1,8 @@
 DEFAULT_COPTS = [
     "-Wall",
-    "-Wthread-safety",
-    "-Wunused-but-set-parameter",
+    #    clang only - reenable when we move to features.
+    #    "-Wthread-safety",
+    #    "-Wunused-but-set-parameter",
     "-Wno-free-nonheap-object",
     "-Wself-assign",
     "-Wcast-align",
