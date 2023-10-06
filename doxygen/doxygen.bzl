@@ -102,10 +102,11 @@ def swift_doxygen(**kwargs):
         html_path = name + "_doxygen/html",
     )
 
+    # We zip the full Doxygen output (all formats), not only the HTML
     pkg_zip(
         name = name_zip,
-        srcs = [name_html],
+        srcs = [name],
         tags = tags,
         package_file_name = name + ".zip",
-        strip_prefix = name_html,
+        strip_prefix = name,
     )
