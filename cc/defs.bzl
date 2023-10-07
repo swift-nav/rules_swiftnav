@@ -126,7 +126,7 @@ def _symbolizer_data():
 def _warn_deprecated_declarations():
     return select({
         Label("//cc:_warn_deprecated_declarations"): [],
-        "//conditions:default": ["-Wdeprecated-declarations"],
+        "//conditions:default": ["-Wno-deprecated-declarations"],
     })
 
 def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
