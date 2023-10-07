@@ -29,6 +29,19 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Enable warnings for deprecated declarations with --@rules_swiftnav//cc:warn_deprecated_declarations=true
+bool_flag(
+    name = "warn_deprecated_declarations",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_warn_deprecated_declarations",
+    flag_values = {":warn_deprecated_declarations": "true"},
+    visibility = ["//visibility:public"],
+)
+
 # Enable exceptions with --@rules_swiftnav//cc:enable_exceptions=true
 bool_flag(
     name = "enable_exceptions",

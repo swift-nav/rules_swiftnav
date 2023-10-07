@@ -77,6 +77,8 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
+# Handle whether to enable -Wdeprecated-declarations
+# Handle whether to link statically
 def _link_static(linkstatic = True):
     return select({
         Label("//cc:_enable_shared"): False,
@@ -119,6 +121,12 @@ def _symbolizer_data():
         Label("//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
         Label("//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
         "//conditions:default": [],
+    })
+
+def _warn_deprecated_declarations():
+    return select({
+        Label("//cc:_warn_deprecated_declarations"): [],
+        "//conditions:default": ["-Wno-deprecated-declarations"],
     })
 
 def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
@@ -630,7 +638,7 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", []) + ["-Wno-deprecated-declarations"]
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _warn_deprecated_declarations()
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
