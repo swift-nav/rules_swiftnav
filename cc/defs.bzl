@@ -77,7 +77,6 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
-# Handle whether to enable -Wdeprecated-declarations
 # Handle whether to link statically
 def _link_static(linkstatic = True):
     return select({
@@ -123,6 +122,7 @@ def _symbolizer_data():
         "//conditions:default": [],
     })
 
+# Handle whether to enable -Wdeprecated-declarations
 def _warn_deprecated_declarations():
     return select({
         Label("//cc:_warn_deprecated_declarations"): [],
