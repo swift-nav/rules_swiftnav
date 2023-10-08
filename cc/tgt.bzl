@@ -188,7 +188,6 @@ def _get_default_flags(lang, level):
       "-Wchar-subscripts",
       # "-Wclobbered", # Disabled until clang is unfucked
       "-Wdangling-else",
-      "-Wdeprecated-copy",
       "-Wfloat-equal",
       "-Wignored-qualifiers",
       "-Winit-self",
@@ -199,7 +198,6 @@ def _get_default_flags(lang, level):
       "-Wmemset-transposed-args",
       "-Wmisleading-indentation",
       # "-Wmismatched-dealloc", # Disabled until clang is unfucked
-      "-Wmismatched-new-delete",
       # "-Wmissing-attributes", # Disabled until clang is unfucked
       "-Wmissing-field-initializers",
       # "-Wmultistatement-macros", # Disabled until clang is unfucked
@@ -227,6 +225,8 @@ def _get_default_flags(lang, level):
     ],
     "cc": [
       # "-Wcatch-value", # Disabled until clang is unfucked
+      "-Wdeprecated-copy",
+      "-Wmismatched-new-delete",
     ]
   }
 
