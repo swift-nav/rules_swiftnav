@@ -508,7 +508,7 @@ def _add_test(**kwargs):
 
   local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-  cflags = lang_flag + local_includes + _construct_cflags(lang, INTERNAL, rtti, exceptions, copts, nocopts)
+  cflags = lang_flag + local_includes + _construct_cflags(lang, INTERNAL, rtti, exceptions, copts, nocopts) + "-Wno-deprecated-declarations"
   
   kwargs["copts"] = cflags
 
