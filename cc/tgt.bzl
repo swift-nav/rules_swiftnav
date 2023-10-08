@@ -156,6 +156,8 @@ def _get_default_flags(lang, level):
   coding standard level
   """
   base_flags = [
+    # stupid clang
+    "-Wno-format-security",
   ]
 
   # Flags which relate to portable targets
