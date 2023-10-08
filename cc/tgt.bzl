@@ -189,7 +189,6 @@ def _get_default_flags(lang, level):
       # "-Wclobbered", # Disabled until clang is unfucked
       "-Wdangling-else",
       "-Wdeprecated-copy",
-      "-Wdeprecated-declarations",
       "-Wfloat-equal",
       "-Wignored-qualifiers",
       "-Winit-self",
