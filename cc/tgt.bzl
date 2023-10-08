@@ -158,6 +158,7 @@ def _get_default_flags(lang, level):
   base_flags = [
     # stupid clang
     "-Wno-format-security",
+    "-Wno-integer-overflow",
   ]
 
   # Flags which relate to portable targets
