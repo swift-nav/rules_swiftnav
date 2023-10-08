@@ -243,7 +243,7 @@ def _get_default_flags(lang, level):
       "-Wempty-body",
       "-Wenum-compare",
       "-Wenum-conversion",
-      "-Wenum-int-mismatch",
+      #"-Wenum-int-mismatch",
       "-Wfloat-conversion",
       "-Wformat",
       "-Wformat-extra-args",
