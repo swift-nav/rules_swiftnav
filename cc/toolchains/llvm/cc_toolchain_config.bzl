@@ -27,6 +27,7 @@ def cc_toolchain_config(
         cxx_builtin_include_directories,
         tool_paths,
         target_system_name,
+        extra_copts = [],
         builtin_sysroot = None,
         extra_copts = [],
         is_darwin = False):
