@@ -502,7 +502,7 @@ def _add_test(**kwargs):
   copts = kwargs.pop("copts", [])
   nocopts = kwargs.pop("nocopts", [])
   nocopts.append("-Wdeprecated-declarations")
-  copts.append("-Wno-deprecated-declarations")
+  #copts.append("-Wno-deprecated-declarations")
 
   # RTTI and Exceptions are enabled by default for tests
   rtti = kwargs.pop("rtti", True)
