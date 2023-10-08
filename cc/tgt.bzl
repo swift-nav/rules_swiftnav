@@ -501,6 +501,8 @@ def _add_test(**kwargs):
 
   copts = kwargs.pop("copts", [])
   nocopts = kwargs.pop("nocopts", [])
+  nocopts += "-Wdeprecated-declarations"
+  copts += "-Wno-deprecated-declarations"
 
   # RTTI and Exceptions are enabled by default for tests
   rtti = kwargs.pop("rtti", True)
@@ -508,7 +510,7 @@ def _add_test(**kwargs):
 
   local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-  cflags = lang_flag + local_includes + _construct_cflags(lang, INTERNAL, rtti, exceptions, copts, nocopts) + "-Wno-deprecated-declarations"
+  cflags = lang_flag + local_includes + _construct_cflags(lang, INTERNAL, rtti, exceptions, copts, nocopts)
   
   kwargs["copts"] = cflags
 
