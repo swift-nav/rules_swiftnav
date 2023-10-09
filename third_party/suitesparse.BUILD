@@ -302,6 +302,7 @@ cc_library(
     defines = [
         "LINUX",
     ],
+    features = ["no_default_warnings"],
     includes = [
         "CHOLMOD/SuiteSparse_metis/GKlib",
     ],
@@ -382,6 +383,7 @@ cc_library(
     copts = [
         "-Iexternal/suitesparse/CHOLMOD/SuiteSparse_metis/libmetis/",
     ],
+    features = ["no_default_warnings"],
     includes = [
         "CHOLMOD/SuiteSparse_metis/include/",
     ],

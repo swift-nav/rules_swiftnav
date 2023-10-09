@@ -53,9 +53,6 @@ def cc_toolchain_config(
         "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
-        "-Wall",
-        "-Wthread-safety",
-        "-Wself-assign",
     ] + extra_copts
 
     # -fstandalone-debug disables options that optimize
@@ -108,6 +105,7 @@ def cc_toolchain_config(
         use_lld = False
         link_flags.extend([
             "-headerpad_max_install_names",
+            "-Wl,-no_warn_duplicate_libraries",
         ])
     else:
         use_lld = True
@@ -190,8 +188,6 @@ def cc_toolchain_config(
 
     supports_start_end_lib = use_lld
 
-    # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
-    # Which defines the rule that actually sets up the cc toolchain.
     unix_cc_toolchain_config(
         name = name,
         cpu = target_cpu,

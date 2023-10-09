@@ -76,6 +76,7 @@ cc_library(
         "cxx4/netcdf",
         "cxx4/test_utilities.h",
     ],
+    features = ["no_default_warnings"],
     includes = ["cxx4"],
     visibility = ["//visibility:public"],
     deps = [

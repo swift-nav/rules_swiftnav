@@ -1,6 +1,10 @@
-# The following are set by default by Bazel:
-# -Wall, -Wunused-but-set-parameter, -Wno-free-heap-object
 DEFAULT_COPTS = [
+    "-Wall",
+    #    clang only - reenable when we move to features.
+    #    "-Wthread-safety",
+    #    "-Wunused-but-set-parameter",
+    #    "-Wself-assign",
+    "-Wno-free-nonheap-object",
     "-Wcast-align",
     "-Wcast-qual",
     "-Wchar-subscripts",

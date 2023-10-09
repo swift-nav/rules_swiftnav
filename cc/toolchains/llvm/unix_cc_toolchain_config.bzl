@@ -28,6 +28,7 @@ load(
     "with_feature_set",
 )
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+load("swift_custom_features.bzl", "swift_no_default_warnings")
 
 def _target_os_version(ctx):
     platform_type = ctx.fragments.apple.single_arch_platform.platform_type
@@ -989,7 +990,7 @@ def _impl(ctx):
             flag_set(
                 actions = [ACTION_NAMES.cpp_link_static_library],
                 flag_groups = [
-                    flag_group(flags = ["-static", "-s"]),
+                    flag_group(flags = ["-no_warning_for_no_symbols", "-static", "-s"]),
                     flag_group(
                         flags = ["-o", "%{output_execpath}"],
                         expand_if_available = "output_execpath",
@@ -1363,7 +1364,10 @@ def _impl(ctx):
             unfiltered_compile_flags_feature,
             treat_warnings_as_errors_feature,
             archive_param_file_feature,
-        ] + layering_check_features(ctx.attr.compiler)
+        ] + layering_check_features(ctx.attr.compiler) + [
+            # append swiftnavs custom features here.
+            swift_no_default_warnings,
+        ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
         # libraries.
@@ -1402,7 +1406,10 @@ def _impl(ctx):
             unfiltered_compile_flags_feature,
             treat_warnings_as_errors_feature,
             archive_param_file_feature,
-        ] + layering_check_features(ctx.attr.compiler)
+        ] + layering_check_features(ctx.attr.compiler) + [
+            # append swiftnavs custom features here
+            swift_no_default_warnings,
+        ]
 
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
