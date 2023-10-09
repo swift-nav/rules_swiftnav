@@ -122,10 +122,10 @@ def _symbolizer_data():
         "//conditions:default": [],
     })
 
-# Handle whether to enable -Wdeprecated-declarations
-def _warn_deprecated_declarations():
+# Handle whether to enable -Wdeprecated-declarations in tests.
+def _tests_warn_deprecated_declarations():
     return select({
-        Label("//cc:_warn_deprecated_declarations"): [],
+        Label("//cc:_tests_warn_deprecated_declarations"): [],
         "//conditions:default": ["-Wno-deprecated-declarations"],
     })
 
@@ -638,7 +638,7 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _warn_deprecated_declarations()
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations()
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
