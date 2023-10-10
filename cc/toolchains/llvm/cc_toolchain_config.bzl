@@ -168,7 +168,8 @@ def cc_toolchain_config(
             "-L{}/lib".format(toolchain_path_prefix),
         ])
 
-    opt_link_flags = ["-Wl,--gc-sections"] if use_lld else []
+    # ldd/linux only
+    opt_link_flags = ["-Wl,--gc-sections"] if not is_darwin else []
 
     # Unfiltered compiler flags; these are placed at the end of the command
     # line, so take precendence over any user supplied flags through --copts or
