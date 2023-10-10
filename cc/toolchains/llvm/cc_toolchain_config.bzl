@@ -29,7 +29,9 @@ def cc_toolchain_config(
         target_system_name,
         builtin_sysroot = None,
         extra_copts = [],
-        is_darwin = False):
+        is_darwin = False,
+        use_lld = True,
+    ):
     if not is_target_triplet(host_system_name):
         fail(host_system_name + " is not a target tripplet")
 
@@ -100,16 +102,18 @@ def cc_toolchain_config(
     link_libs = []
 
     if is_darwin:
-        # Mach-O support in lld is experimental, so on mac
-        # we use the system linker.
-        use_lld = True
-        link_flags.extend([
-            "-fuse-ld=lld",
-            "-headerpad_max_install_names",
-            "-Wl,-no_warn_duplicate_libraries",
-        ])
+        # For the time being we still support ld64 on aarch64 darwin
+        if use_lld:
+            link_flags.extend([
+                "-fuse-ld=lld",
+                "-headerpad_max_install_names",
+            ])
+        else:
+            link_flags.extend([
+                "-headerpad_max_install_names",
+                "-Wl,-no_warn_duplicate_libraries",
+            ])
     else:
-        use_lld = True
         link_flags.extend([
             "-fuse-ld=lld",
             "-Wl,--build-id=md5",
@@ -164,8 +168,7 @@ def cc_toolchain_config(
             "-L{}/lib".format(toolchain_path_prefix),
         ])
 
-    # linux/lld only
-    opt_link_flags = ["-Wl,--gc-sections"] if not is_darwin else []
+    opt_link_flags = ["-Wl,--gc-sections"] if use_lld else []
 
     # Unfiltered compiler flags; these are placed at the end of the command
     # line, so take precendence over any user supplied flags through --copts or
@@ -217,4 +220,5 @@ def cc_toolchain_config(
         coverage_link_flags = coverage_link_flags,
         supports_start_end_lib = supports_start_end_lib,
         builtin_sysroot = builtin_sysroot,
+        use_libtool = not use_lld,
     )

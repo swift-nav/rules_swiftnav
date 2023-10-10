@@ -1455,6 +1455,7 @@ cc_toolchain_config = rule(
         "coverage_link_flags": attr.string_list(),
         "supports_start_end_lib": attr.bool(),
         "builtin_sysroot": attr.string(),
+        "use_libtool": attr.bool(),
         "_xcode_config": attr.label(default = configuration_field(
             fragment = "apple",
             name = "xcode_config_label",
