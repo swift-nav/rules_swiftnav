@@ -1303,7 +1303,7 @@ def _impl(ctx):
     is_linux = ctx.attr.target_libc != "macosx"
     libtool_feature = feature(
         name = "libtool",
-        enabled = False,
+        enabled = ctx.attr.use_libtool,
     )
 
     # TODO(#8303): Mac crosstool should also declare every feature.
