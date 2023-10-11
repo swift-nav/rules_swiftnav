@@ -181,7 +181,7 @@ def _get_default_flags(lang, level):
   internal_flags = {
     "common": [
       "-Waddress",
-      # "-Warray-bounds=1", # Disabled until clang is unfucked
+       "-Warray-bounds", # Disabled until clang is unfucked
       # "-Wbool-compare", # Disabled until clang is unfucked
       "-Wbool-operation",
       "-Wcast-function-type",
