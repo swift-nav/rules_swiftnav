@@ -623,3 +623,8 @@ def swift_new_cc_test(**kwargs):
   _assert_no_reserved_keys(**kwargs)
   # level doesn't need to be specified for tests, it's always INTERNAL
   _add_test(lang = "cc", **kwargs)
+
+def swift_new_cc_test(**kwargs):
+  _assert_no_reserved_keys(**kwargs)
+  # level doesn't need to be specified for tests, it's always INTERNAL
+  _add_test(lang = "c", rtti = False, exceptions = False, **kwargs)
