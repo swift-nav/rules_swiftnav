@@ -90,6 +90,7 @@ swift_no_default_warnings = feature(
                 "-Wno-format",
                 "-Wno-deprecated-declarations",
                 "-Wno-unused-but-set-variable",
+                "-Wno-pointer-bool-conversion",
                 "-Wno-unused-variable",
                 "-Wno-incompatible-pointer-types-discards-qualifiers",
                 "-Wno-implicit-const-int-float-conversion",
