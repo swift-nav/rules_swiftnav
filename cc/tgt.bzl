@@ -577,7 +577,7 @@ def swift_safe_portable_c_library(**kwargs):
 
 def swift_new_c_test(**kwargs):
   _assert_no_reserved_keys(**kwargs)
-  _add_test(lang = "c", **kwargs)
+  _add_test(lang = "c", rtti = False, exceptions = False, **kwargs)
 
 def swift_internal_cc_binary(**kwargs):
   _assert_no_reserved_keys(**kwargs)
@@ -624,7 +624,3 @@ def swift_new_cc_test(**kwargs):
   # level doesn't need to be specified for tests, it's always INTERNAL
   _add_test(lang = "cc", **kwargs)
 
-def swift_new_c_test(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  # level doesn't need to be specified for tests, it's always INTERNAL
-  _add_test(lang = "c", rtti = False, exceptions = False, **kwargs)
