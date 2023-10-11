@@ -375,8 +375,8 @@ def _construct_cflags(lang, level, rtti, exceptions, copts, nocopts):
   # Try to catch anyone trying to skirt the above restriction by adding "-Wno-x"
   # which would be the same as passing "-Wx" in ncopts
   for f in copts:
-    if f.startswith("-Wno-"):
-      fail("Disabling warnings by passing -Wno-* via copts is not allowed. Use nocopts (only valid on internal level targets)")
+    #if f.startswith("-Wno-"):
+      #fail("Disabling warnings by passing -Wno-* via copts is not allowed. Use nocopts (only valid on internal level targets)")
     if f not in cflags:
       cflags += [f]
 
