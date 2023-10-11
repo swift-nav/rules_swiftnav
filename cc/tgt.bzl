@@ -218,7 +218,7 @@ def _get_default_flags(lang, level):
     ],
     "c": [
       "-Warray-parameter=2",
-      "-Wbad-function-cast",
+      #"-Wbad-function-cast",
       "-Wduplicate-decl-specifier",
       "-Wmissing-parameter-type",
       "-Wold-style-declaration",
