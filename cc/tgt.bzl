@@ -217,11 +217,11 @@ def _get_default_flags(lang, level):
       "-Wwrite-strings",
     ],
     "c": [
-      "-Warray-parameter=2",
+      # "-Warray-parameter=2", # Disabled until clang is unfucked
       #"-Wbad-function-cast",
       "-Wduplicate-decl-specifier",
-      "-Wmissing-parameter-type",
-      "-Wold-style-declaration",
+      # "-Wmissing-parameter-type", # Disabled until clang is unfucked
+      # "-Wold-style-declaration", # Disabled until clang is unfucked
     ],
     "cc": [
       # "-Wcatch-value", # Disabled until clang is unfucked
@@ -247,19 +247,19 @@ def _get_default_flags(lang, level):
       "-Wfloat-conversion",
       "-Wformat",
       "-Wformat-extra-args",
-      "-Wformat-overflow",
+      # "-Wformat-overflow", # Disabled until clang is unfucked
       "-Wformat-security",
-      "-Wformat-truncation",
+      # "-Wformat-truncation", # Disabled until clang is unfucked
       "-Wformat-y2k",
-      "-Wimplicit-fallthrough=3",
+      "-Wimplicit-fallthrough",
       "-Wimport",
       "-Wint-in-bool-context",
       "-Wmissing-braces",
       "-Wnarrowing",
       "-Wno-error=deprecated-declarations",
       "-Wnonnull",
-      "-Wnonnull-compare",
-      "-Wopenmp-simd",
+      # "-Wnonnull-compare", # Disabled until clang is unfucked
+      # "-Wopenmp-simd", # Disabled until clang is unfucked
       "-Wredundant-decls",
       "-Wreturn-type",
       "-Wshadow",
@@ -283,9 +283,9 @@ def _get_default_flags(lang, level):
       "-Wunused-result",
       "-Wunused-value",
       "-Wunused-variable",
-      "-Wvla-parameter",
+    # "-Wvla-parameter", # Disabled until clang is unfucked
       "-Wvolatile-register-var",
-      "-Wzero-length-bounds",
+      # "-Wzero-length-bounds", # Disabled until clang is unfucked
     ],
     "c": [
       "-Wimplicit",
