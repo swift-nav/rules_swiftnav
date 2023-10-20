@@ -55,6 +55,7 @@ def swift_cc_toolchain():
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = AARCH64_LINUX_LLVM,
         strip_prefix = "clang+llvm-14.0.0-aarch64-linux-gnu",
+        sha256 = "1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee",
     )
 
     maybe(
