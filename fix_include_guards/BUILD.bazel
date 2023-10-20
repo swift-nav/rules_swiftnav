@@ -1,0 +1,14 @@
+py_binary(
+  name = "fix_include_guards",
+  srcs = [
+    "fix_include_guards.py",
+  ],
+  args = [
+  ],
+  visibility = ["//visibility:public"],
+)
+
+exports_files(
+  glob(["*.bzl"]) + ["fix_include_guards.py"],
+  visibility = ["//visibility:public"],
+)
