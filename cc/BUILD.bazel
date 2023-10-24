@@ -177,3 +177,14 @@ config_setting(
     flag_values = {":use_libstdcpp": "true"},
     visibility = ["//visibility:public"],
 )
+
+py_binary(
+    name = "fix_include_guards",
+    srcs = [
+        "fix_include_guards.py",
+    ],
+    args = [
+    ],
+    visibility = ["//visibility:public"],
+)
+
