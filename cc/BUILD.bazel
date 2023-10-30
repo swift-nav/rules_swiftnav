@@ -8,6 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
 
 exports_files(
@@ -15,7 +16,7 @@ exports_files(
     visibility = ["//visibility:public"],
 )
 
-# Disable tests and test libraries with --@rules_swiftnav//:disable_test=true
+# Disable tests and test libraries with --@rules_swiftnav///cc:disable_test=true
 bool_flag(
     name = "disable_tests",
     build_setting_default = False,
@@ -28,7 +29,20 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-# Enable exceptions with --@rules_swiftnav//:enable_exceptions=true
+# Enable warnings in tests for deprecated declarations with --@rules_swiftnav//cc:tests_warn_deprecated_declarations=true
+bool_flag(
+    name = "tests_warn_deprecated_declarations",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_tests_warn_deprecated_declarations",
+    flag_values = {":tests_warn_deprecated_declarations": "true"},
+    visibility = ["//visibility:public"],
+)
+
+# Enable exceptions with --@rules_swiftnav//cc:enable_exceptions=true
 bool_flag(
     name = "enable_exceptions",
     build_setting_default = False,
@@ -41,7 +55,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-# Enable rtti with --@rules_swiftnav//:enable_exceptions=true
+# Enable rtti with --@rules_swiftnav//cc:enable_exceptions=true
 bool_flag(
     name = "enable_rtti",
     build_setting_default = False,
@@ -51,6 +65,19 @@ bool_flag(
 config_setting(
     name = "_enable_rtti",
     flag_values = {":enable_rtti": "true"},
+    visibility = ["//visibility:public"],
+)
+
+# Enable shared linking with --@rules_swiftnav//cc:enable_shared=true
+bool_flag(
+    name = "enable_shared",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_shared",
+    flag_values = {":enable_shared": "true"},
     visibility = ["//visibility:public"],
 )
 
@@ -74,24 +101,56 @@ string_flag(
     visibility = ["//visibility:public"],
 )
 
-# Enable with --@rules_swiftnav//:cxx_standard=17
+# Enable with --@rules_swiftnav//cc:cxx_standard=17
 config_setting(
     name = "cxx17",
     flag_values = {":cxx_standard": "17"},
     visibility = ["//visibility:public"],
 )
 
-# Enable with --@rules_swiftnav//:cxx_standard=20
+# Enable with --@rules_swiftnav//cc:cxx_standard=20
 config_setting(
     name = "cxx20",
     flag_values = {":cxx_standard": "20"},
     visibility = ["//visibility:public"],
 )
 
-# Enable with --@rules_swiftnav//:cxx_standard=23
+# Enable with --@rules_swiftnav//cc:cxx_standard=23
 config_setting(
     name = "cxx23",
     flag_values = {":cxx_standard": "23"},
+    visibility = ["//visibility:public"],
+)
+
+bool_flag(
+    name = "enable_symbolizer",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_symbolizer",
+    flag_values = {":enable_symbolizer": "true"},
+    visibility = ["//visibility:public"],
+)
+
+selects.config_setting_group(
+    name = "enable_symbolizer_x86_64_linux",
+    match_all = [
+        ":_enable_symbolizer",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+selects.config_setting_group(
+    name = "enable_symbolizer_x86_64_darwin",
+    match_all = [
+        ":_enable_symbolizer",
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -116,5 +175,15 @@ bool_flag(
 config_setting(
     name = "_use_libstdcpp",
     flag_values = {":use_libstdcpp": "true"},
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "fix_include_guards",
+    srcs = [
+        "fix_include_guards.py",
+    ],
+    args = [
+    ],
     visibility = ["//visibility:public"],
 )

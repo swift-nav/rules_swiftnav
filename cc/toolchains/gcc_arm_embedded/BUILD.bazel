@@ -13,7 +13,7 @@ filegroup(
     name = "ar_files",
     srcs = [
         ":wrappers",
-        "@gcc_arm_embedded_toolchain//:ar",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:ar",
     ],
     tags = ["manual"],
 )
@@ -22,7 +22,7 @@ filegroup(
     name = "as_files",
     srcs = [
         ":wrappers",
-        "@gcc_arm_embedded_toolchain//:as",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:as",
     ],
     tags = ["manual"],
 )
@@ -31,8 +31,8 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":wrappers",
-        "@gcc_arm_embedded_toolchain//:bin",
-        "@gcc_arm_embedded_toolchain//:include",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:bin",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:include",
     ],
     tags = ["manual"],
 )
@@ -41,10 +41,10 @@ filegroup(
     name = "linker_files",
     srcs = [
         ":wrappers",
-        "@gcc_arm_embedded_toolchain//:ar",
-        "@gcc_arm_embedded_toolchain//:gcc",
-        "@gcc_arm_embedded_toolchain//:ld",
-        "@gcc_arm_embedded_toolchain//:lib",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:ar",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:gcc",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:ld",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:lib",
     ],
     tags = ["manual"],
 )
@@ -53,7 +53,7 @@ filegroup(
     name = "objcopy_files",
     srcs = [
         ":wrappers",
-        "@gcc_arm_embedded_toolchain//:objcopy",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:objcopy",
     ],
     tags = ["manual"],
 )
@@ -62,7 +62,7 @@ filegroup(
     name = "strip_files",
     srcs = [
         ":wrappers",
-        "@gcc_arm_embedded_toolchain//:strip",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:strip",
     ],
     tags = ["manual"],
 )
@@ -72,7 +72,7 @@ filegroup(
     srcs = [
         ":compiler_files",
         ":linker_files",
-        "@gcc_arm_embedded_toolchain//:bin",
+        "@x86_64_linux_gcc_arm_embedded_toolchain//:bin",
     ],
     tags = ["manual"],
 )

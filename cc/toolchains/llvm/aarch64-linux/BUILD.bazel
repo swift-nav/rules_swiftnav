@@ -11,7 +11,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_DARWIN")
+load("//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX")
 
 filegroup(
     name = "wrappers",
@@ -25,58 +25,77 @@ filegroup(
     name = "ar_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:ar",
-    ],
+        "@aarch64-linux-llvm//:ar",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
     name = "as_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:as",
-    ],
+        "@aarch64-linux-llvm//:as",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
     name = "compiler_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:clang",
-        "@aarch64-darwin-llvm//:include",
-    ],
+        "@aarch64-linux-llvm//:clang",
+        "@aarch64-linux-llvm//:include",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
     name = "dwp_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:dwp",
-    ],
+        "@aarch64-linux-llvm//:dwp",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
     name = "linker_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:ar",
-        "@aarch64-darwin-llvm//:clang",
-        "@aarch64-darwin-llvm//:lib",
-    ],
+        "@aarch64-linux-llvm//:ar",
+        "@aarch64-linux-llvm//:clang",
+        "@aarch64-linux-llvm//:ld",
+        "@aarch64-linux-llvm//:lib",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
     name = "objcopy_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:objcopy",
-    ],
+        "@aarch64-linux-llvm//:objcopy",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 filegroup(
     name = "strip_files",
     srcs = [
         ":wrappers",
-        "@aarch64-darwin-llvm//:strip",
+        "@aarch64-linux-llvm//:strip",
     ],
 )
 
@@ -85,45 +104,53 @@ filegroup(
     srcs = [
         "linker_files",
         ":compiler_files",
-        "@aarch64-darwin-llvm//:bin",
-    ],
+        "@aarch64-linux-llvm//:bin",
+    ] + select({
+        "//cc:_enable_sysroot": ["@aarch64-sysroot"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_toolchain_config(
-    name = "local-aarch64-darwin",
-    abi_libc_version = "darwin_aarch64",
-    abi_version = "darwin_aarch64",
-    builtin_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    name = "local-aarch64-linux",
+    abi_libc_version = "glibc_unknown",
+    abi_version = "clang",
+    builtin_sysroot = select({
+        "//cc:_enable_sysroot": "external/aarch64-sysroot",
+        "//conditions:default": None,
+    }),
     compiler = "clang",
-    cxx_builtin_include_directories = [
-        "%sysroot%/usr/include",
-        "%sysroot%/System/Library/Frameworks",
-    ],
-    host_system_name = AARCH64_DARWIN,
-    is_darwin = True,
-    target_cpu = "darwin",
-    target_libc = "macosx",
-    target_system_name = AARCH64_DARWIN,
+    cxx_builtin_include_directories = select({
+        "//cc:_enable_sysroot": ["%sysroot%/usr/include"],
+        "//conditions:default": [
+            "/include",
+            "/usr/include",
+            "/usr/local/include",
+        ],
+    }),
+    host_system_name = AARCH64_LINUX,
+    target_cpu = "k8",
+    target_libc = "glibc_unknown",
+    target_system_name = AARCH64_LINUX,
     tool_paths = {
-        "ar": "/usr/bin/libtool",
+        "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
         "gcc": "wrappers/clang",
         "gcov": "wrappers/llvm-profdata",
         "llvm-cov": "wrappers/llvm-cov",
         "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "/usr/bin/ld",
+        "ld": "wrappers/ld.ldd",
         "nm": "wrappers/llvm-nm",
         "objcopy": "wrappers/llvm-objcopy",
         "objdump": "wrappers/llvm-objdump",
         "strip": "wrappers/llvm-strip",
     },
-    toolchain_identifier = "clang-aarch64-darwin",
-    toolchain_path_prefix = "external/aarch64-darwin-llvm",
-    use_lld = False,
+    toolchain_identifier = "clang-aarch64-linux",
+    toolchain_path_prefix = "external/aarch64-linux-llvm",
 )
 
 cc_toolchain(
-    name = "cc-clang-aarch64-darwin",
+    name = "cc-clang-aarch64-linux",
     all_files = ":all_files",
     ar_files = ":ar_files",
     as_files = ":as_files",
@@ -132,21 +159,21 @@ cc_toolchain(
     linker_files = ":linker_files",
     objcopy_files = ":objcopy_files",
     strip_files = ":strip_files",
-    toolchain_config = ":local-aarch64-darwin",
+    toolchain_config = ":local-aarch64-linux",
 )
 
 toolchain(
-    name = "cc-toolchain-aarch64-darwin",
+    name = "cc-toolchain-aarch64-linux",
     exec_compatible_with = [
         "@platforms//cpu:aarch64",
-        "@platforms//os:macos",
+        "@platforms//os:linux",
     ],
     target_compatible_with = [
         "@platforms//cpu:aarch64",
-        "@platforms//os:macos",
+        "@platforms//os:linux",
         "//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
-    toolchain = ":cc-clang-aarch64-darwin",
+    toolchain = ":cc-clang-aarch64-linux",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )

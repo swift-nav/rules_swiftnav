@@ -9,7 +9,7 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 load(
-    "@bazel_tools//tools/cpp:unix_cc_toolchain_config.bzl",
+    "unix_cc_toolchain_config.bzl",
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
 load("//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
@@ -29,7 +29,8 @@ def cc_toolchain_config(
         target_system_name,
         builtin_sysroot = None,
         extra_copts = [],
-        is_darwin = False):
+        is_darwin = False,
+        use_lld = True):
     if not is_target_triplet(host_system_name):
         fail(host_system_name + " is not a target tripplet")
 
@@ -53,9 +54,6 @@ def cc_toolchain_config(
         "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
-        "-Wall",
-        "-Wthread-safety",
-        "-Wself-assign",
     ] + extra_copts
 
     # -fstandalone-debug disables options that optimize
@@ -103,20 +101,18 @@ def cc_toolchain_config(
     link_libs = []
 
     if is_darwin:
-        # Mach-O support in lld is experimental, so on mac
-        # we use the system linker.
-        use_lld = False
-        link_flags.extend([
-            "-headerpad_max_install_names",
-            # This will issue a warning on macOS ventura; see:
-            # https://github.com/python/cpython/issues/97524
-            # https://developer.apple.com/forums/thread/719961
-            "-undefined",
-            "dynamic_lookup",
-            "-Wl,-no_fixup_chains",
-        ])
+        # For the time being we still support ld64 on aarch64 darwin
+        if use_lld:
+            link_flags.extend([
+                "-fuse-ld=lld",
+                "-headerpad_max_install_names",
+            ])
+        else:
+            link_flags.extend([
+                "-headerpad_max_install_names",
+                "-Wl,-no_warn_duplicate_libraries",
+            ])
     else:
-        use_lld = True
         link_flags.extend([
             "-fuse-ld=lld",
             "-Wl,--build-id=md5",
@@ -124,7 +120,7 @@ def cc_toolchain_config(
             "-Wl,-z,relro,-z,now",
         ])
 
-    if use_lld:
+    if not is_darwin:
         link_flags.extend([
             # To support libunwind
             # It's ok to assume posix when using this toolchain
@@ -171,7 +167,7 @@ def cc_toolchain_config(
             "-L{}/lib".format(toolchain_path_prefix),
         ])
 
-    # linux/lld only
+    # lld/linux only
     opt_link_flags = ["-Wl,--gc-sections"] if not is_darwin else []
 
     # Unfiltered compiler flags; these are placed at the end of the command
@@ -196,8 +192,6 @@ def cc_toolchain_config(
 
     supports_start_end_lib = use_lld
 
-    # Calls https://github.com/bazelbuild/bazel/blob/master/tools/cpp/unix_cc_toolchain_config.bzl
-    # Which defines the rule that actually sets up the cc toolchain.
     unix_cc_toolchain_config(
         name = name,
         cpu = target_cpu,
@@ -226,4 +220,5 @@ def cc_toolchain_config(
         coverage_link_flags = coverage_link_flags,
         supports_start_end_lib = supports_start_end_lib,
         builtin_sysroot = builtin_sysroot,
+        use_libtool = not use_lld,
     )

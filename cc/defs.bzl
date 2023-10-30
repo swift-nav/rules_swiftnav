@@ -77,6 +77,13 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 def _construct_local_includes(local_includes):
     return [construct_local_include(path) for path in local_includes]
 
+# Handle whether to link statically
+def _link_static(linkstatic = True):
+    return select({
+        Label("//cc:_enable_shared"): False,
+        "//conditions:default": linkstatic,
+    })
+
 # Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
     return select({
@@ -98,6 +105,29 @@ def _create_hdrs(**kwargs):
         srcs = kwargs.get("hdrs", []),
         visibility = kwargs.get("visibility", ["//visibility:private"]),
     )
+
+def _symbolizer_env(val):
+    return select({
+        # The + operator is not supported on dict and select types so we need to be
+        # clever here.
+        Label("//cc:enable_symbolizer_x86_64_linux"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"}),
+        Label("//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"}),
+        "//conditions:default": {},
+    })
+
+def _symbolizer_data():
+    return select({
+        Label("//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
+        Label("//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
+        "//conditions:default": [],
+    })
+
+# Handle whether to enable -Wdeprecated-declarations in tests.
+def _tests_warn_deprecated_declarations():
+    return select({
+        Label("//cc:_tests_warn_deprecated_declarations"): [],
+        "//conditions:default": ["-Wno-deprecated-declarations"],
+    })
 
 def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
     """Creates a cc_library stamped with non-hermetic build metadata.
@@ -204,6 +234,8 @@ def swift_c_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
+
     native.cc_library(**kwargs)
 
 def swift_cc_library(**kwargs):
@@ -255,6 +287,8 @@ def swift_cc_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
+
     native.cc_library(**kwargs)
 
 def swift_c_tool_library(**kwargs):
@@ -296,6 +330,8 @@ def swift_c_tool_library(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -342,6 +378,8 @@ def swift_cc_tool_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
+
     native.cc_library(**kwargs)
 
 def swift_c_binary(**kwargs):
@@ -382,7 +420,13 @@ def swift_c_binary(**kwargs):
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
 
+    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
+
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
+
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
+
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_binary(**kwargs)
 
@@ -428,6 +472,10 @@ def swift_cc_binary(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
+    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
+
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
+
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
     native.cc_binary(**kwargs)
@@ -468,6 +516,10 @@ def swift_c_tool(**kwargs):
     c_standard = _c_standard(extensions, standard)
 
     kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+
+    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
+
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
     native.cc_binary(**kwargs)
 
@@ -511,6 +563,10 @@ def swift_cc_tool(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
+    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
+
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
+
     native.cc_binary(**kwargs)
 
 def swift_cc_test_library(**kwargs):
@@ -535,6 +591,8 @@ def swift_cc_test_library(**kwargs):
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     native.cc_library(**kwargs)
 
@@ -580,9 +638,12 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", [])
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations()
+    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+
     native.cc_test(**kwargs)

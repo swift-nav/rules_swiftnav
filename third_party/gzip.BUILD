@@ -16,4 +16,7 @@ cc_library(
     name = "gzip",
     hdrs = glob(["include/**"]),
     includes = ["include"],
+    deps = [
+        "@zlib",
+    ],
 )

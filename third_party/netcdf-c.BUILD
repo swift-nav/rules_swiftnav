@@ -279,6 +279,7 @@ cc_library(
     ],
     hdrs = hdrs,
     defines = ["HAVE_CONFIG_H"],
+    features = ["no_default_warnings"],
     # Allows including <config.h> with angle brackets
     include_prefix = ".",
     includes = [
