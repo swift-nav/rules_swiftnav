@@ -46,6 +46,7 @@ def cc_toolchain_config(
         "-U_FORTIFY_SOURCE",  # https://github.com/google/sanitizers/issues/247
         "-fstack-protector",
         "-fno-omit-frame-pointer",
+        "-Wall",
         # Math
         # This controls whether the compiler allows contracting floating point operations.
         # It was flipped from off to on in clang-14.
