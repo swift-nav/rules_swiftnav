@@ -120,6 +120,7 @@ cc_toolchain_config(
     },
     toolchain_identifier = "clang-x86_64-darwin",
     toolchain_path_prefix = "external/x86_64-darwin-llvm",
+    extra_copts = ["-Wall"],
 )
 
 cc_toolchain(
