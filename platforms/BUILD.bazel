@@ -101,6 +101,15 @@ platform(
 )
 
 platform(
+    name = "intel_mkl",
+    constraint_values = [
+        "@platforms//os:linux",
+        "//third_party:intel_mkl",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+platform(
     name = "x86_64_linux_musl",
     constraint_values = [
         "@platforms//os:linux",

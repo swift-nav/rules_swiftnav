@@ -18,11 +18,13 @@ cc_library(
     defines = [
         "EIGEN_NO_DEBUG",
     ] + select({
+        "@rules_swiftnav//third_party:intel_mkl": ["EIGEN_USE_MKL_ALL"],
         "@rules_swiftnav//third_party:_enable_mkl": ["EIGEN_USE_MKL_ALL"],
         "//conditions:default": [],
     }),
     includes = ["."],
     deps = select({
+        "@rules_swiftnav//third_party:intel_mkl": ["@mkl"],
         "@rules_swiftnav//third_party:_enable_mkl": ["@mkl"],
         "//conditions:default": [],
     }),
