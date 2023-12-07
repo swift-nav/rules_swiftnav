@@ -22,6 +22,10 @@ fi
 touch $OUTPUT
 truncate -s 0 $OUTPUT
 
+# bazel runs clang-tidy in the sandbox so any diagnostics will contain
+# paths relative to the sandbox. We need to strip the sandbox prefix
+# from the paths so that the output matches the source tree and can
+# be understood by other tools such as IDEs.
 "${CLANG_TIDY_BIN}" "$@" | sed "s;.*execroot/[^/]*/;;"
 sed -i "s;.*execroot/[^/]*/;;" $OUTPUT
 
