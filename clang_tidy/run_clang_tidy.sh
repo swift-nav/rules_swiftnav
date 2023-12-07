@@ -13,7 +13,7 @@ shift
 
 # .clang-tidy config file has to be placed in the current working directory
 if [ ! -f ".clang-tidy" ]; then
-    ln -s $CONFIG .clang-tidy
+	ln -s $CONFIG .clang-tidy
 fi
 
 # clang-tidy doesn't create a patchfile if there are no errors.
@@ -22,6 +22,11 @@ fi
 touch $OUTPUT
 truncate -s 0 $OUTPUT
 
-"${CLANG_TIDY_BIN}" "$@"
+# bazel runs clang-tidy in the sandbox so any diagnostics will contain
+# paths relative to the sandbox. We need to strip the sandbox prefix
+# from the paths so that the output matches the source tree and can
+# be understood by other tools such as IDEs.
+"${CLANG_TIDY_BIN}" "$@" | sed "s;.*execroot/[^/]*/;;"
+sed -i "s;.*execroot/[^/]*/;;" $OUTPUT
 
 test ! -s $OUTPUT
