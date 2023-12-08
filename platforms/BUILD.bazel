@@ -107,6 +107,7 @@ platform(
         "//third_party:intel_mkl",
         "@platforms//cpu:x86_64",
     ],
+    visibility = ["//visibility:public"],
 )
 
 platform(
