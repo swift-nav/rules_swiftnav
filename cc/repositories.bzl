@@ -18,7 +18,7 @@ X86_64_DARWIN_LLVM = "https://github.com/llvm/llvm-project/releases/download/llv
 
 AARCH64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-aarch64-linux-gnu.tar.xz"
 
-X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
+X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-16.0.4/clang+llvm-16.0.4-x86_64-linux-gnu-ubuntu-22.04.tar.xz"
 
 AARCH64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/aarch64-linux-musl-cross.tar.gz"
 
@@ -63,8 +63,8 @@ def swift_cc_toolchain():
         name = "x86_64-linux-llvm",
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = X86_64_LINUX_LLVM,
-        strip_prefix = "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
-        sha256 = "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5",
+        strip_prefix = "clang+llvm-16.0.4-x86_64-linux-gnu-ubuntu-22.04",
+        sha256 = "fd464333bd55b482eb7385f2f4e18248eb43129a3cda4c0920ad9ac3c12bdacf",
     )
 
 def aarch64_sysroot():
