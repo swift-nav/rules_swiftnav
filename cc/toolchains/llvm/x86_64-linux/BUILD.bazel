@@ -27,8 +27,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:ar",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -38,8 +37,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:as",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -50,8 +48,7 @@ filegroup(
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:include",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -61,8 +58,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:dwp",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -75,8 +71,7 @@ filegroup(
         "@x86_64-linux-llvm//:ld",
         "@x86_64-linux-llvm//:lib",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -86,8 +81,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:objcopy",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -106,8 +100,7 @@ filegroup(
         ":compiler_files",
         "@x86_64-linux-llvm//:bin",
     ] + select({
-        "//cc:_enable_sysroot": ["@x86_64-sysroot"],
-        "//conditions:default": [],
+        "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
 
@@ -116,17 +109,11 @@ cc_toolchain_config(
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
     builtin_sysroot = select({
-        "//cc:_enable_sysroot": "external/x86_64-sysroot",
-        "//conditions:default": None,
+        "//conditions:default": "external/x86_64-sysroot",
     }),
     compiler = "clang",
     cxx_builtin_include_directories = select({
-        "//cc:_enable_sysroot": ["%sysroot%/usr/include"],
-        "//conditions:default": [
-            "/include",
-            "/usr/include",
-            "/usr/local/include",
-        ],
+        "//conditions:default": ["%sysroot%/usr/include"],
     }),
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
