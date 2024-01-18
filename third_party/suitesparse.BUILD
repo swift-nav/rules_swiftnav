@@ -727,7 +727,7 @@ cc_library(
         "CHOLMOD/Utility/t_cholmod_clear_flag.c",
         "CHOLMOD/Utility/t_cholmod_copy.c",
         "CHOLMOD/Utility/t_cholmod_copy_dense.c",
-        "CHOLMOD/Utility/t_cholmod_copy_dense2.c
+        "CHOLMOD/Utility/t_cholmod_copy_dense2.c",
         "CHOLMOD/Utility/t_cholmod_copy_dense2_worker.c",
         "CHOLMOD/Utility/t_cholmod_copy_factor.c",
         "CHOLMOD/Utility/t_cholmod_copy_factor_worker.c",
