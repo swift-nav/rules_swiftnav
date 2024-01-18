@@ -81,9 +81,8 @@ def cc_toolchain_config(
         # The whole codebase should build with c++14
         "-std=c++14",
     ] + select({
-        "//cc:_use_libstdcpp": ["-stdlib=libstdc++"],
-        "//cc:_enable_sysroot": ["-stdlib=libstdc++"],
-        "//conditions:default": ["-stdlib=libstdc++"] if is_cross_compile else ["-stdlib=libc++"],
+        "//cc:_use_libcpp": ["-stdlib=libc++"],
+        "//conditions:default": ["-stdlib=libstdc++"],
     })
 
     link_flags = [
@@ -209,9 +208,8 @@ def cc_toolchain_config(
         opt_compile_flags = opt_compile_flags,
         cxx_flags = cxx_flags,
         link_flags = link_flags + select({
-            "//cc:_use_libstdcpp": link_libstdcpp,
-            "//cc:_enable_sysroot": link_libstdcpp,
-            "//conditions:default": link_libstdcpp if is_cross_compile else link_libcpp,
+            "//cc:_use_libcpp": link_libcpp,
+            "//conditions:default": link_libstdcpp,
         }),
         link_libs = link_libs,
         opt_link_flags = opt_link_flags,

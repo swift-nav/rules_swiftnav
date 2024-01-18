@@ -18,8 +18,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
         # The linker needs to be given the explicit search paths when building against a sysroot.
         # TODO(isaac) - Figure out how we can remove this.
     ] + select({
@@ -31,11 +31,10 @@ cc_library(
             "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
             "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
         ],
-        "@rules_swiftnav//cc:_enable_sysroot": [
+        "//conditions:default": [
             "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/lapack",
             "-Lexternal/x86_64-sysroot/usr/lib/x86_64-linux-gnu/blas",
         ],
-        "//conditions:default": [],
     }),
 )
 
