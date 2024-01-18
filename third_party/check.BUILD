@@ -22,6 +22,9 @@ cmake(
         "CMAKE_INSTALL_LIBDIR": "lib",
         "HAVE_SUBUNIT": "0",
     },
+    generate_args = [
+        "-GNinja",
+    ],
     lib_source = ":srcs",
     linkopts = select({
         "@bazel_tools//src/conditions:darwin": ["-lpthread"],

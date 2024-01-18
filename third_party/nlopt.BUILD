@@ -26,6 +26,7 @@ cmake(
         "CMAKE_INSTALL_LIBDIR": "lib",
     },
     generate_args = [
+        "-GNinja",
         "-DBUILD_SHARED_LIBS=OFF",
         "-DNLOPT_PYTHON=OFF",
         "-DNLOPT_OCTAVE=OFF",
