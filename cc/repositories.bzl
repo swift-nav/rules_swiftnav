@@ -71,7 +71,7 @@ def aarch64_sysroot():
     maybe(
         http_archive,
         name = "aarch64-sysroot",
-        sha256 = "b720ec47e4b53db12cd2f5fbf2c162be9a07a3e2f699be6cf2912a570001f39f",
+        sha256 = "4e4cbbed33e78602a5f038305514307a5bd9baa6f6330f433fa4dffb3e9e9ad1",
         build_file_content = """
 filegroup(
     name = "aarch64-sysroot",
@@ -86,7 +86,7 @@ def x86_64_sysroot():
     maybe(
         http_archive,
         name = "x86_64-sysroot",
-        sha256 = "becd9de3af6e4e8bc1bc116d77dbde6ab28ebd5a77d59adaa5380ee936a1f541",
+        sha256 = "cfa444ecc4fcc858acc045e72403efd54dab734bdad4ddec30aad8826916a617",
         build_file_content = """
 filegroup(
     name = "x86_64-sysroot",
