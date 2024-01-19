@@ -79,7 +79,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v2/debian_bullseye_aarch64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_aarch64_sysroot.tar.xz",
     )
 
 def x86_64_sysroot():
@@ -94,7 +94,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v2/debian_bullseye_x86_64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_x86_64_sysroot.tar.xz",
     )
 
 def register_swift_cc_toolchains():
