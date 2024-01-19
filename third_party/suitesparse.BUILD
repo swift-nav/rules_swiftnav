@@ -18,8 +18,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
 )
 
@@ -52,8 +52,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     textual_hdrs = [
         "AMD/Source/amd_1.c",
@@ -100,8 +100,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     textual_hdrs = [
         "CAMD/Source/camd_1.c",
@@ -136,8 +136,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     textual_hdrs = [
         "COLAMD/Source/colamd.c",
@@ -162,8 +162,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     textual_hdrs = [
         "CCOLAMD/Source/ccolamd.c",
@@ -237,8 +237,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     deps = ["suitesparseconfig"],
 )
@@ -304,8 +304,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     deps = [
         "GKlib",
@@ -393,8 +393,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     textual_hdrs = [
         "CHOLMOD/Cholesky/cholmod_amd.c",
@@ -573,8 +573,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-lblas",
-        "-llapack",
+        "-l:blas.a",
+        "-l:lapack.a",
     ],
     deps = [
         "cholmod",
