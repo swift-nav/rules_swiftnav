@@ -27,6 +27,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:ar",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -37,6 +38,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:as",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -48,6 +50,7 @@ filegroup(
         "@x86_64-linux-llvm//:clang",
         "@x86_64-linux-llvm//:include",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -58,6 +61,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:dwp",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -71,6 +75,7 @@ filegroup(
         "@x86_64-linux-llvm//:ld",
         "@x86_64-linux-llvm//:lib",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -81,6 +86,7 @@ filegroup(
         ":wrappers",
         "@x86_64-linux-llvm//:objcopy",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -100,6 +106,7 @@ filegroup(
         ":compiler_files",
         "@x86_64-linux-llvm//:bin",
     ] + select({
+        "//cc:_use_libcpp": [],
         "//conditions:default": ["@x86_64-sysroot"],
     }),
 )
@@ -109,10 +116,16 @@ cc_toolchain_config(
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
     builtin_sysroot = select({
+        "//cc:_use_libcpp": None,
         "//conditions:default": "external/x86_64-sysroot",
     }),
     compiler = "clang",
     cxx_builtin_include_directories = select({
+        "//cc:_use_libcpp": [
+            "/include",
+            "/usr/include",
+            "/usr/local/include",
+        ],
         "//conditions:default": ["%sysroot%/usr/include"],
     }),
     host_system_name = X86_64_LINUX,
