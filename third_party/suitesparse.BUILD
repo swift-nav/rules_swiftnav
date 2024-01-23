@@ -529,6 +529,7 @@ cc_library(
         "CHOLMOD/Include/cholmod.h",
         "CHOLMOD/Include/cholmod_internal.h",
         "CHOLMOD/Include/cholmod_template.h",
+        "CHOLMOD/Include/cholmod_types.h",
     ],
     copts = [
         "-Iexternal/suitesparse/CHOLMOD/Cholesky",
