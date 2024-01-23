@@ -877,6 +877,8 @@ cc_library(
         "SPQR/Source/spqr_type.cpp",
     ],
     hdrs = [
+        "SPQR/Include/spqr_cholmod_wrappers.hpp",
+        "SPQR/Include/spqrgpu.hpp",
         "SPQR/Include/SuiteSparseQR.hpp",
         "SPQR/Include/SuiteSparseQR_C.h",
         "SPQR/Include/SuiteSparseQR_definitions.h",
