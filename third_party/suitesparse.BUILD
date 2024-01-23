@@ -675,6 +675,7 @@ cc_library(
         "CHOLMOD/Cholesky/t_cholmod_rowfac_worker.c",
         "CHOLMOD/Cholesky/t_cholmod_solve_worker.c",
         "CHOLMOD/Cholesky/t_cholmod_psolve_worker.c",
+        "CHOLMOD/Cholesky/t_cholmod_spsolve_worker.c",
         "CHOLMOD/MatrixOps/t_cholmod_drop_worker.c",
         "CHOLMOD/MatrixOps/t_cholmod_horzcat_worker.c",
         "CHOLMOD/MatrixOps/t_cholmod_norm_worker.c",
