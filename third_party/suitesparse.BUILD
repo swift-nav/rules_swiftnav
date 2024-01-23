@@ -666,6 +666,8 @@ cc_library(
         "CHOLMOD/Supernodal/cholmod_super_numeric.c",
         "CHOLMOD/Supernodal/cholmod_super_solve.c",
         "CHOLMOD/Supernodal/cholmod_super_symbolic.c",
+        "CHOLMOD/Supernodal/t_cholmod_super_numeric_worker.c",
+        "CHOLMOD/Supernodal/t_cholmod_super_solve_worker.c",
         "CHOLMOD/Cholesky/t_cholmod_lsolve_template.c",
         "CHOLMOD/Cholesky/t_cholmod_ltsolve_template.c",
         "CHOLMOD/Cholesky/t_cholmod_rcond_worker.c",
