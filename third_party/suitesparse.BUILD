@@ -537,6 +537,7 @@ cc_library(
         "-Iexternal/suitesparse/CHOLMOD/Modify",
         "-Iexternal/suitesparse/CHOLMOD/Partition",
         "-Iexternal/suitesparse/CHOLMOD/Supernodal",
+        "-Iexternal/suitesparse/CHOLMOD/Utility",
         # The following include paths seem to be needed -- some
         # CHOLMOD code directly #includes internal libmetis/GKlib
         # files.
@@ -646,6 +647,7 @@ cc_library(
         "CHOLMOD/Utility/cholmod_triplet_to_sparse.c",
         "CHOLMOD/Utility/cholmod_version.c",
         "CHOLMOD/Utility/cholmod_xtype.c",
+        "CHOLMOD/Utility/cholmod_zeros.c",
         "CHOLMOD/MatrixOps/cholmod_drop.c",
         "CHOLMOD/MatrixOps/cholmod_horzcat.c",
         "CHOLMOD/MatrixOps/cholmod_norm.c",
