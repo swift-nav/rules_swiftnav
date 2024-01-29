@@ -82,6 +82,7 @@ def cc_toolchain_config(
         "-std=c++14",
     ] + select({
         "//cc:_use_libcpp": ["-stdlib=libc++"],
+        "@platforms//os:macos": ["-stdlib=libc++"],
         "//conditions:default": ["-stdlib=libstdc++"],
     })
 
