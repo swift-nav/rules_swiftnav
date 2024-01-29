@@ -210,6 +210,7 @@ def cc_toolchain_config(
         cxx_flags = cxx_flags,
         link_flags = link_flags + select({
             "//cc:_use_libcpp": link_libcpp,
+            "@platforms//os:macos": link_libcpp,
             "//conditions:default": link_libstdcpp,
         }),
         link_libs = link_libs,
