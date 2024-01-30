@@ -18,8 +18,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
 )
 
@@ -52,8 +52,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     textual_hdrs = [
         "AMD/Source/amd_1.c",
@@ -100,8 +100,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     textual_hdrs = [
         "CAMD/Source/camd_1.c",
@@ -136,8 +136,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     textual_hdrs = [
         "COLAMD/Source/colamd.c",
@@ -162,8 +162,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     textual_hdrs = [
         "CCOLAMD/Source/ccolamd.c",
@@ -237,8 +237,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     deps = ["suitesparseconfig"],
 )
@@ -304,8 +304,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     deps = [
         "GKlib",
@@ -393,8 +393,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     textual_hdrs = [
         "CHOLMOD/Cholesky/cholmod_amd.c",
@@ -573,8 +573,8 @@ cc_library(
     linkopts = [
         "-lm",
         "-lpthread",
-        "-l:libblas.a",
-        "-l:liblapack.a",
+        "-lblas",
+        "-llapack",
     ],
     deps = [
         "cholmod",
