@@ -97,6 +97,7 @@ cc_toolchain_config(
     builtin_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
     compiler = "clang",
     cxx_builtin_include_directories = [
+        "%sysroot%/include/c++/v1",
         "%sysroot%/usr/include",
         "%sysroot%/System/Library/Frameworks",
     ],
