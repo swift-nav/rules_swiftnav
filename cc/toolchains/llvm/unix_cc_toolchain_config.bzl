@@ -28,7 +28,20 @@ load(
     "with_feature_set",
 )
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
-load("swift_custom_features.bzl", "swift_no_default_warnings")
+load("swift_custom_features.bzl", 
+"gnu_extensions_feature",
+"c89_standard_feature",
+"c90_standard_feature",
+"c99_standard_feature",
+"c11_standard_feature",
+"c17_standard_feature",
+"cxx98_standard_feature",
+"cxx11_standard_feature",
+"cxx14_standard_feature",
+"cxx17_standard_feature",
+"cxx20_standard_feature",
+"swift_no_default_warnings"
+)
 
 def _target_os_version(ctx):
     platform_type = ctx.fragments.apple.single_arch_platform.platform_type
@@ -1306,6 +1319,47 @@ def _impl(ctx):
         enabled = ctx.attr.use_libtool,
     )
 
+    swift_stdlib_feature = feature(
+        name = "stdlib",
+        enabled = True,
+        # The default is libstdc++, with the option to use libc++ instead.
+        flag_sets = [
+            flag_set(
+                actions = all_link_actions + lto_index_actions,
+                flag_groups = ([
+                    flag_group(
+                        flags = [
+                            "-std=libstdc++",
+                            # link statically for now
+                            "-l:libstdc++.a",
+                        ],
+                    ),
+                ]),
+                with_features = [with_feature_set(not_features = ["libcpp"])],
+            ),
+            flag_set(
+                actions = all_link_actions + lto_index_actions,
+                flag_groups = ([
+                    flag_group(
+                        flags = ["stdlib=libc++"] + [
+                            # implies static linking.
+                            "-l:libc++.a",
+                            "-l:libc++abi.a",
+                            "-l:libunwind.a",
+                        ] if is_linux else [],
+                    ),
+                ]),
+                with_features = [with_feature_set(features = ["libcpp"])],
+            ),
+        ],
+    )
+
+    swift_libcpp_feature = feature(
+        name = "libcpp",
+        # we only support libcpp on macos
+        enabled = not is_linux,
+    )
+    
     # TODO(#8303): Mac crosstool should also declare every feature.
     if is_linux:
         # Linux artifact name patterns are the default.
@@ -1366,7 +1420,20 @@ def _impl(ctx):
             archive_param_file_feature,
         ] + layering_check_features(ctx.attr.compiler) + [
             # append swiftnavs custom features here.
+            gnu_extensions_feature,
+            c89_standard_feature,
+            c90_standard_feature,
+            c99_standard_feature,
+            c11_standard_feature,
+            c17_standard_feature,
+            cxx98_standard_feature,
+            cxx11_standard_feature,
+            cxx14_standard_feature,
+            cxx17_standard_feature,
+            cxx20_standard_feature,
             swift_no_default_warnings,
+            swift_stdlib_feature,
+            swift_libcpp_feature,
         ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
@@ -1408,7 +1475,20 @@ def _impl(ctx):
             archive_param_file_feature,
         ] + layering_check_features(ctx.attr.compiler) + [
             # append swiftnavs custom features here
+            gnu_extensions_feature,
+            c89_standard_feature,
+            c90_standard_feature,
+            c99_standard_feature,
+            c11_standard_feature,
+            c17_standard_feature,
+            cxx98_standard_feature,
+            cxx11_standard_feature,
+            cxx14_standard_feature,
+            cxx17_standard_feature,
+            cxx20_standard_feature,
             swift_no_default_warnings,
+            swift_stdlib_feature,
+            swift_libcpp_feature,
         ]
 
     return cc_common.create_cc_toolchain_config_info(
