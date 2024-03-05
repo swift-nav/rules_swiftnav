@@ -28,19 +28,20 @@ load(
     "with_feature_set",
 )
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
-load("swift_custom_features.bzl", 
-"gnu_extensions_feature",
-"c89_standard_feature",
-"c90_standard_feature",
-"c99_standard_feature",
-"c11_standard_feature",
-"c17_standard_feature",
-"cxx98_standard_feature",
-"cxx11_standard_feature",
-"cxx14_standard_feature",
-"cxx17_standard_feature",
-"cxx20_standard_feature",
-"swift_no_default_warnings"
+load(
+    "swift_custom_features.bzl",
+    "c11_standard_feature",
+    "c17_standard_feature",
+    "c89_standard_feature",
+    "c90_standard_feature",
+    "c99_standard_feature",
+    "cxx11_standard_feature",
+    "cxx14_standard_feature",
+    "cxx17_standard_feature",
+    "cxx20_standard_feature",
+    "cxx98_standard_feature",
+    "gnu_extensions_feature",
+    "swift_no_default_warnings",
 )
 
 def _target_os_version(ctx):
@@ -1359,7 +1360,7 @@ def _impl(ctx):
         # we only support libcpp on macos
         enabled = not is_linux,
     )
-    
+
     # TODO(#8303): Mac crosstool should also declare every feature.
     if is_linux:
         # Linux artifact name patterns are the default.
