@@ -371,6 +371,7 @@ cxx20_standard_feature = feature(
             flag_groups = ([
                 flag_group(
                     flags = [
+                        "-DSWIFTNAV_EXPERIMENTAL_MEMORY_RESOURCE",
                         "-D_LIBCPP_ENABLE_CXX20_REMOVED_FEATURES",
                     ],
                 ),
