@@ -33,7 +33,7 @@ X86_64_LINUX_GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/r
 # Fixes a bug in libcpp that removed the std::allocator<void> specialization
 # when building with c++20. This was patched in llvm-15 so once we upgrade to
 # that this will no longer be necessary.
-LLVM_PATCH_FILE = [Label("//cc/toolchains/llvm:llvm.patch")],
+LLVM_PATCH_FILE = [Label("//cc/toolchains/llvm:llvm.patch")]
 
 # Use p1 for patches generated with git.
 LLVM_PATCH_ARGS = ["-p1"]
