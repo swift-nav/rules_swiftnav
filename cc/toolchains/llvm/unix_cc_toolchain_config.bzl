@@ -1326,13 +1326,11 @@ def _impl(ctx):
         # The default is libstdc++, with the option to use libc++ instead.
         flag_sets = [
             flag_set(
-                actions = all_link_actions + lto_index_actions,
+                actions = all_cpp_compile_actions + [ACTION_NAMES.lto_backend],
                 flag_groups = ([
                     flag_group(
                         flags = [
-                            "-std=libstdc++",
-                            # link statically for now
-                            "-l:libstdc++.a",
+                            "-stdlib=libstdc++",
                         ],
                     ),
                 ]),
@@ -1342,11 +1340,33 @@ def _impl(ctx):
                 actions = all_link_actions + lto_index_actions,
                 flag_groups = ([
                     flag_group(
-                        flags = ["stdlib=libc++"] + [
+                        flags = [
+                            # link statically for now
+                            "-l:libstdc++.a",
+                        ],
+                    ),
+                ]),
+                with_features = [with_feature_set(not_features = ["libcpp"])],
+            ),
+            flag_set(
+                actions = all_cpp_compile_actions + [ACTION_NAMES.lto_backend],
+                flag_groups = ([
+                    flag_group(
+                        flags = ["-stdlib=libc++"],
+                    ),
+                ]),
+                with_features = [with_feature_set(features = ["libcpp"])],
+            ),
+            flag_set(
+                actions = all_link_actions + lto_index_actions,
+                flag_groups = ([
+                    flag_group(
+                        flags = [
                             # implies static linking.
                             "-l:libc++.a",
                             "-l:libc++abi.a",
                             "-l:libunwind.a",
+                            "-rtlib=compiler-rt",
                         ] if is_linux else [],
                     ),
                 ]),
@@ -1357,7 +1377,7 @@ def _impl(ctx):
 
     swift_libcpp_feature = feature(
         name = "libcpp",
-        # we only support libcpp on macos
+        # libc++ is the default on macos.
         enabled = not is_linux,
     )
 

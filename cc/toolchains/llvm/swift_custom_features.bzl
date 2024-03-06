@@ -18,6 +18,7 @@ load(
     "feature",
     "flag_group",
     "flag_set",
+    "with_feature_set",
 )
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
@@ -227,7 +228,7 @@ cxx98_standard_feature = feature(
     provides = ["cxx_standard"],
     flag_sets = [
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=c++98"],
@@ -238,7 +239,7 @@ cxx98_standard_feature = feature(
             ],
         ),
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=gnu++98"],
@@ -256,7 +257,7 @@ cxx11_standard_feature = feature(
     provides = ["cxx_standard"],
     flag_sets = [
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=c++0x"],
@@ -267,7 +268,7 @@ cxx11_standard_feature = feature(
             ],
         ),
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=gnu++0x"],
@@ -285,7 +286,7 @@ cxx14_standard_feature = feature(
     provides = ["cxx_standard"],
     flag_sets = [
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=c++14"],
@@ -296,7 +297,7 @@ cxx14_standard_feature = feature(
             ],
         ),
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=gnu++14"],
@@ -314,7 +315,7 @@ cxx17_standard_feature = feature(
     provides = ["cxx_standard"],
     flag_sets = [
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=c++17"],
@@ -325,7 +326,7 @@ cxx17_standard_feature = feature(
             ],
         ),
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=gnu++17"],
@@ -343,7 +344,7 @@ cxx20_standard_feature = feature(
     provides = ["cxx_standard"],
     flag_sets = [
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=c++20"],
@@ -354,7 +355,7 @@ cxx20_standard_feature = feature(
             ],
         ),
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-std=gnu++20"],
@@ -366,7 +367,7 @@ cxx20_standard_feature = feature(
         ),
         # clang is aggresive about removing features from the standard.
         flag_set(
-            actions = all_cpp_compile_actions,
+            actions = _all_cpp_compile_actions,
             flag_groups = ([
                 flag_group(
                     flags = ["-D_LIBCPP_ENABLE_CXX20_REMOVED_FEATURES"],
