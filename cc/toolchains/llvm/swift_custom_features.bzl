@@ -367,10 +367,12 @@ cxx20_standard_feature = feature(
         ),
         # clang is aggresive about removing features from the standard.
         flag_set(
-            actions = _all_cpp_compile_actions,
+            actions = _preprocessor_compile_actions,
             flag_groups = ([
                 flag_group(
-                    flags = ["-D_LIBCPP_ENABLE_CXX20_REMOVED_FEATURES"],
+                    flags = [
+                        "-D_LIBCPP_ENABLE_CXX20_REMOVED_FEATURES",
+                    ],
                 ),
             ]),
             with_features = [

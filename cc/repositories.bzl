@@ -62,6 +62,8 @@ def swift_cc_toolchain():
         http_archive,
         name = "x86_64-linux-llvm",
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
+        patch_args = ["-p1"],
+        patches = [Label("//cc/toolchains/llvm:llvm.patch")],
         url = X86_64_LINUX_LLVM,
         strip_prefix = "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
         sha256 = "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5",
