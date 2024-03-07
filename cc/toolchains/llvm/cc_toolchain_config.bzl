@@ -135,7 +135,6 @@ def cc_toolchain_config(
         # toolchain directory back after we are done.
         link_flags.extend([
             "-L{}/usr/lib".format(builtin_sysroot),
-            "-isystem {}/include/c++/v1".format(builtin_sysroot),
             "-lc++",
             "-lc++abi",
         ])
