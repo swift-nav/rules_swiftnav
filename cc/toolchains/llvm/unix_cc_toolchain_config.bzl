@@ -1357,21 +1357,6 @@ def _impl(ctx):
                 ]),
                 with_features = [with_feature_set(features = ["libcpp"])],
             ),
-            flag_set(
-                actions = all_link_actions + lto_index_actions,
-                flag_groups = ([
-                    flag_group(
-                        flags = [
-                            # implies static linking.
-                            "-l:libc++.a",
-                            "-l:libc++abi.a",
-                            "-l:libunwind.a",
-                            "-rtlib=compiler-rt",
-                        ] if is_linux else [],
-                    ),
-                ]),
-                with_features = [with_feature_set(features = ["libcpp"])],
-            ),
         ] + flag_set(
             actions = all_link_actions + lto_index_actions,
             flag_groups = ([
