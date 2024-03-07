@@ -1357,7 +1357,7 @@ def _impl(ctx):
                 ]),
                 with_features = [with_feature_set(features = ["libcpp"])],
             ),
-        ] + flag_set(
+        ] + [flag_set(
             actions = all_link_actions + lto_index_actions,
             flag_groups = ([
                 flag_group(
@@ -1371,7 +1371,7 @@ def _impl(ctx):
                 ),
             ]),
             with_features = [with_feature_set(features = ["libcpp"])],
-        ) if is_linux else [],
+        )] if is_linux else [],
     )
 
     swift_libcpp_feature = feature(
