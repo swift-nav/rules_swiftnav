@@ -198,6 +198,8 @@ def _impl(ctx):
     ]
     action_configs = []
 
+    is_linux = ctx.attr.target_libc != "macosx"
+
     llvm_cov_action = action_config(
         action_name = ACTION_NAMES.llvm_cov,
         tools = [
@@ -295,7 +297,21 @@ def _impl(ctx):
                 ] if ctx.attr.opt_link_flags else []),
                 with_features = [with_feature_set(features = ["opt"])],
             ),
-        ],
+        ] + [flag_set(
+            actions = all_link_actions + lto_index_actions,
+            flag_groups = ([
+                flag_group(
+                    flags = [
+                        # implies static linking.
+                        "-l:libc++.a",
+                        "-l:libc++abi.a",
+                        "-l:libunwind.a",
+                        "-rtlib=compiler-rt",
+                    ],
+                ),
+            ]),
+            with_features = [with_feature_set(features = ["libcpp"])],
+        )] if is_linux else [],
     )
 
     dbg_feature = feature(name = "dbg")
@@ -1314,7 +1330,6 @@ def _impl(ctx):
         ],
     )
 
-    is_linux = ctx.attr.target_libc != "macosx"
     libtool_feature = feature(
         name = "libtool",
         enabled = ctx.attr.use_libtool,
@@ -1357,21 +1372,7 @@ def _impl(ctx):
                 ]),
                 with_features = [with_feature_set(features = ["libcpp"])],
             ),
-        ] + [flag_set(
-            actions = all_link_actions + lto_index_actions,
-            flag_groups = ([
-                flag_group(
-                    flags = [
-                        # implies static linking.
-                        "-l:libc++.a",
-                        "-l:libc++abi.a",
-                        "-l:libunwind.a",
-                        "-rtlib=compiler-rt",
-                    ],
-                ),
-            ]),
-            with_features = [with_feature_set(features = ["libcpp"])],
-        )] if is_linux else [],
+        ],
     )
 
     swift_libcpp_feature = feature(
