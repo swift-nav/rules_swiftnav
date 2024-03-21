@@ -42,6 +42,7 @@ load(
     "cxx98_standard_feature",
     "gnu_extensions_feature",
     "swift_no_default_warnings",
+    "swift_relwdbg_feature",
 )
 
 def _target_os_version(ctx):
