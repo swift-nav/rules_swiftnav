@@ -1455,6 +1455,7 @@ def _impl(ctx):
             swift_no_default_warnings,
             swift_stdlib_feature,
             swift_libcpp_feature,
+            swift_relwdbg_feature,
         ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
@@ -1510,6 +1511,7 @@ def _impl(ctx):
             swift_no_default_warnings,
             swift_stdlib_feature,
             swift_libcpp_feature,
+            swift_relwdbg_feature,
         ]
 
     return cc_common.create_cc_toolchain_config_info(

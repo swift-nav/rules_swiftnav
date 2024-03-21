@@ -385,6 +385,16 @@ cxx20_standard_feature = feature(
     ],
 )
 
+swift_relwdbg_feature = feature(
+    name = "relwdbg",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = ["-O2", "-g"])],
+        ),
+    ],
+)
+
 # Clang has a set of warnings that are always enabled by default
 # which gets noisey for third party code. This feature allows disabling
 # these warnings for code we likely never intend to patch to focus on
