@@ -80,21 +80,13 @@ def cc_toolchain_config(
     cxx_flags = [
         # The whole codebase should build with c++14
         "-std=c++14",
-    ] + select({
-        "//cc:_use_libstdcpp": ["-stdlib=libstdc++"],
-        "//cc:_enable_sysroot": ["-stdlib=libstdc++"],
-        "//conditions:default": ["-stdlib=libstdc++"] if is_cross_compile else ["-stdlib=libc++"],
-    })
+    ]
 
     link_flags = [
         "--target=" + target_system_name,
         "-lm",
         "-no-canonical-prefixes",
     ]
-
-    link_libcpp = []
-
-    link_libstdcpp = ["-l:libstdc++.a"]
 
     # Similar to link_flags, but placed later in the command line such that
     # unused symbols are not stripped.
@@ -126,15 +118,6 @@ def cc_toolchain_config(
             # It's ok to assume posix when using this toolchain
             "-lpthread",
             "-ldl",
-        ])
-
-        link_libcpp.extend([
-            # Below this line, assumes libc++ & lld
-            "-l:libc++.a",
-            "-l:libc++abi.a",
-            "-l:libunwind.a",
-            # Compiler runtime features.
-            "-rtlib=compiler-rt",
         ])
     else:
         # The comments below were copied directly from:
@@ -208,11 +191,7 @@ def cc_toolchain_config(
         dbg_compile_flags = dbg_compile_flags,
         opt_compile_flags = opt_compile_flags,
         cxx_flags = cxx_flags,
-        link_flags = link_flags + select({
-            "//cc:_use_libstdcpp": link_libstdcpp,
-            "//cc:_enable_sysroot": link_libstdcpp,
-            "//conditions:default": link_libstdcpp if is_cross_compile else link_libcpp,
-        }),
+        link_flags = link_flags,
         link_libs = link_libs,
         opt_link_flags = opt_link_flags,
         unfiltered_compile_flags = unfiltered_compile_flags,
