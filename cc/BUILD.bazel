@@ -155,26 +155,14 @@ selects.config_setting_group(
 )
 
 bool_flag(
-    name = "enable_sysroot",
+    name = "use_libcpp",
     build_setting_default = False,
     visibility = ["//visibility:public"],
 )
 
 config_setting(
-    name = "_enable_sysroot",
-    flag_values = {":enable_sysroot": "true"},
-    visibility = ["//visibility:public"],
-)
-
-bool_flag(
-    name = "use_libstdcpp",
-    build_setting_default = False,
-    visibility = ["//visibility:public"],
-)
-
-config_setting(
-    name = "_use_libstdcpp",
-    flag_values = {":use_libstdcpp": "true"},
+    name = "_use_libcpp",
+    flag_values = {":use_libcpp": "true"},
     visibility = ["//visibility:public"],
 )
 

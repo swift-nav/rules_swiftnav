@@ -30,11 +30,21 @@ DARWIN_GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/release
 
 X86_64_LINUX_GCC_ARM_EMBEDDED = "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
 
+# Fixes a bug in libcpp that removed the std::allocator<void> specialization
+# when building with c++20. This was patched in llvm-15 so once we upgrade to
+# that this will no longer be necessary.
+LLVM_PATCH_FILE = [Label("//cc/toolchains/llvm:llvm.patch")]
+
+# Use p1 for patches generated with git.
+LLVM_PATCH_ARGS = ["-p1"]
+
 def swift_cc_toolchain():
     maybe(
         http_archive,
         name = "aarch64-darwin-llvm",
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
+        patch_args = LLVM_PATCH_ARGS,
+        patches = LLVM_PATCH_FILE,
         url = AARCH64_DARWIN_LLVM,
         strip_prefix = "clang+llvm-14.0.0-arm64-apple-darwin",
         sha256 = "f826ee92c3fedb92bad2f9f834d96f6b9db3192871bfe434124bca848ba9a2a3",
@@ -43,6 +53,8 @@ def swift_cc_toolchain():
     maybe(
         http_archive,
         name = "x86_64-darwin-llvm",
+        patch_args = LLVM_PATCH_ARGS,
+        patches = LLVM_PATCH_FILE,
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = X86_64_DARWIN_LLVM,
         strip_prefix = "clang+llvm-14.0.0-x86_64-apple-darwin",
@@ -52,6 +64,8 @@ def swift_cc_toolchain():
     maybe(
         http_archive,
         name = "aarch64-linux-llvm",
+        patch_args = LLVM_PATCH_ARGS,
+        patches = LLVM_PATCH_FILE,
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
         url = AARCH64_LINUX_LLVM,
         strip_prefix = "clang+llvm-14.0.0-aarch64-linux-gnu",
@@ -62,6 +76,8 @@ def swift_cc_toolchain():
         http_archive,
         name = "x86_64-linux-llvm",
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
+        patch_args = LLVM_PATCH_ARGS,
+        patches = LLVM_PATCH_FILE,
         url = X86_64_LINUX_LLVM,
         strip_prefix = "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
         sha256 = "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5",
@@ -71,7 +87,7 @@ def aarch64_sysroot():
     maybe(
         http_archive,
         name = "aarch64-sysroot",
-        sha256 = "b720ec47e4b53db12cd2f5fbf2c162be9a07a3e2f699be6cf2912a570001f39f",
+        sha256 = "4e4cbbed33e78602a5f038305514307a5bd9baa6f6330f433fa4dffb3e9e9ad1",
         build_file_content = """
 filegroup(
     name = "aarch64-sysroot",
@@ -79,14 +95,14 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v2/debian_bullseye_aarch64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_aarch64_sysroot.tar.xz",
     )
 
 def x86_64_sysroot():
     maybe(
         http_archive,
         name = "x86_64-sysroot",
-        sha256 = "becd9de3af6e4e8bc1bc116d77dbde6ab28ebd5a77d59adaa5380ee936a1f541",
+        sha256 = "cfa444ecc4fcc858acc045e72403efd54dab734bdad4ddec30aad8826916a617",
         build_file_content = """
 filegroup(
     name = "x86_64-sysroot",
@@ -94,7 +110,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v2/debian_bullseye_x86_64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_x86_64_sysroot.tar.xz",
     )
 
 def register_swift_cc_toolchains():
