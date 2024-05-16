@@ -38,7 +38,7 @@ def _download_ex(gh, url, output, executable = False, sha256 = "", headers = {})
     if http_response_code < 200 or http_response_code > 299:
         fail("Download of {url} failed with HTTP response code {http_response_code}".format(
             url = url,
-            http_response_code = http_response_code
+            http_response_code = http_response_code,
         ))
 
     actual_sha256 = gh._calculate_sha256(gh, output)
@@ -84,7 +84,8 @@ def _get_github_release_id(gh, owner, repo, tag_name, auth_token):
         gh,
         url = "https://api.github.com/repos/{owner}/{repo}/releases".format(
             owner = owner,
-            repo = repo),
+            repo = repo,
+        ),
         output = releases_file,
         headers = {
             "Accept": "application/vnd.github+json",
@@ -100,7 +101,8 @@ def _get_github_release_id(gh, owner, repo, tag_name, auth_token):
     fail("Could not find release with tag {tag_name} in {owner}/{repo}".format(
         tag_name = tag_name,
         owner = owner,
-        repo = repo))
+        repo = repo,
+    ))
 
 def _get_github_release_asset_id(gh, owner, repo, release_id, asset_name, auth_token):
     """Gets the asset id of an asset within a GitHub release"""
@@ -110,7 +112,8 @@ def _get_github_release_asset_id(gh, owner, repo, release_id, asset_name, auth_t
         url = "https://api.github.com/repos/{owner}/{repo}/releases/{release_id}/assets".format(
             owner = owner,
             repo = repo,
-            release_id = release_id),
+            release_id = release_id,
+        ),
         output = assets_file,
         headers = {
             "Accept": "application/vnd.github+json",
@@ -127,10 +130,19 @@ def _get_github_release_asset_id(gh, owner, repo, release_id, asset_name, auth_t
         asset_name = asset_name,
         owner = owner,
         repo = repo,
-        release_id = release_id))
+        release_id = release_id,
+    ))
 
-def _download_with_http_client(gh, owner, repo, tag_name, asset_name, output,
-    executable = False, netrc = None, sha256 = ""):
+def _download_with_http_client(
+        gh,
+        owner,
+        repo,
+        tag_name,
+        asset_name,
+        output,
+        executable = False,
+        netrc = None,
+        sha256 = ""):
     """Downloads an asset from github using HTTP requests"""
     github_auth_token = gh._get_github_auth_token(gh, netrc)
 
@@ -156,7 +168,8 @@ def _download_with_http_client(gh, owner, repo, tag_name, asset_name, output,
         url = "https://api.github.com/repos/{owner}/{repo}/releases/assets/{asset_id}".format(
             owner = owner,
             repo = repo,
-            asset_id = asset_id),
+            asset_id = asset_id,
+        ),
         headers = {
             # Note the required use of a custom request header to download the release _content_
             "Accept": "application/octet-stream",
@@ -168,8 +181,16 @@ def _download_with_http_client(gh, owner, repo, tag_name, asset_name, output,
         output = output,
     )
 
-def _download(gh, owner, repo, tag_name, asset_name, output, executable = False,
-    netrc = None, sha256 = ""):
+def _download(
+        gh,
+        owner,
+        repo,
+        tag_name,
+        asset_name,
+        output,
+        executable = False,
+        netrc = None,
+        sha256 = ""):
     """download() that works with a GitHub release asset"""
     return gh._download_with_http_client(
         gh,
@@ -183,8 +204,15 @@ def _download(gh, owner, repo, tag_name, asset_name, output, executable = False,
         output = output,
     )
 
-def _download_and_extract(gh, owner, repo, tag_name, asset_name, netrc = None,
-    sha256 = "", strip_prefix = ""):
+def _download_and_extract(
+        gh,
+        owner,
+        repo,
+        tag_name,
+        asset_name,
+        netrc = None,
+        sha256 = "",
+        strip_prefix = ""):
     """download_and_extract() that works with a GitHub release asset"""
     download_file = "downloaded_file.tar.gz"
     res = gh.download(

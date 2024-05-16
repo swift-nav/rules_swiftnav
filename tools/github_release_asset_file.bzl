@@ -67,6 +67,6 @@ github_release_asset_file = repository_rule(
         "executable": attr.bool(
             default = False,
             doc = "Mark the downloaded file as executable",
-        )
+        ),
     },
 )
