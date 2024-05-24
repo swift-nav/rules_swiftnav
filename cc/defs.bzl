@@ -110,8 +110,8 @@ def _symbolizer_env(val):
     return select({
         # The + operator is not supported on dict and select types so we need to be
         # clever here.
-        Label("//cc:enable_symbolizer_x86_64_linux"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"}),
-        Label("//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{"ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"}),
+        Label("//cc:enable_symbolizer_x86_64_linux"): dict(val, **{"UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)"}),
+        Label("//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{"UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)"}),
         "//conditions:default": {},
     })
 
@@ -506,6 +506,8 @@ def swift_c_tool(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_cc_opts(nocopts, pedantic = False)
@@ -515,7 +517,7 @@ def swift_c_tool(**kwargs):
 
     c_standard = _c_standard(extensions, standard)
 
-    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+    kwargs["copts"] = copts + c_standard + local_includes + kwargs.get("copts", [])
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
@@ -551,6 +553,8 @@ def swift_cc_tool(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
     nocopts = kwargs.pop("nocopts", [])
 
     copts = _common_cc_opts(nocopts, pedantic = False)
@@ -561,7 +565,7 @@ def swift_cc_tool(**kwargs):
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
-    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + local_includes + kwargs.get("copts", [])
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
