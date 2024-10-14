@@ -12,7 +12,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//cc/toolchains/yocto_generic:yocto_generic.bzl", "yocto_generic")
 
-AARCH64_DARWIN_LLVM = "https://github.com/swift-nav/swift-toolchains/releases/download/llvm-14.0.0/clang%2Bllvm-14.0.0-arm64-apple-darwin.tar.gz"
+AARCH64_DARWIN_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/clang+llvm-17.0.6-arm64-apple-darwin22.0.tar.xz"
 
 X86_64_DARWIN_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-apple-darwin.tar.xz"
 
@@ -43,11 +43,9 @@ def swift_cc_toolchain():
         http_archive,
         name = "aarch64-darwin-llvm",
         build_file = Label("//cc/toolchains/llvm:llvm.BUILD.bzl"),
-        patch_args = LLVM_PATCH_ARGS,
-        patches = LLVM_PATCH_FILE,
         url = AARCH64_DARWIN_LLVM,
-        strip_prefix = "clang+llvm-14.0.0-arm64-apple-darwin",
-        sha256 = "f826ee92c3fedb92bad2f9f834d96f6b9db3192871bfe434124bca848ba9a2a3",
+        strip_prefix = "clang+llvm-17.0.6-arm64-apple-darwin22.0",
+        sha256 = "1264eb3c2a4a6d5e9354c3e5dc5cb6c6481e678f6456f36d2e0e566e9400fcad",
     )
 
     maybe(
