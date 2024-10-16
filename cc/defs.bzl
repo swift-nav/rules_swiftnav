@@ -58,6 +58,15 @@ def _common_cc_opts(nocopts, pedantic = False):
         "//conditions:default": ["-Werror"],
     }) + ["-pedantic"] if pedantic else []
 
+# Options specific to C++ language standard
+def _common_cxx_standard_opts(standard = None):
+    return select({
+        Label("//cc:cxx17"): [_cxx_standard("-std=c++17", standard)],
+        Label("//cc:cxx20"): [_cxx_standard("-std=c++20", standard)],
+        Label("//cc:cxx23"): [_cxx_standard("-std=c++23", standard)],
+        "//conditions:default": [_cxx_standard("-std=c++14", standard)],
+    })
+
 # Options specific to c++ code (exceptions, rtti, etc..)
 def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
     return select({
@@ -66,12 +75,7 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
     }) + select({
         Label("//cc:_enable_rtti"): ["-frtti"],
         "//conditions:default": ["-fno-rtti" if not rtti else "-frtti"],
-    }) + select({
-        Label("//cc:cxx17"): [_cxx_standard("-std=c++17", standard)],
-        Label("//cc:cxx20"): [_cxx_standard("-std=c++20", standard)],
-        Label("//cc:cxx23"): [_cxx_standard("-std=c++23", standard)],
-        "//conditions:default": [_cxx_standard("-std=c++14", standard)],
-    })
+    }) + _common_cxx_standard_opts(standard)
 
 # Handle various nuances of local include paths
 def _construct_local_includes(local_includes):
@@ -638,7 +642,7 @@ def swift_cc_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations()
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _common_cxx_standard_opts(kwargs.pop("standard", []))
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
