@@ -99,7 +99,7 @@ def _impl(ctx):
                     actions = all_compile_actions,
                     flag_groups = ([
                         flag_group(
-                            flags = ["-O2", "-g"],
+                            flags = ["-O2", "-gdwarf-4"],
                         ),
                     ]),
                     with_features = [with_feature_set(features = ["opt"])],
