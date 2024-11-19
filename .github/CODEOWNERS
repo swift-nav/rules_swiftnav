@@ -1,1 +1,5 @@
 * @swift-nav/build
+
+# Software Coding Guidelines related
+clang_format/* @swift-nav/coding-guidelines-ccb
+clang_tidy/* @swift-nav/coding-guidelines-ccb
