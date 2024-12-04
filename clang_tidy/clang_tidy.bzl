@@ -126,7 +126,7 @@ def _safe_flags(flags):
         "-Wno-stringop-overflow",
     ]
 
-    return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("--sysroot") and not "-std=" in flag]
+    return [flag for flag in flags if flag not in unsupported_flags and not flag.startswith("--sysroot")]
 
 def _replace_gendir(flags, ctx):
     return [flag.replace("$(GENDIR)", ctx.genfiles_dir.path) for flag in flags]
