@@ -9,4 +9,4 @@ def is_target_triplet(target):
            target != AARCH64_LINUX or \
            target != X86_64_DARWIN or \
            target != AARCH64_DARWIN or \
-           target != X86_64_WINDOWS or \
+           target != X86_64_WINDOWS
