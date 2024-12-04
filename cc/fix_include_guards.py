@@ -13,12 +13,12 @@
 #
 
 import locale
-import subprocess
 import os
-import sys
 import re
-from pathlib import Path
+import subprocess
+import sys
 from datetime import datetime
+from pathlib import Path
 
 """
 Don't check for header guards if there are error suppression
@@ -28,6 +28,8 @@ Because this is silencing a warning for a nonexistent line, we
 only support the very specific NOLINT(build/header_guard) syntax,
 and not the general NOLINT or NOLINT(*) syntax.
 """
+
+
 def can_ignore_file(lines):
     if any("NOLINT(build/header_guard)" in line for line in lines) or any(
         "#pragma once" in line for line in lines
@@ -52,7 +54,7 @@ def get_expected_guard(filename):
 
     expected_guard = "_".join(expected_guard_parts)
     expected_guard = expected_guard.replace("++", "cpp")
-    expected_guard = re.sub(r"[/\.-]", "_", expected_guard).upper()
+    expected_guard = re.sub(r"[/\.-]", "_", expected_guard).upper() + "_"
 
     return expected_guard
 
@@ -144,11 +146,12 @@ def main():
     os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
     files = []
     if len(sys.argv) == 1:
-        git = subprocess.run(['git', 'ls-files', '*.h'],
-                             capture_output=True,
-                             encoding=locale.getpreferredencoding(),
-                             check=True,
-                             )
+        git = subprocess.run(
+            ["git", "ls-files", "*.h"],
+            capture_output=True,
+            encoding=locale.getpreferredencoding(),
+            check=True,
+        )
         files = git.stdout.splitlines()
     else:
         files = sys.argv[1:]
