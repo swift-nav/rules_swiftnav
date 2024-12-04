@@ -87,7 +87,7 @@ filegroup(
         "linker_files",
         ":compiler_files",
         "@x86_64-windows-llvm-mingw//:bin",
-    ]
+    ],
 )
 
 cc_toolchain_config(
@@ -96,9 +96,9 @@ cc_toolchain_config(
     abi_version = "clang",
     compiler = "clang",
     cxx_builtin_include_directories = [
-            "/include",
-            "/usr/include",
-            "/usr/local/include",
+        "/include",
+        "/usr/include",
+        "/usr/local/include",
     ],
     host_system_name = X86_64_WINDOWS,
     target_cpu = "k8",
@@ -149,4 +149,3 @@ toolchain(
     toolchain = ":cc-clang-x86_64-windows",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
-
