@@ -20,6 +20,8 @@ AARCH64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llv
 
 X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
 
+X86_64_LINUX_UCRT_LLVM_MINGW = "https://github.com/mstorsjo/llvm-mingw/releases/download/20241030/llvm-mingw-20241030-ucrt-x86_64.zip"
+
 AARCH64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/aarch64-linux-musl-cross.tar.gz"
 
 ARM_LINUX_MUSLEABIHF = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/arm-linux-musleabihf-cross.tar.gz"
@@ -157,6 +159,18 @@ def x86_64_linux_musl_toolchain():
 
 def register_x86_64_linux_musl_toolchain():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/musl/x86_64:toolchain")
+
+def llvm_mingw_toolchain():
+    http_archive(
+        name = "x86_64-linux-llvm-mingw",
+        build_file = "//cc/toolchains/llvm-mingw:x86_64-liux.BUILD.bzl",
+        sha256 = "05c55108e9b400bda1d4cef8e22c0e5f9495f1316c072e92b9f7965114a30b66",
+        strip_prefix = "clang+llvm-mingw-19.1.3-x86_64-linux-gnu-ubuntu-20.04",
+        url = X86_64_LINUX_UCRT_LLVM_MINGW,
+    )
+
+def register_llvm_mingw_toolchain():
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm-mingw/x86_64:toolchain")
 
 def gcc_arm_embedded_toolchain():
     http_archive(
