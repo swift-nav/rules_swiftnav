@@ -94,10 +94,10 @@ cc_toolchain_config(
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
     compiler = "clang",
-    host_system_name = X86_64_LINUX,
+    host_system_name = "x86_64-linux-gnu",
     target_cpu = "k8",
     target_libc = "glibc_unknown",
-    target_system_name = X86_64_WINDOWS,
+    target_system_name = "x86_64-windows",
     tool_paths = {
         "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
