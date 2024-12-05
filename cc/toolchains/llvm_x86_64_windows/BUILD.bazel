@@ -132,7 +132,7 @@ cc_toolchain(
 )
 
 toolchain(
-    name = "cc-toolchain-x86_64-linux",
+    name = "cc-toolchain-x86_64-windows",
     exec_compatible_with = [
         "@platforms//cpu:x86_64",
         "@platforms//os:windows",
@@ -142,6 +142,6 @@ toolchain(
         "@platforms//os:windows",
     ],
     target_settings = None,
-    toolchain = ":cc-clang-x86_64-linux",
+    toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
 )
