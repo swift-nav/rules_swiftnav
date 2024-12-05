@@ -2,7 +2,7 @@ load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_gro
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 def _impl(ctx):
-    SDK_PATH_PREFIX = "wrappers/aarch64-linux-gnu-{}"
+    SDK_PATH_PREFIX = "wrappers/{}"
 
     tool_paths = [
         tool_path(
