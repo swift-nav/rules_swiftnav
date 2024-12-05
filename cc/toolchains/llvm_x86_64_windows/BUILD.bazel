@@ -94,6 +94,9 @@ cc_toolchain_config(
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
     compiler = "clang",
+    cxx_builtin_include_directories = [
+        "@x86_64-linux-llvm-mingw//:include",
+    ],
     host_system_name = "x86_64-linux-gnu",
     target_cpu = "k8",
     target_libc = "glibc_unknown",
