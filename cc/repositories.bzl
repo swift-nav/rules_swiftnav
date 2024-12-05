@@ -163,7 +163,7 @@ def register_x86_64_linux_musl_toolchain():
 def llvm_mingw_toolchain():
     http_archive(
         name = "x86_64-linux-llvm-mingw",
-        build_file = "//cc/toolchains/llvm_x86_64_windows:toolchain.BUILD",
+        build_file = "@rules_swiftnav//cc/toolchains/llvm_x86_64_windows:toolchain.BUILD",
         sha256 = "21458febf5d2c918df922dd0da60137a8787e5e6b427925a1977c882fc79b550",
         strip_prefix = "llvm-mingw-20241203-ucrt-ubuntu-20.04-x86_64",
         url = X86_64_LINUX_UCRT_LLVM_MINGW,
