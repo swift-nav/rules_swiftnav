@@ -80,7 +80,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot=external/x86_64-linux-llvm-mingw",
+                                "--sysroot=external/llvm_mingw_toolchain",
                                 "-no-canonical-prefixes",
                                 # Reproducibility
                                 "-Wno-builtin-macro-redefined",

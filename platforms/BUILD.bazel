@@ -125,7 +125,6 @@ platform(
     constraint_values = [
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
-        "@rules_swiftnav//cc/toolchains/llvm_x86_64_windows:cc-toolchain-x86_64-windows
     ],
     visibility = ["//visibility:public"],
 )

@@ -12,6 +12,12 @@ package(default_visibility = ["//visibility:public"])
 
 load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
 
+constraint_value(
+    name = "llvm_mingw_toolchain",
+    constraint_setting = "@rules_swiftnav//cc/constraints:toolchain",
+    visibility = ["//visibility:public"],
+)
+
 filegroup(
     name = "wrappers",
     srcs = glob([
@@ -24,7 +30,8 @@ filegroup(
     name = "ar_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:ar",
+        "@llvm_mingw_toolchain//:ar",
+        "@llvm_mingw_toolchain//:include",
     ],
 )
 
@@ -32,7 +39,8 @@ filegroup(
     name = "as_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:as",
+        "@llvm_mingw_toolchain//:as",
+        "@llvm_mingw_toolchain//:include",
     ],
 )
 
@@ -40,8 +48,8 @@ filegroup(
     name = "compiler_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:bin",
-        "@x86_64-linux-llvm-mingw//:include",
+        "@llvm_mingw_toolchain//:bin",
+        "@llvm_mingw_toolchain//:include",
     ],
 )
 
@@ -49,7 +57,7 @@ filegroup(
     name = "dwp_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:dwp",
+        "@llvm_mingw_toolchain//:dwp",
     ],
 )
 
@@ -57,10 +65,11 @@ filegroup(
     name = "linker_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:ar",
-        "@x86_64-linux-llvm-mingw//:clang",
-        "@x86_64-linux-llvm-mingw//:ld",
-        "@x86_64-linux-llvm-mingw//:lib",
+        "@llvm_mingw_toolchain//:ar",
+        "@llvm_mingw_toolchain//:clang",
+        "@llvm_mingw_toolchain//:include",
+        "@llvm_mingw_toolchain//:ld",
+        "@llvm_mingw_toolchain//:lib",
     ],
 )
 
@@ -68,7 +77,7 @@ filegroup(
     name = "objcopy_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:objcopy",
+        "@llvm_mingw_toolchain//:objcopy",
     ],
 )
 
@@ -76,7 +85,7 @@ filegroup(
     name = "strip_files",
     srcs = [
         ":wrappers",
-        "@x86_64-linux-llvm-mingw//:strip",
+        "@llvm_mingw_toolchain//:strip",
     ],
 )
 
@@ -85,20 +94,20 @@ filegroup(
     srcs = [
         ":compiler_files",
         ":linker_files",
-        "@x86_64-linux-llvm-mingw//:bin",
+        "@llvm_mingw_toolchain//:bin",
     ],
 )
 
 cc_toolchain_config(
-    name = "local-x86_64-windows",
-    abi_libc_version = "glibc_unknown",
+    name = "mingw_toolchain_config",
+    abi_libc_version = "mingw",
     abi_version = "clang",
     compiler = "clang",
     cxx_builtin_include_directories = [
-        "@x86_64-linux-llvm-mingw//:include",
+        "@llvm_mingw_toolchain//:include",
     ],
     host_system_name = "x86_64-linux-gnu",
-    target_cpu = "k8",
+    target_cpu = "x86_64",
     target_libc = "glibc_unknown",
     target_system_name = "x86_64-windows",
     tool_paths = {
@@ -114,8 +123,8 @@ cc_toolchain_config(
         "objdump": "wrappers/llvm-objdump",
         "strip": "wrappers/llvm-strip",
     },
-    toolchain_identifier = "clang-x86_64-linux",
-    toolchain_path_prefix = "external/x86_64-linux-llvm-mingw",
+    toolchain_identifier = "toolchain",
+    toolchain_path_prefix = "external/llvm_mingw_toolchain",
 )
 
 cc_toolchain(
@@ -124,18 +133,18 @@ cc_toolchain(
     ar_files = ":ar_files",
     as_files = ":as_files",
     compiler_files = ":compiler_files",
-    dwp_files = ":dwp_files",
+    dwp_files = ":empty",
     linker_files = ":linker_files",
     objcopy_files = ":objcopy_files",
     strip_files = ":strip_files",
-    toolchain_config = ":local-x86_64-windows",
+    toolchain_config = ":mingw_toolchain_config",
 )
 
 toolchain(
-    name = "cc-toolchain-x86_64-windows",
+    name = "mingw_toolchain",
     exec_compatible_with = [
         "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
+        "@platforms//os:linux",
     ],
     target_compatible_with = [
         "@platforms//cpu:x86_64",
