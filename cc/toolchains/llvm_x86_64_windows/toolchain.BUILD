@@ -3,18 +3,18 @@ package(default_visibility = ["//visibility:public"])
 filegroup(
     name = "gcc",
     srcs = [
-        "x86_64-w64-mingw32uwp-c++",
         "bin/x86_64-w64-mingw32uwp-g++",
         "bin/x86_64-w64-mingw32uwp-gcc",
+        "x86_64-w64-mingw32uwp-c++",
     ],
 )
 
 filegroup(
     name = "clang",
     srcs = [
+        "bin/clang-cpp",
         "bin/x86_64-w64-mingw32uwp-clang",
         "bin/x86_64-w64-mingw32uwp-clang++",
-        "bin/clang-cpp",
     ],
 )
 

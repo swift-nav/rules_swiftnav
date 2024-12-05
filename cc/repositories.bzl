@@ -170,7 +170,7 @@ def llvm_mingw_toolchain():
     )
 
 def register_llvm_mingw_toolchain():
-    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm_x86_64_windows:toolchain.BUILD")
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm_x86_64_windows:toolchain")
 
 def gcc_arm_embedded_toolchain():
     http_archive(
