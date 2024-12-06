@@ -9,4 +9,4 @@ fi
 NAME=$(basename "$0")
 TOOLCHAIN_BINDIR=external/llvm_mingw_toolchain/bin
 
-exec "${TOOLCHAIN_BINDIR}"/x86_64-w64-mingw32uwp-gcc "$@"
+exec "${TOOLCHAIN_BINDIR}"/"${NAME}" "$@"

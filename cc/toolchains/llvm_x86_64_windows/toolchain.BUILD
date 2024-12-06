@@ -3,9 +3,9 @@ package(default_visibility = ["//visibility:public"])
 filegroup(
     name = "gcc",
     srcs = [
+        "bin/x86_64-w64-mingw32uwp-c++",
         "bin/x86_64-w64-mingw32uwp-g++",
         "bin/x86_64-w64-mingw32uwp-gcc",
-        "x86_64-w64-mingw32uwp-c++",
     ],
 )
 

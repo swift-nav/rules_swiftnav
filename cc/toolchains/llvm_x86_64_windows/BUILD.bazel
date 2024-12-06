@@ -8,9 +8,9 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-package(default_visibility = ["//visibility:public"])
+load(":config.bzl", "config")
 
-load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+filegroup(name = "empty")
 
 constraint_value(
     name = "llvm_mingw_toolchain",
@@ -98,34 +98,7 @@ filegroup(
     ],
 )
 
-cc_toolchain_config(
-    name = "mingw_toolchain_config",
-    abi_libc_version = "mingw",
-    abi_version = "clang",
-    compiler = "clang",
-    cxx_builtin_include_directories = [
-        "@llvm_mingw_toolchain//:include",
-    ],
-    host_system_name = "x86_64-linux-gnu",
-    target_cpu = "x86_64",
-    target_libc = "glibc_unknown",
-    target_system_name = "x86_64-windows",
-    tool_paths = {
-        "ar": "wrappers/llvm-ar",
-        "cpp": "wrappers/clang-cpp",
-        "gcc": "wrappers/clang",
-        "gcov": "wrappers/llvm-profdata",
-        "llvm-cov": "wrappers/llvm-cov",
-        "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "wrappers/ld.ldd",
-        "nm": "wrappers/llvm-nm",
-        "objcopy": "wrappers/llvm-objcopy",
-        "objdump": "wrappers/llvm-objdump",
-        "strip": "wrappers/llvm-strip",
-    },
-    toolchain_identifier = "toolchain",
-    toolchain_path_prefix = "external/llvm_mingw_toolchain",
-)
+config(name = "config")
 
 cc_toolchain(
     name = "cc_toolchain",
@@ -137,7 +110,10 @@ cc_toolchain(
     linker_files = ":linker_files",
     objcopy_files = ":objcopy_files",
     strip_files = ":strip_files",
-    toolchain_config = ":mingw_toolchain_config",
+    supports_param_files = 0,
+    tags = ["manual"],
+    toolchain_config = ":config",
+    toolchain_identifier = "llvm-mingw",
 )
 
 toolchain(
@@ -153,4 +129,5 @@ toolchain(
     target_settings = None,
     toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+    visibility = ["//visibility:public"],
 )
