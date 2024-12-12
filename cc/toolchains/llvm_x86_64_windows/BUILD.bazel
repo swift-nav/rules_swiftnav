@@ -31,7 +31,6 @@ filegroup(
     srcs = [
         ":wrappers",
         "@llvm_mingw_toolchain//:ar",
-        "@llvm_mingw_toolchain//:include",
     ],
 )
 
@@ -40,7 +39,6 @@ filegroup(
     srcs = [
         ":wrappers",
         "@llvm_mingw_toolchain//:as",
-        "@llvm_mingw_toolchain//:include",
     ],
 )
 
@@ -67,7 +65,7 @@ filegroup(
         ":wrappers",
         "@llvm_mingw_toolchain//:ar",
         "@llvm_mingw_toolchain//:clang",
-        "@llvm_mingw_toolchain//:include",
+        "@llvm_mingw_toolchain//:gcc",
         "@llvm_mingw_toolchain//:ld",
         "@llvm_mingw_toolchain//:lib",
     ],
@@ -111,7 +109,6 @@ cc_toolchain(
     objcopy_files = ":objcopy_files",
     strip_files = ":strip_files",
     supports_param_files = 0,
-    tags = ["manual"],
     toolchain_config = ":config",
     toolchain_identifier = "llvm-mingw",
 )
