@@ -134,7 +134,7 @@ def _impl(ctx):
         target_system_name = "local",
         target_cpu = "x86_64",
         target_libc = "unknown",
-        compiler = "llvm",
+        compiler = "gcc",
         abi_version = "unknown",
         abi_libc_version = "unknown",
         tool_paths = tool_paths,
