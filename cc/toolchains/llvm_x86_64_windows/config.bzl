@@ -117,6 +117,7 @@ def _impl(ctx):
                             flags = [
                                 "-lstdc++",
                                 "-lm",
+                                "-static",
                             ],
                         ),
                     ]),
