@@ -142,5 +142,9 @@ def _impl(ctx):
 
 config = rule(
     implementation = _impl,
+    attrs = {
+        "c_opts": attr.string_list(),
+        "link_opts": attr.string_list(),
+    },
     provides = [CcToolchainConfigInfo],
 )
