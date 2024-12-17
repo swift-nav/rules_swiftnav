@@ -28,8 +28,8 @@ filegroup(
 filegroup(
     name = "include",
     srcs = glob([
-        "x86_64-w64-mingw32/include/**",
-        "lib/clang/*/include/**",
+        "x86_64-w64-mingw32/include/*",
+        "lib/clang/19/include/*",
         "generic-w64-mingw32/include/c++/v1/*",
     ]),
 )
