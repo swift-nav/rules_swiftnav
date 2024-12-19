@@ -298,7 +298,7 @@ def _impl(ctx):
                 ] if ctx.attr.opt_link_flags else []),
                 with_features = [with_feature_set(features = ["opt"])],
             ),
-        ] + [flag_set(
+        ] + ([flag_set(
             actions = all_link_actions + lto_index_actions,
             flag_groups = ([
                 flag_group(
@@ -312,7 +312,7 @@ def _impl(ctx):
                 ),
             ]),
             with_features = [with_feature_set(features = ["libcpp"])],
-        )] if is_linux else [],
+        )] if is_linux else []),
     )
 
     dbg_feature = feature(name = "dbg")
