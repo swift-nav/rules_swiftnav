@@ -77,10 +77,12 @@ def cc_toolchain_config(
         "-fdata-sections",
     ]
 
-    cxx_flags = [
-        # The whole codebase should build with c++14
-        "-std=c++14",
-    ]
+    cxx_flags = select({
+        "//cc:global_cxx17": ["-std=c++17"],
+        "//cc:global_cxx20": ["-std=c++20"],
+        "//cc:global_cxx23": ["-std=c++23"],
+        "//conditions:default": ["-std=c++14"],
+    })
 
     link_flags = [
         "--target=" + target_system_name,

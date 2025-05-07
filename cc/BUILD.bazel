@@ -122,6 +122,34 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# Globally sets the default C++ version, even for third-party libraries
+string_flag(
+    name = "global_cxx_standard",
+    build_setting_default = "",  #inactive by default
+    visibility = ["//visibility:public"],
+)
+
+# Enable with --@rules_swiftnav//:global_cxx_standard=17
+config_setting(
+    name = "global_cxx17",
+    flag_values = {":global_cxx_standard": "17"},
+    visibility = ["//visibility:public"],
+)
+
+# Enable with --@rules_swiftnav//:global_cxx_standard=20
+config_setting(
+    name = "global_cxx20",
+    flag_values = {":global_cxx_standard": "20"},
+    visibility = ["//visibility:public"],
+)
+
+# Enable with --@rules_swiftnav//:global_cxx_standard=23
+config_setting(
+    name = "global_cxx23",
+    flag_values = {":global_cxx_standard": "23"},
+    visibility = ["//visibility:public"],
+)
+
 bool_flag(
     name = "enable_symbolizer",
     build_setting_default = False,
