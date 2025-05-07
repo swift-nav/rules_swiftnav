@@ -599,8 +599,12 @@ def swift_cc_test_library(**kwargs):
     _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    exceptions = kwargs.pop("exceptions", False)
+    rtti = kwargs.pop("rtti", False)
+    standard = kwargs.pop("standard", None)
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", [])
+    cxxopts = _common_cxx_opts(exceptions, rtti, standard)
+    kwargs["copts"] = copts + cxxopts + local_includes + kwargs.get("copts", [])
 
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
 
