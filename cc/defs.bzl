@@ -592,7 +592,6 @@ def swift_cc_test_library(**kwargs):
             be relative to the package this macro is called from.
     """
 
-
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
