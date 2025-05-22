@@ -260,6 +260,10 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.GlobalConstantPrefix
     value: c
+  - key: readability-identifier-naming.LocalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.LocalConstantPrefix
+    value: c
   - key: readability-identifier-naming.MemberConstantCase
     value: CamelCase
   - key: readability-identifier-naming.MemberConstantPrefix
