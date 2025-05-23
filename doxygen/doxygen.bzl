@@ -8,8 +8,8 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("//tools:configure_file.bzl", "configure_file_impl")
 load("@rules_pkg//pkg:pkg.bzl", "pkg_zip")
+load("//tools:configure_file.bzl", "configure_file_impl")
 
 def _swift_doxygen_impl(ctx):
     vars = ctx.attr.vars | {}  # copy dict instead of referencing it
@@ -18,37 +18,36 @@ def _swift_doxygen_impl(ctx):
     doxygen_out = ctx.actions.declare_directory(ctx.attr.name + "_doxygen")
     vars["DOXYGEN_OUTPUT_DIRECTORY"] = doxygen_out.path
 
+    # this performs a CMake-like replacement of @VAR@ based on the vars dict
     config = configure_file_impl(ctx, vars, ctx.attr.name + "_Doxyfile")[0].files.to_list()[0]
-
-    input_dir = ""
-    if "PROJECT_SOURCE_DIR" in vars:
-        input_dir = vars["PROJECT_SOURCE_DIR"]
-
-    project_name = ""
-    if "PROJECT_NAME" in vars:
-        project_name = vars["PROJECT_NAME"]
 
     ctx.actions.run_shell(
         inputs = [config] + ctx.files.deps,
         outputs = [doxygen_out],
+        env = vars,
         command = """
         DOXYGEN_DOT_FOUND=NO
         DOXYGEN_DOT_PATH=
-
         if command -v dot &> /dev/null
         then
             DOXYGEN_DOT_FOUND=YES
             DOXYGEN_DOT_PATH=$(which dot)
         fi
 
+        PRW=`pwd`
+
+        # backward compatibility with old CMake-style doxygen config files
         sed -i "s|@DOXYGEN_DOT_FOUND@|$DOXYGEN_DOT_FOUND|g" {config}
         sed -i "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" {config}
         sed -i "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" {config}
-        sed -i "s|@INPUT_DIR@|{input_dir}|g" {config}
-        sed -i "s|@PROJECT_NAME@|{project_name}|g" {config}
+        sed -i "s|@INPUT_DIR@|$PROJECT_SOURCE_DIR|g" {config}
+        sed -i "s|@PROJECT_NAME@|$PROJECT_NAME|g" {config}
+        sed -i "s|@STABLE_GIT_TAG@|$STABLE_GIT_TAG|g" {config}
+        sed -i "s|@DOXYGEN_EXCLUDE@|$DOXYGEN_EXCLUDE|g" {config}
+        sed -i "s|@PROJECT_SOURCE_DIR@|$PRW|g" {config}
 
         PATH=$PATH doxygen {config}
-        """.format(config = config.path, input_dir = input_dir, project_name = project_name),
+        """.format(config = config.path),
     )
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
