@@ -33,8 +33,10 @@ use_repo(swift_cc_deps,
     "x86_64-linux-musl",
     "gcc-arm-none-eabi-darwin",
     "gcc-arm-none-eabi-x86_64-linux",
-    "yocto_toolchain"
 )
+
+yocto_generic_ext = use_extension("//cc/toolchains/yocto_generic/yocto_generic_extension.bzl", "yocto_generic_extension")
+use_repo(yocto_generic_ext, "yocto_generic")
 
 register_toolchains(
     "//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin",
@@ -49,5 +51,5 @@ register_toolchains(
     "//cc/toolchains/musl/x86_64:toolchain",
     "//cc/toolchains/llvm_x86_64_windows:mingw_toolchain",
     "//cc/toolchains/gcc_arm_embedded:toolchain",
-    "//cc/toolchains/yocto_generic:toolchain",
+    "@yocto_generic//:toolchain",
 )
