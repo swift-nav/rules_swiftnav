@@ -1,0 +1,53 @@
+module(
+    name = "rules_swiftnav",
+    version = "0.1.0",
+    compatibility_level = 1,
+)
+
+# Core Bazel dependencies
+bazel_dep(name = "bazel_skylib", version = "1.4.1")
+bazel_dep(name = "platforms", version = "0.0.6")
+bazel_dep(name = "rules_cc", version = "0.0.9")
+bazel_dep(name = "rules_pkg", version = "0.9.1")
+
+# Go dependencies (for buildifier)
+bazel_dep(name = "rules_go", version = "0.39.1", dev_dependency = True)
+bazel_dep(name = "gazelle", version = "0.31.0", dev_dependency = True)
+
+# Protocol Buffers
+bazel_dep(name = "protobuf", version = "21.7", dev_dependency = True)
+
+# Buildtools (for buildifier)
+# bazel_dep(name = "buildtools", version = "6.1.2", dev_dependency = True)
+
+# Register module extensions
+swift_cc_deps = use_extension("//cc:extensions.bzl", "swift_cc_deps")
+use_repo(swift_cc_deps, 
+    "aarch64-darwin-llvm",
+    "x86_64-darwin-llvm", 
+    "aarch64-linux-llvm",
+    "x86_64-linux-llvm",
+    "x86_64-linux-ucrt-llvm-mingw",
+    "aarch64-linux-musl",
+    "arm-linux-musleabihf",
+    "x86_64-linux-musl",
+    "gcc-arm-none-eabi-darwin",
+    "gcc-arm-none-eabi-x86_64-linux",
+    "yocto_toolchain"
+)
+
+register_toolchains(
+    "//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin",
+    "//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin",
+    "//cc/toolchains/llvm/aarch64-linux:cc-toolchain-aarch64-linux", 
+    "//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux",
+    "//cc/toolchains/llvm/x86_64-linux:cc-toolchain-intel-mkl",
+    "//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton2",
+    "//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton3",
+    "//cc/toolchains/musl/aarch64:toolchain",
+    "//cc/toolchains/musl/armhf:toolchain", 
+    "//cc/toolchains/musl/x86_64:toolchain",
+    "//cc/toolchains/llvm_x86_64_windows:mingw_toolchain",
+    "//cc/toolchains/gcc_arm_embedded:toolchain",
+    "//cc/toolchains/yocto_generic:toolchain",
+)

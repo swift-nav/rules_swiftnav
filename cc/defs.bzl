@@ -284,7 +284,7 @@ def swift_cc_library(**kwargs):
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
 
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    local_includes = kwargs.pop("local_includes", [])
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
