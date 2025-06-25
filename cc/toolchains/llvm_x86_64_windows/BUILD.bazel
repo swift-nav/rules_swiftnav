@@ -51,13 +51,13 @@ filegroup(
     ],
 )
 
-filegroup(
-    name = "dwp_files",
-    srcs = [
-        ":wrappers",
-        "@llvm_mingw_toolchain//:dwp",
-    ],
-)
+# filegroup(
+#     name = "dwp_files",
+#     srcs = [
+#         ":wrappers",
+#         "@llvm_mingw_toolchain//:dwp",
+#     ],
+# )
 
 filegroup(
     name = "linker_files",
