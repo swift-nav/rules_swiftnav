@@ -21,39 +21,17 @@ bazel_dep(name = "protobuf", version = "21.7", dev_dependency = True)
 # bazel_dep(name = "buildtools", version = "6.1.2", dev_dependency = True)
 
 # # Register module extensions
-# swift_cc_deps = use_extension("//cc:extensions.bzl", "swift_cc_deps")
-# use_repo(
-#     swift_cc_deps,
-#     "aarch64-darwin-llvm",
-#     "x86_64-darwin-llvm",
-#     "aarch64-linux-llvm",
-#     "x86_64-linux-llvm",
-#     "x86_64-linux-ucrt-llvm-mingw",
-#     "aarch64-linux-musl",
-#     "arm-linux-musleabihf",
-#     "x86_64-linux-musl",
-#     "gcc-arm-none-eabi-darwin",
-#     "gcc-arm-none-eabi-x86_64-linux",
-# )
-
-# yocto_generic_ext = use_extension("@rules_swiftnav//cc/toolchains/yocto_generic:yocto_generic_extension.bzl", "yocto_generic_extension")
-# use_repo(yocto_generic_ext, "yocto_generic")
-# # register_toolchains(
-# #     "@yocto_generic//:toolchain",
-# # )
-
-# # register_toolchains(
-# #     "@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin",
-# #     "@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin",
-# #     "@rules_swiftnav//cc/toolchains/llvm/aarch64-linux:cc-toolchain-aarch64-linux",
-# #     "@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux",
-# #     "@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-intel-mkl",
-# #     "@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton2",
-# #     "@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton3",
-# #     "@rules_swiftnav//cc/toolchains/musl/aarch64:toolchain",
-# #     "@rules_swiftnav//cc/toolchains/musl/armhf:toolchain",
-# #     "@rules_swiftnav//cc/toolchains/musl/x86_64:toolchain",
-# #     "@rules_swiftnav//cc/toolchains/llvm_x86_64_windows:mingw_toolchain",
-# #     "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain",
-# #     "@yocto_generic//:toolchain",
-# # )
+swift_cc_toolchain_ext = use_extension("@rules_swiftnav//cc:extensions.bzl", "swift_cc_toolchain_extension")
+use_repo(
+    swift_cc_toolchain_ext,
+    "aarch64-darwin-llvm",
+    "x86_64-darwin-llvm",
+    "aarch64-linux-llvm",
+    "x86_64-linux-llvm",
+    "aarch64-linux-musl",
+    "arm-linux-musleabihf",
+    "x86_64-linux-musl",
+    "llvm_mingw_toolchain",
+    "aarch64-sysroot",
+    "x86_64-sysroot",
+)
