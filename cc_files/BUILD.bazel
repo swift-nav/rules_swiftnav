@@ -12,20 +12,20 @@ string_list_flag(
     build_setting_default = [],
 )
 
-# string_list_file(
-#     name = "_ignored_test_srcs",
-#     string_list = ":ignored_test_srcs",
-#     visibility = ["//visibility:public"],
-# )
+string_list_file(
+    name = "_ignored_test_srcs",
+    string_list = ":ignored_test_srcs",
+    visibility = ["//visibility:public"],
+)
 
-# sh_binary(
-#     name = "compare_cc_test_files",
-#     srcs = ["compare_cc_test_files.sh"],
-#     args = [
-#         "$(location :_ignored_test_srcs)",
-#     ],
-#     data = [
-#         ":_ignored_test_srcs",
-#     ],
-#     visibility = ["//visibility:public"],
-# )
+sh_binary(
+    name = "compare_cc_test_files",
+    srcs = ["compare_cc_test_files.sh"],
+    args = [
+        "$(location :_ignored_test_srcs)",
+    ],
+    data = [
+        ":_ignored_test_srcs",
+    ],
+    visibility = ["//visibility:public"],
+)
