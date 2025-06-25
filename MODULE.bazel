@@ -34,4 +34,5 @@ use_repo(
     "llvm_mingw_toolchain",
     "aarch64-sysroot",
     "x86_64-sysroot",
+    "gcc_arm_gnu_8_3_toolchain",
 )
