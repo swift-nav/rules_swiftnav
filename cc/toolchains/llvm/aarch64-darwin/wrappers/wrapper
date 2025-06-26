@@ -10,7 +10,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-# Locates the actual tool paths relative to the location this script is 
+# Locates the actual tool paths relative to the location this script is
 # executed from.
 #
 # This is necessary because we download the toolchain using
@@ -34,7 +34,11 @@ if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
 fi
 
 tool_name=$(basename "${BASH_SOURCE[0]}")
-toolchain_bindir=external/aarch64-darwin-llvm/bin
+toolchain_bindir=external/rules_swiftnav\~\~swift_cc_toolchain_extension\~aarch64-darwin-llvm/bin
+
+echo toolname: $tool_name
+echo toolchain_bindir: $toolchain_bindir
+echo "BASH_SOURCE0: ${BASH_SOURCE[0]}"
 
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
