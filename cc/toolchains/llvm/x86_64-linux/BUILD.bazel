@@ -117,7 +117,8 @@ cc_toolchain_config(
     abi_version = "clang",
     builtin_sysroot = select({
         "@rules_swiftnav//cc:_use_libcpp": None,
-        "//conditions:default": "external/x86_64-sysroot",
+        # TODO(martin4861): How to be backwards compatible with WORKSPACE
+        "//conditions:default": "external/rules_swiftnav~~swift_cc_toolchain_extension~x86_64-sysroot",
     }),
     compiler = "clang",
     cxx_builtin_include_directories = select({
