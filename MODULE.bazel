@@ -20,6 +20,9 @@ bazel_dep(name = "protobuf", version = "21.7", dev_dependency = True)
 # Buildtools (for buildifier)
 # bazel_dep(name = "buildtools", version = "6.1.2", dev_dependency = True)
 
+yocto_generic_ext = use_extension("@rules_swiftnav//cc/toolchains/yocto_generic:yocto_generic_extension.bzl", "yocto_generic_extension")
+use_repo(yocto_generic_ext, "yocto_generic")
+
 # # Register module extensions
 swift_cc_toolchain_ext = use_extension("@rules_swiftnav//cc:extensions.bzl", "swift_cc_toolchain_extension")
 use_repo(
@@ -35,4 +38,20 @@ use_repo(
     "aarch64-sysroot",
     "x86_64-sysroot",
     "gcc_arm_gnu_8_3_toolchain",
+)
+
+register_toolchains(
+    "@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin",
+    "@rules_swiftnav//cc/toolchains/llvm/x86_64-darwin:cc-toolchain-x86_64-darwin",
+    "@rules_swiftnav//cc/toolchains/llvm/aarch64-linux:cc-toolchain-aarch64-linux",
+    "@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux",
+    "@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-intel-mkl",
+    "@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton2",
+    "@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton3",
+    "@rules_swiftnav//cc/toolchains/musl/aarch64:toolchain",
+    "@rules_swiftnav//cc/toolchains/musl/armhf:toolchain",
+    "@rules_swiftnav//cc/toolchains/musl/x86_64:toolchain",
+    "@rules_swiftnav//cc/toolchains/llvm_x86_64_windows:mingw_toolchain",
+    "@rules_swiftnav//cc/toolchains/gcc_arm_embedded:toolchain",
+    "@rules_swiftnav//cc/toolchains/yocto_generic:toolchain",
 )
