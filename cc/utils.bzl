@@ -25,11 +25,4 @@ def construct_local_include(path):
             any generated files the build depends on. Assumes these files are
             not generated into a subdirectory.
     """
-    root = Label(native.repository_name() + "//:WORKSPACE").workspace_root or "."
-    package = native.package_name()
-
-    # Generated files are placed in $(GENDIR)/external/<workspace_root>
-    if path == "$(GENDIR)":
-        return "-I" + path + "/" + root + "/" + package + "/"
-    else:
-        return "-I" + root + "/" + package + "/" + path + "/"
+    return "-I" + path + "/"
