@@ -110,7 +110,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
-        "//cc/toolchains/gcc_arm_gnu_8_3:gcc_arm_gnu_8_3_toolchain",
+        "@rules_swiftnav//cc/toolchains/gcc_arm_gnu_8_3:gcc_arm_gnu_8_3_toolchain",
     ],
     toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",

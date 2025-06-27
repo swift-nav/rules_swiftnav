@@ -35,7 +35,7 @@ toolchain(
         # In this context this constraint implies you
         # can use this toolchain for gcc-5 and up.
         "@rules_swiftnav//cc/constraints:gcc-5",
-        "//cc/constraints:yocto_generic_toolchain",
+        "@rules_swiftnav//cc/constraints:yocto_generic_toolchain",
     ],
     toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",

@@ -11,9 +11,9 @@
 """Swift wrappers for native cc rules."""
 
 load("//stamp:stamp_file.bzl", "stamp_file")
-load(":utils.bzl", "construct_local_include")
-load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
 load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
+load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
+load(":utils.bzl", "construct_local_include")
 
 # Name for a unit test
 UNIT = "unit"
@@ -50,30 +50,30 @@ def _cxx_standard(default, override):
 # Options common to both c and c++ code
 def _common_cc_opts(nocopts, pedantic = False):
     return select({
-        Label("//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
-        Label("//cc/constraints:gcc-5"): [copt for copt in GCC5_COPTS if copt not in nocopts],
+        Label("@rules_swiftnav//cc/constraints:gcc-6"): [copt for copt in GCC6_COPTS if copt not in nocopts],
+        Label("@rules_swiftnav//cc/constraints:gcc-5"): [copt for copt in GCC5_COPTS if copt not in nocopts],
         "//conditions:default": [copt for copt in DEFAULT_COPTS if copt not in nocopts],
     }) + select({
-        Label("//cc:_disable_warnings_as_errors"): [],
+        Label("@rules_swiftnav//cc:_disable_warnings_as_errors"): [],
         "//conditions:default": ["-Werror"],
     }) + ["-pedantic"] if pedantic else []
 
 # Options specific to C++ language standard
 def _common_cxx_standard_opts(standard = None):
     return select({
-        Label("//cc:cxx17"): [_cxx_standard("-std=c++17", standard)],
-        Label("//cc:cxx20"): [_cxx_standard("-std=c++20", standard)],
-        Label("//cc:cxx23"): [_cxx_standard("-std=c++23", standard)],
+        Label("@rules_swiftnav//cc:cxx17"): [_cxx_standard("-std=c++17", standard)],
+        Label("@rules_swiftnav//cc:cxx20"): [_cxx_standard("-std=c++20", standard)],
+        Label("@rules_swiftnav//cc:cxx23"): [_cxx_standard("-std=c++23", standard)],
         "//conditions:default": [_cxx_standard("-std=c++14", standard)],
     })
 
 # Options specific to c++ code (exceptions, rtti, etc..)
 def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
     return select({
-        Label("//cc:_enable_exceptions"): ["-fexceptions"],
+        Label("@rules_swiftnav//cc:_enable_exceptions"): ["-fexceptions"],
         "//conditions:default": ["-fno-exceptions" if not exceptions else "-fexceptions"],
     }) + select({
-        Label("//cc:_enable_rtti"): ["-frtti"],
+        Label("@rules_swiftnav//cc:_enable_rtti"): ["-frtti"],
         "//conditions:default": ["-fno-rtti" if not rtti else "-frtti"],
     }) + _common_cxx_standard_opts(standard)
 
@@ -84,14 +84,14 @@ def _construct_local_includes(local_includes):
 # Handle whether to link statically
 def _link_static(linkstatic = True):
     return select({
-        Label("//cc:_enable_shared"): False,
+        Label("@rules_swiftnav//cc:_enable_shared"): False,
         "//conditions:default": linkstatic,
     })
 
 # Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
     return select({
-        Label("//cc:_disable_tests"): ["@platforms//:incompatible"],
+        Label("@rules_swiftnav//cc:_disable_tests"): ["@platforms//:incompatible"],
         "@platforms//os:windows": ["@platforms//:incompatible"],
         "//conditions:default": [],
     })
@@ -114,13 +114,13 @@ def _symbolizer_env(val):
     return select({
         # The + operator is not supported on dict and select types so we need to be
         # clever here.
-        Label("//cc:enable_symbolizer_x86_64_linux"): dict(val, **{
+        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_linux"): dict(val, **{
             "ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
             "UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
             "MSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
             "TSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
         }),
-        Label("//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{
+        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{
             "ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
             "UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
             "MSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
@@ -131,15 +131,15 @@ def _symbolizer_env(val):
 
 def _symbolizer_data():
     return select({
-        Label("//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
-        Label("//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
+        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
+        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
         "//conditions:default": [],
     })
 
 # Handle whether to enable -Wdeprecated-declarations in tests.
 def _tests_warn_deprecated_declarations():
     return select({
-        Label("//cc:_tests_warn_deprecated_declarations"): [],
+        Label("@rules_swiftnav//cc:_tests_warn_deprecated_declarations"): [],
         "//conditions:default": ["-Wno-deprecated-declarations"],
     })
 

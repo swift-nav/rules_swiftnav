@@ -8,11 +8,11 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@rules_swiftnav//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
 load(
     "unix_cc_toolchain_config.bzl",
     unix_cc_toolchain_config = "cc_toolchain_config",
 )
-load("//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
 
 def cc_toolchain_config(
         name,
@@ -78,9 +78,9 @@ def cc_toolchain_config(
     ]
 
     cxx_flags = select({
-        "//cc:global_cxx17": ["-std=c++17"],
-        "//cc:global_cxx20": ["-std=c++20"],
-        "//cc:global_cxx23": ["-std=c++23"],
+        "@rules_swiftnav//cc:global_cxx17": ["-std=c++17"],
+        "@rules_swiftnav//cc:global_cxx20": ["-std=c++20"],
+        "@rules_swiftnav//cc:global_cxx23": ["-std=c++23"],
         "//conditions:default": ["-std=c++14"],
     })
 
