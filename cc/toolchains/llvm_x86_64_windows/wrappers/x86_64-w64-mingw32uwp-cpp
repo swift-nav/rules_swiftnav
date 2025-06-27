@@ -7,6 +7,6 @@ if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
 fi
 
 NAME=$(basename "$0")
-TOOLCHAIN_BINDIR=external/llvm_mingw_toolchain/bin
+TOOLCHAIN_BINDIR=external/rules_swiftnav\~\~swift_cc_toolchain_extension\~llvm_mingw_toolchain/bin
 
 exec "${TOOLCHAIN_BINDIR}"/"${NAME}" "$@"
