@@ -38,6 +38,8 @@ use_repo(
     "aarch64-sysroot",
     "x86_64-sysroot",
     "gcc_arm_gnu_8_3_toolchain",
+    "x86_64_linux_gcc_arm_embedded_toolchain",
+    "darwin_gcc_arm_embedded_toolchain"
 )
 
 register_toolchains(
