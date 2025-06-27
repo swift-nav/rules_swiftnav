@@ -81,6 +81,7 @@ def _impl(ctx):
                         flag_group(
                             flags = [
                                 "--sysroot=external/llvm_mingw_toolchain",
+                                "--sysroot=external/rules_swiftnav~~swift_cc_toolchain_extension~llvm_mingw_toolchain",
                                 "-no-canonical-prefixes",
                                 # Reproducibility
                                 "-Wno-builtin-macro-redefined",
