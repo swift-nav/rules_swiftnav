@@ -35,13 +35,16 @@ fi
 
 tool_name=$(basename "${BASH_SOURCE[0]}")
 # In case the tool label is changed, a change in here is very likely needed
-# TODO(martin4861): How to be backwards compatible with WORKSPACE
-
-toolchain_bindir=external/rules_swiftnav\~\~swift_cc_toolchain_extension\~aarch64-darwin-llvm/bin
+# TODO(martin4861): This establishes backwards compatibility with the old WORKSPACE file
+toolchain_bindir=external/aarch64-darwin-llvm/bin
+toolchain_bindir_as_bzlmod=external/rules_swiftnav\~\~swift_cc_toolchain_extension\~aarch64-darwin-llvm/bin
 
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
   exec "${toolchain_bindir}"/"${tool_name}" "$@"
+elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
 elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # This branch exists because some users of the toolchain,
   # namely rules_foreign_cc, will change CWD and call $CC (this script)
