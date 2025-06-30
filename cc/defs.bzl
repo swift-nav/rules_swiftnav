@@ -13,7 +13,6 @@
 load("//stamp:stamp_file.bzl", "stamp_file")
 load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
-load(":utils.bzl", "construct_local_include")
 
 # Name for a unit test
 UNIT = "unit"
@@ -76,10 +75,6 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
         Label("@rules_swiftnav//cc:_enable_rtti"): ["-frtti"],
         "//conditions:default": ["-fno-rtti" if not rtti else "-frtti"],
     }) + _common_cxx_standard_opts(standard)
-
-# Handle various nuances of local include paths
-def _construct_local_includes(local_includes):
-    return [construct_local_include(path) for path in local_includes]
 
 # Handle whether to link statically
 def _link_static(linkstatic = True):
@@ -232,7 +227,8 @@ def swift_c_library(**kwargs):
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
 
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
@@ -284,7 +280,8 @@ def swift_cc_library(**kwargs):
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
 
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
 
@@ -331,7 +328,8 @@ def swift_c_tool_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     nocopts = kwargs.pop("nocopts", [])
 
@@ -377,7 +375,8 @@ def swift_cc_tool_library(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     nocopts = kwargs.pop("nocopts", [])
 
@@ -421,7 +420,8 @@ def swift_c_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     nocopts = kwargs.pop("nocopts", [])
 
@@ -471,7 +471,8 @@ def swift_cc_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     nocopts = kwargs.pop("nocopts", [])
 
@@ -598,7 +599,8 @@ def swift_cc_test_library(**kwargs):
 
     _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
 
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     kwargs["copts"] = local_includes + kwargs.get("copts", [])
 
@@ -650,7 +652,8 @@ def swift_cc_test(name, type, **kwargs):
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
-    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+    kwargs["includes"] = kwargs.get("includes", []) + kwargs.pop("local_includes", [])
+    local_includes = []
 
     kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _common_cxx_standard_opts(kwargs.pop("standard", []))
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
