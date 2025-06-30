@@ -8,10 +8,10 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-package(default_visibility = ["//visibility:public"])
+load("@rules_swiftnav//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@rules_swiftnav//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_DARWIN")
 
-load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_DARWIN")
+package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "wrappers",
@@ -144,7 +144,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//cpu:aarch64",
         "@platforms//os:macos",
-        "//cc/constraints:llvm_toolchain",
+        "@rules_swiftnav//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
     toolchain = ":cc-clang-aarch64-darwin",

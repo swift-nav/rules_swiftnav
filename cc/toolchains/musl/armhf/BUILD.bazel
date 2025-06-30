@@ -104,7 +104,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:arm",
-        "//cc/constraints:musl",
+        "@rules_swiftnav//cc/constraints:musl",
     ],
     toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",

@@ -8,10 +8,10 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-package(default_visibility = ["//visibility:public"])
+load("@rules_swiftnav//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@rules_swiftnav//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX", "X86_64_LINUX")
 
-load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX", "X86_64_LINUX")
+package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "wrappers",
@@ -107,8 +107,8 @@ cc_toolchain_config(
         "%sysroot%/usr/include",
     ],
     extra_copts = select({
-        "//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
-        "//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
+        "@rules_swiftnav//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
+        "@rules_swiftnav//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
     }),
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
@@ -153,9 +153,9 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
-        "//cc/constraints:glibc_2_31",
-        "//cc/constraints:graviton2",
-        "//cc/constraints:llvm_toolchain",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:graviton2",
+        "@rules_swiftnav//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
     toolchain = ":cc-clang-x86_64-aarch64-linux",
@@ -171,9 +171,9 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
-        "//cc/constraints:glibc_2_31",
-        "//cc/constraints:graviton3",
-        "//cc/constraints:llvm_toolchain",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:graviton3",
+        "@rules_swiftnav//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
     toolchain = ":cc-clang-x86_64-aarch64-linux",

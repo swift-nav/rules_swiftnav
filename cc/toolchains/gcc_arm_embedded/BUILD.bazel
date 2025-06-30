@@ -81,31 +81,31 @@ config(
     name = "config",
     c_opts = select(
         {
-            "//cc/constraints:cortex-m4": [
+            "@rules_swiftnav//cc/constraints:cortex-m4": [
                 "-mcpu=cortex-m4",
                 "-march=armv7e-m",
                 "-mthumb",
                 "-mfloat-abi=hard",
                 "-mfpu=fpv4-sp-d16",
             ],
-            "//cc/constraints:cortex-m7": [
+            "@rules_swiftnav//cc/constraints:cortex-m7": [
                 "-mcpu=cortex-m7",
                 "-mthumb",
                 "-mfpu=fpv5-d16",
                 "-mfloat-abi=hard",
             ],
-            "//cc/constraints:cortex-m3": [
+            "@rules_swiftnav//cc/constraints:cortex-m3": [
                 "-mcpu=cortex-m3",
                 "-march=armv7-m",
                 "-mthumb",
                 "-msoft-float",
             ],
-            "//cc/constraints:cortex-a7": [
+            "@rules_swiftnav//cc/constraints:cortex-a7": [
                 "-mcpu=cortex-a7",
                 "-mfloat-abi=hard",
                 "-mfpu=neon-vfpv4",
             ],
-            "//cc/constraints:cortex-a9": [
+            "@rules_swiftnav//cc/constraints:cortex-a9": [
                 "-mcpu=cortex-a9",
                 "-march=armv7-a",
                 "-mthumb",
@@ -141,7 +141,7 @@ toolchain(
     ],
     target_compatible_with = [
         "@platforms//os:none",
-        "//cc/constraints:gcc_arm_cpu",
+        "@rules_swiftnav//cc/constraints:gcc_arm_cpu",
     ],
     toolchain = ":cc_toolchain",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",

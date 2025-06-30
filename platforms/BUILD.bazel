@@ -30,7 +30,7 @@ platform(
     name = "cortex_m4_none_eabi",
     constraint_values = [
         "@platforms//os:none",
-        "//cc/constraints:cortex-m4",
+        "@rules_swiftnav//cc/constraints:cortex-m4",
     ],
     visibility = ["//visibility:public"],
 )
@@ -39,7 +39,7 @@ platform(
     name = "cortex_m7_none_eabi",
     constraint_values = [
         "@platforms//os:none",
-        "//cc/constraints:cortex-m7",
+        "@rules_swiftnav//cc/constraints:cortex-m7",
     ],
     visibility = ["//visibility:public"],
 )
@@ -48,7 +48,7 @@ platform(
     name = "cortex_m3_none_eabi",
     constraint_values = [
         "@platforms//os:none",
-        "//cc/constraints:cortex-m3",
+        "@rules_swiftnav//cc/constraints:cortex-m3",
     ],
     visibility = ["//visibility:public"],
 )
@@ -57,7 +57,7 @@ platform(
     name = "cortex_a7_none_eabi",
     constraint_values = [
         "@platforms//os:none",
-        "//cc/constraints:cortex-a7",
+        "@rules_swiftnav//cc/constraints:cortex-a7",
     ],
     visibility = ["//visibility:public"],
 )
@@ -66,7 +66,7 @@ platform(
     name = "cortex_a9_none_eabi",
     constraint_values = [
         "@platforms//os:none",
-        "//cc/constraints:cortex-a9",
+        "@rules_swiftnav//cc/constraints:cortex-a9",
     ],
     visibility = ["//visibility:public"],
 )
@@ -75,7 +75,7 @@ platform(
     name = "arm_none_eabi",
     constraint_values = [
         "@platforms//os:none",
-        "//cc/constraints:unspecified_arm",
+        "@rules_swiftnav//cc/constraints:unspecified_arm",
     ],
     visibility = ["//visibility:public"],
 )
@@ -85,7 +85,7 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
-        "//cc/constraints:musl",
+        "@rules_swiftnav//cc/constraints:musl",
     ],
     visibility = ["//visibility:public"],
 )
@@ -95,7 +95,7 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:arm",
-        "//cc/constraints:musl",
+        "@rules_swiftnav//cc/constraints:musl",
     ],
     visibility = ["//visibility:public"],
 )
@@ -115,7 +115,7 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
-        "//cc/constraints:musl",
+        "@rules_swiftnav//cc/constraints:musl",
     ],
     visibility = ["//visibility:public"],
 )
@@ -134,7 +134,7 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@rules_swiftnav//cc/constraints:gcc-5",
-        "//cc/constraints:yocto_generic_toolchain",
+        "@rules_swiftnav//cc/constraints:yocto_generic_toolchain",
     ],
     visibility = ["//visibility:public"],
 )
@@ -144,7 +144,7 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
-        "//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
     ],
     visibility = ["//visibility:public"],
 )
@@ -154,8 +154,8 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
-        "//cc/constraints:graviton2",
-        "//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:graviton2",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
     ],
     visibility = ["//visibility:public"],
 )
@@ -165,8 +165,8 @@ platform(
     constraint_values = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
-        "//cc/constraints:graviton3",
-        "//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:graviton3",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
     ],
     visibility = ["//visibility:public"],
 )

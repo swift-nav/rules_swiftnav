@@ -8,10 +8,10 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-package(default_visibility = ["//visibility:public"])
+load("@rules_swiftnav//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@rules_swiftnav//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX")
 
-load("//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
-load("//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX")
+package(default_visibility = ["//visibility:public"])
 
 filegroup(
     name = "wrappers",
@@ -27,7 +27,7 @@ filegroup(
         ":wrappers",
         "@aarch64-linux-llvm//:ar",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -38,7 +38,7 @@ filegroup(
         ":wrappers",
         "@aarch64-linux-llvm//:as",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -50,7 +50,7 @@ filegroup(
         "@aarch64-linux-llvm//:clang",
         "@aarch64-linux-llvm//:include",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -61,7 +61,7 @@ filegroup(
         ":wrappers",
         "@aarch64-linux-llvm//:dwp",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -75,7 +75,7 @@ filegroup(
         "@aarch64-linux-llvm//:ld",
         "@aarch64-linux-llvm//:lib",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -86,7 +86,7 @@ filegroup(
         ":wrappers",
         "@aarch64-linux-llvm//:objcopy",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -106,7 +106,7 @@ filegroup(
         ":compiler_files",
         "@aarch64-linux-llvm//:bin",
     ] + select({
-        "//cc:_use_libcpp": [],
+        "@rules_swiftnav//cc:_use_libcpp": [],
         "//conditions:default": ["@aarch64-sysroot"],
     }),
 )
@@ -116,12 +116,12 @@ cc_toolchain_config(
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
     builtin_sysroot = select({
-        "//cc:_use_libcpp": None,
+        "@rules_swiftnav//cc:_use_libcpp": None,
         "//conditions:default": "external/aarch64-sysroot",
     }),
     compiler = "clang",
     cxx_builtin_include_directories = select({
-        "//cc:_use_libcpp": [
+        "@rules_swiftnav//cc:_use_libcpp": [
             "/include",
             "/usr/include",
             "/usr/local/include",
@@ -171,7 +171,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//cpu:aarch64",
         "@platforms//os:linux",
-        "//cc/constraints:llvm_toolchain",
+        "@rules_swiftnav//cc/constraints:llvm_toolchain",
     ],
     target_settings = None,
     toolchain = ":cc-clang-aarch64-linux",
