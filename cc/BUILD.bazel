@@ -194,6 +194,18 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "enable_bzlmod",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_bzlmod",
+    flag_values = {":enable_bzlmod": "true"},
+    visibility = ["//visibility:public"],
+)
+
 py_binary(
     name = "fix_include_guards",
     srcs = [
