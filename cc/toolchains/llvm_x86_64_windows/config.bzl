@@ -80,8 +80,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot=external/llvm_mingw_toolchain",
-                                "--sysroot=external/rules_swiftnav~~swift_cc_toolchain_extension~llvm_mingw_toolchain",
+                                "--sysroot={}".format(ctx.attr.sysroot),
                                 "-no-canonical-prefixes",
                                 # Reproducibility
                                 "-Wno-builtin-macro-redefined",
@@ -147,6 +146,7 @@ config = rule(
     attrs = {
         "c_opts": attr.string_list(),
         "link_opts": attr.string_list(),
+        "sysroot": attr.string(),
     },
     provides = [CcToolchainConfigInfo],
 )

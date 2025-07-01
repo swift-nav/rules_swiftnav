@@ -83,7 +83,13 @@ filegroup(
     tags = ["manual"],
 )
 
-config(name = "config")
+config(
+    name = "config",
+    sysroot = select({
+        "@rules_swiftnav//cc:_enable_bzlmod": "external/rules_swiftnav~~swift_cc_toolchain_extension~gcc_arm_gnu_8_3_toolchain/aarch64-linux-gnu/libc",
+        "//conditions:default": "external/gcc_arm_gnu_8_3_toolchain/aarch64-linux-gnu/libc",
+    }),
+)
 
 cc_toolchain(
     name = "cc_toolchain",
