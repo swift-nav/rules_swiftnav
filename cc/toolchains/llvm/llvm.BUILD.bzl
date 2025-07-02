@@ -81,7 +81,6 @@ filegroup(
     name = "as",
     srcs = [
         "bin/clang",
-        "bin/llvm-as",
     ],
 )
 
