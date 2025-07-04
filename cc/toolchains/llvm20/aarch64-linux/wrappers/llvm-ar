@@ -34,7 +34,7 @@ if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
 fi
 
 tool_name=$(basename "${BASH_SOURCE[0]}")
-toolchain_bindir=external/aarch64-linux-llvm/bin
+toolchain_bindir=external/aarch64-linux-llvm20/bin
 
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
