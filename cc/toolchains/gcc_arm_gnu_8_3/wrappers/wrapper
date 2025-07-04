@@ -28,7 +28,7 @@
 
 set -e
 
-# Use --actionv_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
+# Use --action_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
 if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
   set -x
 fi

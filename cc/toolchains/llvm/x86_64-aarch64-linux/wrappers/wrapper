@@ -10,7 +10,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-# Locates the actual tool paths relative to the location this script is 
+# Locates the actual tool paths relative to the location this script is
 # executed from.
 #
 # This is necessary because we download the toolchain using
@@ -28,7 +28,7 @@
 
 set -e
 
-# Use --actionv_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
+# Use --action_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
 if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
   set -x
 fi
