@@ -20,6 +20,15 @@ AARCH64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llv
 
 X86_64_LINUX_LLVM = "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz"
 
+# LLVM 20.1.7 URLs
+AARCH64_DARWIN_LLVM20 = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-ARM64.tar.xz"
+
+X86_64_DARWIN_LLVM20 = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-X64.tar.xz"
+
+AARCH64_LINUX_LLVM20 = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-ARM64.tar.xz"
+
+X86_64_LINUX_LLVM20 = "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-X64.tar.xz"
+
 X86_64_LINUX_UCRT_LLVM_MINGW = "https://github.com/mstorsjo/llvm-mingw/releases/download/20241203/llvm-mingw-20241203-ucrt-ubuntu-20.04-x86_64.tar.xz"
 
 AARCH64_LINUX_MUSL = "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/aarch64-linux-musl-cross.tar.gz"
@@ -85,6 +94,44 @@ def swift_cc_toolchain():
         sha256 = "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5",
     )
 
+def swift_cc_toolchain_llvm20():
+    """Define LLVM 20.1.7 toolchain repositories."""
+    maybe(
+        http_archive,
+        name = "aarch64-darwin-llvm20",
+        build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
+        url = AARCH64_DARWIN_LLVM20,
+        strip_prefix = "LLVM-20.1.7-macOS-ARM64",
+        # TODO: Add sha256 hash for integrity
+    )
+
+    maybe(
+        http_archive,
+        name = "x86_64-darwin-llvm20",
+        build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
+        url = X86_64_DARWIN_LLVM20,
+        strip_prefix = "LLVM-20.1.7-macOS-X64",
+        sha256 = "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
+    )
+
+    maybe(
+        http_archive,
+        name = "aarch64-linux-llvm20",
+        build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
+        url = AARCH64_LINUX_LLVM20,
+        strip_prefix = "LLVM-20.1.7-Linux-ARM64",
+        sha256 = "832f2802a29457dc758f56e26e98558c6cd0e45fcd07186f540cb6e7f4e59385",
+    )
+
+    maybe(
+        http_archive,
+        name = "x86_64-linux-llvm20",
+        build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
+        url = X86_64_LINUX_LLVM20,
+        strip_prefix = "LLVM-20.1.7-Linux-X64",
+        sha256 = "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f",
+    )
+
 def aarch64_sysroot():
     maybe(
         http_archive,
@@ -123,6 +170,13 @@ def register_swift_cc_toolchains():
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-intel-mkl")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton2")
     native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm/x86_64-aarch64-linux:cc-toolchain-aarch64-bullseye-graviton3")
+
+def register_swift_cc_toolchains_llvm20():
+    """Register LLVM 20.1.7 toolchains."""
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm20/aarch64-darwin:cc-toolchain-aarch64-darwin")
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm20/x86_64-darwin:cc-toolchain-x86_64-darwin")
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm20/aarch64-linux:cc-toolchain-aarch64-linux")
+    native.register_toolchains("@rules_swiftnav//cc/toolchains/llvm20/x86_64-linux:cc-toolchain-x86_64-linux")
 
 def aarch64_linux_musl_toolchain():
     http_archive(
