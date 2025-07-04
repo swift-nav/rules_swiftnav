@@ -80,7 +80,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot=external/gcc_arm_gnu_8_3_toolchain/aarch64-linux-gnu/libc",
+                                "--sysroot={}".format(ctx.attr.sysroot),
                                 "-no-canonical-prefixes",
                                 # Reproducibility
                                 "-Wno-builtin-macro-redefined",
@@ -143,4 +143,7 @@ def _impl(ctx):
 config = rule(
     implementation = _impl,
     provides = [CcToolchainConfigInfo],
+    attrs = {
+        "sysroot": attr.string(),
+    },
 )

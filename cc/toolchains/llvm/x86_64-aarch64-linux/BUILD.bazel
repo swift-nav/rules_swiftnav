@@ -109,6 +109,7 @@ cc_toolchain_config(
     extra_copts = select({
         "@rules_swiftnav//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
         "@rules_swiftnav//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
+        "//conditions:default": [],
     }),
     host_system_name = X86_64_LINUX,
     target_cpu = "k8",
