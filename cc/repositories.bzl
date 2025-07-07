@@ -111,7 +111,7 @@ def swift_cc_toolchain_llvm20():
         build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
         url = X86_64_DARWIN_LLVM20,
         strip_prefix = "LLVM-20.1.7-macOS-X64",
-        # TODO: Add sha256 hash for integrity
+        sha256 = "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
     )
 
     maybe(
@@ -120,7 +120,7 @@ def swift_cc_toolchain_llvm20():
         build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
         url = AARCH64_LINUX_LLVM20,
         strip_prefix = "LLVM-20.1.7-Linux-ARM64",
-        # TODO: Add sha256 hash for integrity
+        sha256 = "832f2802a29457dc758f56e26e98558c6cd0e45fcd07186f540cb6e7f4e59385",
     )
 
     maybe(
@@ -129,7 +129,7 @@ def swift_cc_toolchain_llvm20():
         build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
         url = X86_64_LINUX_LLVM20,
         strip_prefix = "LLVM-20.1.7-Linux-X64",
-        # TODO: Add sha256 hash for integrity
+        sha256 = "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f",
     )
 
 def aarch64_sysroot():
