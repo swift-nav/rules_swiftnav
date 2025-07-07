@@ -8,7 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-def construct_local_include(path):
+def construct_local_include(target_name, path):
     """Helper to correctly set up local (non-public) include paths.
 
     When a bazel workspace is consumed externally, (i.e. via local_repository),
@@ -19,13 +19,18 @@ def construct_local_include(path):
     building a workpace standalone, and externally.
 
     Args:
+        name: The target, which calls this macro
+
         path: The include path relative to the package this macro is called from
 
             Use the special argument $(GENDIR) to construct an include path for
             any generated files the build depends on. Assumes these files are
             not generated into a subdirectory.
     """
-    root = Label(native.repository_name() + "//:WORKSPACE").workspace_root or "."
+    if target_name != "":
+        root = Label(target_name).workspace_root or "."
+    else:
+        root = "."
     package = native.package_name()
 
     # Generated files are placed in $(GENDIR)/external/<workspace_root>
