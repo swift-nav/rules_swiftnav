@@ -13,6 +13,7 @@ Bug fixes, ports of features from newer versions, etc.. should be put as they
 appear in upstream in unix_cc_toolchain_config.bzl.
 """
 
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "feature",
@@ -20,7 +21,6 @@ load(
     "flag_set",
     "with_feature_set",
 )
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 _all_compile_actions = [
     ACTION_NAMES.c_compile,

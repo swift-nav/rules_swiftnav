@@ -1,7 +1,7 @@
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load("//cc:defs.bzl", "BINARY", "LIBRARY")
 load("//cc_files:get_cc_files.bzl", "get_cc_srcs")
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
 def _flatten(input_list):
     return [item for sublist in input_list for item in sublist]

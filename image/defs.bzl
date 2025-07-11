@@ -1,5 +1,5 @@
-load("@rules_swiftnav//image:transition.bzl", "multi_arch")
 load("@rules_oci//oci:defs.bzl", "oci_image_index")
+load("@rules_swiftnav//image:transition.bzl", "multi_arch")
 
 def swift_image_index(name, image, platforms, **kwargs):
     """

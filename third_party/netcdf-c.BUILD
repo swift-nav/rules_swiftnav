@@ -12,13 +12,13 @@
 netcdf-c@4.9.0
 """
 
-load("@rules_swiftnav//tools:configure_file.bzl", "configure_file")
 load("@rules_swiftnav//third_party/netcdf-c:aarch64-darwin-config.bzl", "AARCH64_DARWIN_CONFIG")
-load("@rules_swiftnav//third_party/netcdf-c:x86_64-darwin-config.bzl", "X86_64_DARWIN_CONFIG")
-load("@rules_swiftnav//third_party/netcdf-c:linux-config.bzl", "LINUX_CONFIG")
 load("@rules_swiftnav//third_party/netcdf-c:attr.bzl", "attr")
+load("@rules_swiftnav//third_party/netcdf-c:linux-config.bzl", "LINUX_CONFIG")
 load("@rules_swiftnav//third_party/netcdf-c:ncx.bzl", "ncx")
 load("@rules_swiftnav//third_party/netcdf-c:putget.bzl", "putget")
+load("@rules_swiftnav//third_party/netcdf-c:x86_64-darwin-config.bzl", "X86_64_DARWIN_CONFIG")
+load("@rules_swiftnav//tools:configure_file.bzl", "configure_file")
 
 configure_file(
     name = "netcdf_dispatch",
