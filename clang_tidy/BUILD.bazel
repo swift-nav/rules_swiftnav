@@ -11,7 +11,10 @@ sh_binary(
         "@platforms//os:macos": ["run_clang_tidy_macos.sh"],
         "//conditions:default": ["run_clang_tidy.sh"],
     }),
-    data = [":clang_tidy_config"],
+    data = [
+      ":clang_tidy_config",
+      ":clang_tidy_plugin",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -24,6 +27,17 @@ label_flag(
     name = "clang_tidy_config",
     build_setting_default = ":clang_tidy_config_default",
     visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "clang_tidy_plugin_default",
+  srcs = ["libSwiftClangTidyChecks.so"],
+)
+
+label_flag(
+  name = "clang_tidy_plugin",
+  build_setting_default = ":clang_tidy_plugin_default",
+  visibility = ["//visibility:public"],
 )
 
 filegroup(
