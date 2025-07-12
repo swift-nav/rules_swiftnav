@@ -4,7 +4,6 @@ set -ue
 
 CLANG_TIDY_BIN=$1
 shift
-#CLANG_TIDY_BIN=/usr/bin/clang-tidy
 
 CONFIG=$1
 shift
@@ -27,7 +26,7 @@ truncate -s 0 $OUTPUT
 # paths relative to the sandbox. We need to strip the sandbox prefix
 # from the paths so that the output matches the source tree and can
 # be understood by other tools such as IDEs.
-"${CLANG_TIDY_BIN}" -load=/home/matt/work/swift-snprintf-checker/build.14/libSwiftSnprintfChecker.so "$@" | sed "s;.*execroot/[^/]*/;;"
+"${CLANG_TIDY_BIN}" "$@" | sed "s;.*execroot/[^/]*/;;"
 sed -i "s;.*execroot/[^/]*/;;" $OUTPUT
 
 test ! -s $OUTPUT
