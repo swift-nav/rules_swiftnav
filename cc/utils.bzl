@@ -8,6 +8,8 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
+
 def construct_local_include(path):
     """Helper to correctly set up local (non-public) include paths.
 
@@ -25,11 +27,13 @@ def construct_local_include(path):
             any generated files the build depends on. Assumes these files are
             not generated into a subdirectory.
     """
-    root = Label(native.repository_name() + "//:WORKSPACE").workspace_root or "."
-    package = native.package_name()
-
-    # Generated files are placed in $(GENDIR)/external/<workspace_root>
-    if path == "$(GENDIR)":
-        return "-I" + path + "/" + root + "/" + package + "/"
+    repo_name = native.repository_name()[1:]
+    package_name = native.package_name()
+    if repo_name:
+        source_dir = paths.join("external", repo_name, package_name, path)
     else:
-        return "-I" + root + "/" + package + "/" + path + "/"
+        source_dir = paths.join(package_name, path)
+    return [
+        "-I{}".format(source_dir),
+        "-I{}".format(paths.join("$(GENDIR)", source_dir)),
+    ]
