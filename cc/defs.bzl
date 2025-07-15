@@ -79,7 +79,7 @@ def _common_cxx_opts(exceptions = False, rtti = False, standard = None):
 
 # Handle various nuances of local include paths
 def _construct_local_includes(local_includes):
-    return [construct_local_include(path) for path in local_includes]
+    return [include for path in local_includes for include in construct_local_include(path)]
 
 # Handle whether to link statically
 def _link_static(linkstatic = True):
