@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Swift Navigation Inc.
+# Copyright (C) 2025 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
 #
 # This source is subject to the license found in the file 'LICENSE' which must
