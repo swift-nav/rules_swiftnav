@@ -117,7 +117,7 @@ cc_toolchain_config(
         "gcov": "wrappers/llvm-profdata",
         "llvm-cov": "wrappers/llvm-cov",
         "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "wrappers/ld.ldd",
+        "ld": "wrappers/ld.lld",
         "nm": "wrappers/llvm-nm",
         "objcopy": "wrappers/llvm-objcopy",
         "objdump": "wrappers/llvm-objdump",
