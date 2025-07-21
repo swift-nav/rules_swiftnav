@@ -32,10 +32,10 @@ def cc_toolchain_config(
         is_darwin = False,
         use_lld = True):
     if not is_target_triplet(host_system_name):
-        fail(host_system_name + " is not a target tripplet")
+        fail(host_system_name + " is not a target triplet")
 
     if not is_target_triplet(target_system_name):
-        fail(target_system_name + " is not a target tripplet")
+        fail(target_system_name + " is not a target triplet")
 
     is_cross_compile = host_system_name != target_system_name
 
