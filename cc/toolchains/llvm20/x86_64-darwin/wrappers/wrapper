@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Copyright (C) 2025 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+# Locates the actual tool paths relative to the location this script is 
+# executed from.
+#
+# This is necessary because we download the toolchain using
+# http_archive, which bazel places in _execroot_/external/_repo_name_.
+#
+# Unfortunately we cannot provide this location as the argument of tool_path
+# when configuring the toolchain, because tool_path only takes a relative path.
+#
+# This is the fairly common workaround to handle this.
+#
+# TODO: [BUILD-549] - Remove need for wrapper files
+#
+# Recent versions of Bazel may have introduced a mechanism that removes
+# the need for this workaround: https://github.com/bazelbuild/bazel/issues/7746
+
+set -e
+
+# Use --actionv_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
+if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
+  set -x
+fi
+
+tool_name=$(basename "${BASH_SOURCE[0]}")
+# In case the tool label is changed, a change in here is very likely needed
+# This establishes backwards compatibility with the old WORKSPACE file
+toolchain_bindir=external/x86_64-darwin-llvm20/bin
+toolchain_bindir_as_bzlmod="external/rules_swiftnav~~swift_cc_toolchain_extension~x86_64-darwin-llvm20/bin"
+
+if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  exec "${toolchain_bindir}"/"${tool_name}" "$@"
+elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
+elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
+  # This branch exists because some users of the toolchain,
+  # namely rules_foreign_cc, will change CWD and call $CC (this script)
+  # with its absolute path.
+  #
+  # To deal with this we find the tool relative to this script, which is at
+  # _execroot_/external/rules_swiftnav/cc/toolchain/llvm/x86_64-linux/wrappers/wrapper.
+  #
+  # If the wrapper is relocated then this line needs to be adjusted.
+  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}"
+  tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
+  exec "${tool}" "${@}"
+else
+  >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
+  exit 5
+fi
+

@@ -15,6 +15,11 @@ constraint_value(
 )
 
 constraint_value(
+    name = "llvm20_toolchain",
+    constraint_setting = ":toolchain",
+)
+
+constraint_value(
     name = "yocto_generic_toolchain",
     constraint_setting = ":toolchain",
 )

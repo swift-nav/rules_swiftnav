@@ -1,0 +1,152 @@
+# Copyright (C) 2025 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+load("@rules_swiftnav//cc/toolchains/llvm20:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@rules_swiftnav//cc/toolchains/llvm20:target_triplets.bzl", "X86_64_DARWIN")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "wrappers",
+    srcs = glob([
+        "wrappers/**",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ar_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:ar",
+    ],
+)
+
+filegroup(
+    name = "as_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:as",
+    ],
+)
+
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:clang",
+        "@x86_64-darwin-llvm20//:include",
+    ],
+)
+
+filegroup(
+    name = "dwp_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:dwp",
+    ],
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:ar",
+        "@x86_64-darwin-llvm20//:clang",
+        "@x86_64-darwin-llvm20//:ld",
+        "@x86_64-darwin-llvm20//:lib",
+    ],
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:objcopy",
+    ],
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        ":wrappers",
+        "@x86_64-darwin-llvm20//:strip",
+    ],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        "linker_files",
+        ":compiler_files",
+        "@x86_64-darwin-llvm20//:bin",
+    ],
+)
+
+cc_toolchain_config(
+    name = "local-x86_64-darwin",
+    abi_libc_version = "darwin_x86_64",
+    abi_version = "darwin_x86_64",
+    builtin_sysroot = "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+    compiler = "clang",
+    cxx_builtin_include_directories = [
+        "%sysroot%/usr/include",
+        "%sysroot%/System/Library/Frameworks",
+    ],
+    host_system_name = X86_64_DARWIN,
+    is_darwin = True,
+    target_cpu = "darwin",
+    target_libc = "macosx",
+    target_system_name = X86_64_DARWIN,
+    tool_paths = {
+        "ar": "wrappers/llvm-ar",
+        "cpp": "wrappers/clang-cpp",
+        "gcc": "wrappers/clang",
+        "gcov": "wrappers/llvm-profdata",
+        "llvm-cov": "wrappers/llvm-cov",
+        "llvm-profdata": "wrappers/llvm-profdata",
+        "ld": "wrappers/ld.lld",
+        "nm": "wrappers/llvm-nm",
+        "objcopy": "wrappers/llvm-objcopy",
+        "objdump": "wrappers/llvm-objdump",
+        "strip": "wrappers/llvm-strip",
+    },
+    toolchain_identifier = "clang-x86_64-darwin",
+    toolchain_path_prefix = "external/x86_64-darwin-llvm20",
+)
+
+cc_toolchain(
+    name = "cc-clang-x86_64-darwin",
+    all_files = ":all_files",
+    ar_files = ":ar_files",
+    as_files = ":as_files",
+    compiler_files = ":compiler_files",
+    dwp_files = ":dwp_files",
+    linker_files = ":linker_files",
+    objcopy_files = ":objcopy_files",
+    strip_files = ":strip_files",
+    toolchain_config = ":local-x86_64-darwin",
+)
+
+toolchain(
+    name = "cc-toolchain-x86_64-darwin",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
+        "@rules_swiftnav//cc/constraints:llvm20_toolchain",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-darwin",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)

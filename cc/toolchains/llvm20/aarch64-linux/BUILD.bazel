@@ -1,0 +1,179 @@
+# Copyright (C) 2025 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+load("@rules_swiftnav//cc/toolchains/llvm20:cc_toolchain_config.bzl", "cc_toolchain_config")
+load("@rules_swiftnav//cc/toolchains/llvm20:target_triplets.bzl", "AARCH64_LINUX")
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "wrappers",
+    srcs = glob([
+        "wrappers/**",
+    ]),
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "ar_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:ar",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+filegroup(
+    name = "as_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:as",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+filegroup(
+    name = "compiler_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:clang",
+        "@aarch64-linux-llvm20//:include",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+filegroup(
+    name = "dwp_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:dwp",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+filegroup(
+    name = "linker_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:ar",
+        "@aarch64-linux-llvm20//:clang",
+        "@aarch64-linux-llvm20//:ld",
+        "@aarch64-linux-llvm20//:lib",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+filegroup(
+    name = "objcopy_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:objcopy",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+filegroup(
+    name = "strip_files",
+    srcs = [
+        ":wrappers",
+        "@aarch64-linux-llvm20//:strip",
+    ],
+)
+
+filegroup(
+    name = "all_files",
+    srcs = [
+        "linker_files",
+        ":compiler_files",
+        "@aarch64-linux-llvm20//:bin",
+    ] + select({
+        "@rules_swiftnav//cc:_use_libcpp": [],
+        "//conditions:default": ["@aarch64-sysroot"],
+    }),
+)
+
+cc_toolchain_config(
+    name = "local-aarch64-linux",
+    abi_libc_version = "glibc_unknown",
+    abi_version = "clang",
+    builtin_sysroot = select({
+        "@rules_swiftnav//cc:_use_libcpp": None,
+        "//conditions:default": "external/aarch64-sysroot",
+    }),
+    compiler = "clang",
+    cxx_builtin_include_directories = select({
+        "@rules_swiftnav//cc:_use_libcpp": [
+            "/include",
+            "/usr/include",
+            "/usr/local/include",
+        ],
+        "//conditions:default": ["%sysroot%/usr/include"],
+    }),
+    host_system_name = AARCH64_LINUX,
+    target_cpu = "k8",
+    target_libc = "glibc_unknown",
+    target_system_name = AARCH64_LINUX,
+    tool_paths = {
+        "ar": "wrappers/llvm-ar",
+        "cpp": "wrappers/clang-cpp",
+        "gcc": "wrappers/clang",
+        "gcov": "wrappers/llvm-profdata",
+        "llvm-cov": "wrappers/llvm-cov",
+        "llvm-profdata": "wrappers/llvm-profdata",
+        "ld": "wrappers/ld.ldd",
+        "nm": "wrappers/llvm-nm",
+        "objcopy": "wrappers/llvm-objcopy",
+        "objdump": "wrappers/llvm-objdump",
+        "strip": "wrappers/llvm-strip",
+    },
+    toolchain_identifier = "clang-aarch64-linux",
+    toolchain_path_prefix = "external/aarch64-linux-llvm20",
+)
+
+cc_toolchain(
+    name = "cc-clang-aarch64-linux",
+    all_files = ":all_files",
+    ar_files = ":ar_files",
+    as_files = ":as_files",
+    compiler_files = ":compiler_files",
+    dwp_files = ":dwp_files",
+    linker_files = ":linker_files",
+    objcopy_files = ":objcopy_files",
+    strip_files = ":strip_files",
+    toolchain_config = ":local-aarch64-linux",
+)
+
+toolchain(
+    name = "cc-toolchain-aarch64-linux",
+    exec_compatible_with = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//cpu:aarch64",
+        "@platforms//os:linux",
+        "@rules_swiftnav//cc/constraints:llvm20_toolchain",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-aarch64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
