@@ -36,8 +36,8 @@ fi
 tool_name=$(basename "${BASH_SOURCE[0]}")
 # In case the tool label is changed, a change in here is very likely needed
 # This establishes backwards compatibility with the old WORKSPACE file
-toolchain_bindir=external/x86_64-aarch64-linux-llvm20/bin
-toolchain_bindir_as_bzlmod="external/rules_swiftnav~~swift_cc_toolchain_extension~x86_64-aarch64-linux-llvm20/bin"
+toolchain_bindir=external/x86_64-linux-llvm20/bin
+toolchain_bindir_as_bzlmod="external/rules_swiftnav~~swift_cc_toolchain_extension~x86_64-linux-llvm20/bin"
 
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
