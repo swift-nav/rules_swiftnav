@@ -10,12 +10,14 @@ load(
     "gcc_arm_gnu_8_3_toolchain",
     "llvm_mingw_toolchain",
     "swift_cc_toolchain",
+    "swift_cc_toolchain_llvm20",
     "x86_64_linux_musl_toolchain",
     "x86_64_sysroot",
 )
 
 def _swift_cc_toolchain_impl(_ctx):
     swift_cc_toolchain()
+    swift_cc_toolchain_llvm20()
     aarch64_sysroot()
     llvm_mingw_toolchain()
     x86_64_sysroot()
