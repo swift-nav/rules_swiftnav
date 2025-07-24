@@ -610,6 +610,58 @@ def swift_cc_test_library(**kwargs):
 
     native.cc_library(**kwargs)
 
+def swift_c_test(name, type, **kwargs):
+    """Wraps cc_test to enforce Swift testing conventions for C code.
+
+    This rule creates a test target along with a target that contains the sources
+    of the test. The name of the sources is created with the '.srcs' suffix.
+
+    Args:
+        name: A unique name for this rule.
+        type: Specifies whether the test is a unit or integration test.
+
+            These are passed to cc_test as tags which enables running
+            these test types seperately: `bazel test --test_tag_filters=unit //...`
+
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+    """
+
+    _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
+
+    srcs_name = name + ".srcs"
+    srcs = kwargs.get("srcs", [])
+
+    native.filegroup(
+        name = srcs_name,
+        srcs = srcs,
+        visibility = ["//visibility:public"],
+        tags = [TEST_SRCS],
+        target_compatible_with = kwargs.get("target_compatible_with", []),
+    )
+
+    kwargs["srcs"] = [":" + srcs_name]
+
+    if not (type == UNIT or type == INTEGRATION):
+        fail("The 'type' attribute must be either UNIT or INTEGRATION")
+
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations()
+    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
+    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["name"] = name
+    kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+
+    native.cc_test(**kwargs)
+
 def swift_cc_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
 
