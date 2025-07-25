@@ -43,6 +43,10 @@ if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
   # use-case: WORKSPACE
   exec "${toolchain_bindir}"/"${tool_name}" "$@"
+elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  # Use-case: bazelmod
+  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
 elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # This branch exists because some users of the toolchain,
   # namely rules_foreign_cc, will change CWD and call $CC (this script)
@@ -68,10 +72,6 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   then
     exec "${tool_as_bzlmod}" "${@}"
   fi
-elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
-  # We're running under _execroot_, call the real tool.
-  # Use-case: bazelmod
-  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
 else
   >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
   exit 5

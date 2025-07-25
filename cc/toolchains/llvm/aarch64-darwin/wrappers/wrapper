@@ -39,15 +39,14 @@ tool_name=$(basename "${BASH_SOURCE[0]}")
 toolchain_bindir=external/aarch64-darwin-llvm/bin
 toolchain_bindir_as_bzlmod="external/rules_swiftnav~~swift_cc_toolchain_extension~aarch64-darwin-llvm/bin"
 
-echo "DEBUG:"
-echo "pwd: $(pwd)"
-echo "toolchain_bindir_as_bzlmod: ${toolchain_bindir_as_bzlmod}"
-echo "tool: ${tool_name}"
-echo "DEBUG_END"
-
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
+  # use-case: WORKSPACE
   exec "${toolchain_bindir}"/"${tool_name}" "$@"
+elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  # Use-case: bazelmod
+  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
 elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # This branch exists because some users of the toolchain,
   # namely rules_foreign_cc, will change CWD and call $CC (this script)
@@ -57,10 +56,6 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # _execroot_/external/rules_swiftnav/cc/toolchain/llvm/x86_64-linux/wrappers/wrapper.
   #
   # If the wrapper is relocated then this line needs to be adjusted.
-
-  echo "FOOOO"
-  echo "${BASH_SOURCE[0]}"
-  echo "CXC"
 
   execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}" 
 
@@ -77,9 +72,6 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   then
     exec "${tool_as_bzlmod}" "${@}"
   fi
-elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
-  # We're running under _execroot_, call the real tool.
-  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
 else
   >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
   exit 5
