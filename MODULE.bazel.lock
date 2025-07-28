@@ -70,7 +70,7 @@
   "moduleExtensions": {
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "owZnzd3iM7No2MXr1OBoOjK6Bcqw0fJm965uaoQOOA0=",
+        "bzlTransitiveDigest": "znaZSUcCcLiSKWaNXYgIV48LbAb5o709DZwDQPkDEXs=",
         "usagesDigest": "JO/wENMiKsORO6Z0Y/QsQqhEvjxGVTXaD62oIR5ovYM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -138,6 +138,45 @@
               "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
               "strip_prefix": "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
               "sha256": "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5"
+            }
+          },
+          "aarch64-darwin-llvm20": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-ARM64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-macOS-ARM64"
+            }
+          },
+          "x86_64-darwin-llvm20": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-X64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-macOS-X64",
+              "sha256": "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
+            }
+          },
+          "aarch64-linux-llvm20": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-ARM64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-Linux-ARM64",
+              "sha256": "832f2802a29457dc758f56e26e98558c6cd0e45fcd07186f540cb6e7f4e59385"
+            }
+          },
+          "x86_64-linux-llvm20": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-X64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-Linux-X64",
+              "sha256": "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
             }
           },
           "aarch64-sysroot": {

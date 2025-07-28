@@ -38,19 +38,37 @@ toolchain_bindir=external/x86_64-darwin-llvm/bin
 
 if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
   # We're running under _execroot_, call the real tool.
+  # use-case: WORKSPACE
   exec "${toolchain_bindir}"/"${tool_name}" "$@"
+elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+  # We're running under _execroot_, call the real tool.
+  # Use-case: bazelmod
+  exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
 elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # This branch exists because some users of the toolchain,
   # namely rules_foreign_cc, will change CWD and call $CC (this script)
   # with its absolute path.
   #
   # To deal with this we find the tool relative to this script, which is at
-  # _execroot_/external/rules_swiftnav/cc/toolchain/llvm/x86_64-linux/wrappers/wrapper.
+  # _execroot_/external/rules_swiftnav/cc/toolchains/llvm/x86_64-darwin/wrappers/wrapper.
   #
   # If the wrapper is relocated then this line needs to be adjusted.
-  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}"
+
+  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}" 
+
+  # Legacy path for non-bazelmod
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
-  exec "${tool}" "${@}"
+  if [[ -f "${execroot_path}/${toolchain_bindir}/${tool_name}" ]];
+  then
+    exec "${tool}" "${@}"
+  fi
+
+  # After bazelmod migration, the directory structure is different
+  tool_as_bzlmod="${execroot_path}/${toolchain_bindir_as_bzlmod}/${tool_name}"
+  if [[ -f "${tool_as_bzlmod}" ]];
+  then
+    exec "${tool_as_bzlmod}" "${@}"
+  fi
 else
   >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
   exit 5
