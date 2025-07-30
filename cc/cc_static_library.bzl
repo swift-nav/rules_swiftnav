@@ -10,8 +10,10 @@ def _get_linker_inputs(deps):
 def _get_static_libaries(ctx, lib):
     # This statement checks if path contains "+" and replaces it with "_".
     # This workaround is needed for the older version of archiver (2.31.1), which doesn't accept paths with "+".
-    if lib.path.find("+") != -1:
-        new_lib = ctx.actions.declare_file(lib.path.replace("+", "_"))
+    # Moreover, the archiver MRI script has hickups with paths containing "~".
+    # This is unfortunate, because "~" is part of the folder structure when using bzl_mod.
+    if lib.path.find("+") != -1 or lib.path.find("~") != -1:
+        new_lib = ctx.actions.declare_file(lib.path.replace("+", "_").replace("~", "_"))
         ctx.actions.run_shell(
             command = "cp {} {}".format(lib.path, new_lib.path),
             inputs = [lib],
