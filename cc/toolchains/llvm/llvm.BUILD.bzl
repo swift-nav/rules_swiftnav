@@ -15,7 +15,7 @@ exports_files(glob([
     "bin/*",
     "lib/*",
     "include/*",
-]))
+], allow_empty = True))
 
 ## LLVM toolchain files
 
@@ -36,7 +36,7 @@ filegroup(
         "bin/ld.lld",
         # Required on mac
         "bin/ld64.lld",
-    ]),
+    ], allow_empty = True),
 )
 
 filegroup(
@@ -49,7 +49,7 @@ filegroup(
 
 filegroup(
     name = "bin",
-    srcs = glob(["bin/**"]),
+    srcs = glob(["bin/**"], allow_empty = True),
 )
 
 filegroup(
@@ -66,6 +66,7 @@ filegroup(
             "lib/libclang*.a",
             "lib/liblld*.a",
         ],
+        allow_empty = True,
     ),
     # Do not include the .dylib files in the linker sandbox because they will
     # not be available at runtime. Any library linked from the toolchain should
