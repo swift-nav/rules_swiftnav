@@ -80,7 +80,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot=external/gcc_arm_embedded_toolchain",
+                                "--sysroot={}".format(ctx.attr.sysroot),
                                 "-no-canonical-prefixes",
                                 "-fno-canonical-system-headers",
                                 "-fno-common",
@@ -167,6 +167,7 @@ config = rule(
     attrs = {
         "c_opts": attr.string_list(),
         "link_opts": attr.string_list(),
+        "sysroot": attr.string(),
     },
     provides = [CcToolchainConfigInfo],
 )
