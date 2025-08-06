@@ -80,7 +80,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot=external/arm-linux-musleabihf",
+                                "--sysroot={}".format(ctx.attr.sysroot),
                                 "-no-canonical-prefixes",
                                 "-fno-canonical-system-headers",
                                 "-fno-common",
@@ -120,7 +120,7 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot=external/arm-linux-musleabihf",
+                                "--sysroot={}".format(ctx.attr.sysroot),
                                 "-Wl,-O1",
                                 "-Wl,--hash-style=gnu",
                                 "-Wl,--as-needed",
@@ -152,6 +152,8 @@ def _impl(ctx):
 
 config = rule(
     implementation = _impl,
-    attrs = {},
+    attrs = {
+        "sysroot": attr.string(),
+    },
     provides = [CcToolchainConfigInfo],
 )

@@ -115,6 +115,10 @@ config(
             "//conditions:default": [],
         },
     ),
+    sysroot = select({
+        "@rules_swiftnav//cc:_enable_bzlmod": "external/rules_swiftnav++swift_cc_toolchain_extension+gcc_arm_embedded_toolchain",
+        "//conditions:default": "external/gcc_arm_embedded_toolchain",
+    }),
 )
 
 cc_toolchain(
