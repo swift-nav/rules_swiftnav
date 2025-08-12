@@ -14,6 +14,9 @@ package(
 
 cc_library(
     name = "json",
-    hdrs = ["src/json.hpp"],
-    includes = ["src"],
+    hdrs = [
+        "single_include/nlohmann/json.hpp",
+        "single_include/nlohmann/json_fwd.hpp",
+    ],
+    includes = ["single_include"],
 )
