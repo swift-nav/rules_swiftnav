@@ -117,8 +117,8 @@ cc_toolchain_config(
     abi_version = "clang",
     builtin_sysroot = select({
         "@rules_swiftnav//cc:_use_libcpp": None,
-        # Remove once bzlmod is enabled by default
-        "@rules_swiftnav//cc:_enable_bzlmod": "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-sysroot",
+        # When bzlmod is enabled but libcpp is not, use the bzlmod path
+        "@rules_swiftnav//cc:_enable_bzlmod_not_libcpp": "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-sysroot",
         "//conditions:default": "external/x86_64-sysroot",
     }),
     compiler = "clang",
