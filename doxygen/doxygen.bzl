@@ -20,7 +20,7 @@ def _swift_doxygen_impl(ctx):
 
     # this performs a CMake-like replacement of @VAR@ based on the vars dict
     config = configure_file_impl(ctx, vars, ctx.attr.name + "_Doxyfile")[0].files.to_list()[0]
-    
+
     # Create a processed config file for sed operations
     processed_config = ctx.actions.declare_file(ctx.attr.name + "_processed_Doxyfile")
 
