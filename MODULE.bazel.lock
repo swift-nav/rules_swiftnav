@@ -76,7 +76,7 @@
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "znaZSUcCcLiSKWaNXYgIV48LbAb5o709DZwDQPkDEXs=",
-        "usagesDigest": "eJT8fw0gfMPpMr0QXJk+/2KyaDk7tWABkSg38EnwwmY=",
+        "usagesDigest": "BqeY+vKftdzwujAL4kqw9tfp/bR/gWuJaOeQtpeBjZc=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -290,7 +290,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "rq/79ksOx0UzTXiDiNZPMxP/ynuGC96ZKXAp671gmfI=",
+        "usagesDigest": "7kQDxQZ5IqOQabmfswCYPykw+dYufc7fj3KaTEjzrbo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
