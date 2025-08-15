@@ -206,6 +206,15 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "_enable_bzlmod_not_libcpp",
+    flag_values = {
+        ":enable_bzlmod": "true",
+        ":use_libcpp": "false",
+    },
+    visibility = ["//visibility:public"],
+)
+
 py_binary(
     name = "fix_include_guards",
     srcs = [

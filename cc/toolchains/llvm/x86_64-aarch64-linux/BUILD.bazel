@@ -101,7 +101,12 @@ cc_toolchain_config(
     name = "local-x86_64-aarch64-linux",
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
-    builtin_sysroot = "external/aarch64-sysroot",
+    builtin_sysroot = select({
+        "@rules_swiftnav//cc:_use_libcpp": None,
+        # When bzlmod is enabled but libcpp is not, use the bzlmod path
+        "@rules_swiftnav//cc:_enable_bzlmod_not_libcpp": "external/rules_swiftnav++swift_cc_toolchain_extension+aarch64-sysroot",
+        "//conditions:default": "external/aarch64-sysroot",
+    }),
     compiler = "clang",
     cxx_builtin_include_directories = [
         "%sysroot%/usr/include",
