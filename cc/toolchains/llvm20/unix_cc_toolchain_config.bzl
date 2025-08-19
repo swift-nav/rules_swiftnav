@@ -752,7 +752,7 @@ def _impl(ctx):
                         iterate_over = "include_paths",
                     ),
                     flag_group(
-                        flags = ["-isystem", "%{system_include_paths}"],
+                        flags = ["-I", "%{system_include_paths}"],
                         iterate_over = "system_include_paths",
                     ),
                 ],
