@@ -1,0 +1,13 @@
+platform(
+    name = "aptiv",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "@rules_swiftnav//cc/toolchains/gcc_arm_gnu_8_3:gcc_arm_gnu_8_3_toolchain",
+    ],
+)
+
+alias(
+    name = "toolchain",
+    actual = "@rules_swiftnav//cc/toolchains/gcc_arm_gnu_8_3:toolchain",
+)

@@ -1,0 +1,5 @@
+constraint_value(
+    name = "tesla_toolchain",
+    constraint_setting = "@rules_swiftnav//cc/constraints:toolchain",
+    visibility = ["//visibility:public"],
+)

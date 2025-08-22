@@ -1,0 +1,47 @@
+load(":config.bzl", "config")
+
+filegroup(name = "empty")
+
+constraint_value(
+    name = "step_toolchain",
+    constraint_setting = "@rules_swiftnav//cc/constraints:toolchain",
+)
+
+LINUX_CORTEXA7T2HF = [
+    "@platforms//os:linux",
+    "@platforms//cpu:arm",
+    ":step_toolchain",
+]
+
+platform(
+    name = "step",
+    constraint_values = LINUX_CORTEXA7T2HF,
+)
+
+config(name = "config")
+
+cc_toolchain(
+    name = "cc_toolchain",
+    all_files = ":empty",
+    ar_files = ":empty",
+    as_files = ":empty",
+    compiler_files = ":empty",
+    dwp_files = ":empty",
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
+    supports_param_files = 0,
+    toolchain_config = ":config",
+    toolchain_identifier = "step-toolchain",
+)
+
+toolchain(
+    name = "toolchain",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = LINUX_CORTEXA7T2HF,
+    toolchain = ":cc_toolchain",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
