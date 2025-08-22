@@ -1,5 +1,29 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path", "with_feature_set")
+load(
+    "swift_custom_features.bzl",
+    "c11_standard_feature",
+    "c17_standard_feature",
+    "c89_standard_feature",
+    "c90_standard_feature",
+    "c99_standard_feature",
+    "cxx11_standard_feature",
+    "cxx14_standard_feature",
+    "cxx17_standard_feature",
+    "cxx20_standard_feature",
+    "cxx98_standard_feature",
+    "gnu_extensions_feature",
+    "swift_relwdbg_feature",
+    "swift_rtti_feature",
+    "swift_nortti_feature",
+    "swift_exceptions_feature",
+    "swift_noexceptions_feature",
+    "swift_internal_coding_standard_feature",
+    "swift_prod_coding_standard_feature",
+    "swift_safe_coding_standard_feature",
+    "swift_portable_coding_standard_feature",
+    "swift_disable_conversion_warning_feature",
+)
 
 def _impl(ctx):
     SDK_PATH_PREFIX = "wrappers/arm-none-eabi-{}"
@@ -146,6 +170,37 @@ def _impl(ctx):
             ],
         ),
         opt_feature,
+      feature(
+          name = "treat_warnings_as_errors",
+          flag_sets = [
+              flag_set(
+                  actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
+                  flag_groups = [flag_group(flags = ["-Werror"])],
+              ),
+          ],
+      )
+    ] + [
+            # append swiftnavs custom features here
+            gnu_extensions_feature,
+            c89_standard_feature,
+            c90_standard_feature,
+            c99_standard_feature,
+            c11_standard_feature,
+            c17_standard_feature,
+            cxx98_standard_feature,
+            cxx11_standard_feature,
+            cxx14_standard_feature,
+            cxx17_standard_feature,
+            cxx20_standard_feature,
+            swift_relwdbg_feature,
+            swift_rtti_feature,
+            swift_nortti_feature,
+            swift_exceptions_feature,
+            swift_noexceptions_feature,
+            swift_internal_coding_standard_feature,
+            swift_prod_coding_standard_feature,
+            swift_safe_coding_standard_feature,
+            swift_portable_coding_standard_feature,
     ]
 
     return cc_common.create_cc_toolchain_config_info(

@@ -41,8 +41,17 @@ load(
     "cxx20_standard_feature",
     "cxx98_standard_feature",
     "gnu_extensions_feature",
-    "swift_no_default_warnings",
     "swift_relwdbg_feature",
+    "swift_rtti_feature",
+    "swift_nortti_feature",
+    "swift_exceptions_feature",
+    "swift_noexceptions_feature",
+    "swift_internal_coding_standard_feature",
+    "swift_prod_coding_standard_feature",
+    "swift_safe_coding_standard_feature",
+    "swift_portable_coding_standard_feature",
+    "swift_disable_conversion_warning_feature",
+    "swift_disable_warnings_for_test_targets_feature",
 )
 
 def _target_os_version(ctx):
@@ -1453,10 +1462,19 @@ def _impl(ctx):
             cxx14_standard_feature,
             cxx17_standard_feature,
             cxx20_standard_feature,
-            swift_no_default_warnings,
             swift_stdlib_feature,
             swift_libcpp_feature,
             swift_relwdbg_feature,
+            swift_rtti_feature,
+            swift_nortti_feature,
+            swift_exceptions_feature,
+            swift_noexceptions_feature,
+            swift_internal_coding_standard_feature,
+            swift_prod_coding_standard_feature,
+            swift_safe_coding_standard_feature,
+            swift_portable_coding_standard_feature,
+            swift_disable_conversion_warning_feature,
+            swift_disable_warnings_for_test_targets_feature,
         ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
@@ -1509,10 +1527,19 @@ def _impl(ctx):
             cxx14_standard_feature,
             cxx17_standard_feature,
             cxx20_standard_feature,
-            swift_no_default_warnings,
             swift_stdlib_feature,
             swift_libcpp_feature,
             swift_relwdbg_feature,
+            swift_rtti_feature,
+            swift_nortti_feature,
+            swift_exceptions_feature,
+            swift_noexceptions_feature,
+            swift_internal_coding_standard_feature,
+            swift_prod_coding_standard_feature,
+            swift_safe_coding_standard_feature,
+            swift_portable_coding_standard_feature,
+            swift_disable_conversion_warning_feature,
+            swift_disable_warnings_for_test_targets_feature,
         ]
 
     return cc_common.create_cc_toolchain_config_info(
