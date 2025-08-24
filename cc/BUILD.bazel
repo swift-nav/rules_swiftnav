@@ -224,3 +224,12 @@ py_binary(
     ],
     visibility = ["//visibility:public"],
 )
+
+py_binary(
+  name = "checktags",
+  srcs = [
+    "checktags.py",
+  ],
+  args = [],
+  visibility = ["//visibility:public"],
+)
