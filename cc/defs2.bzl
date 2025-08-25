@@ -374,7 +374,7 @@ def _add_test(**kwargs):
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
-    kwargs["tags"] = [BINARY, TEST, level, type] + kwargs.get("tags", [])
+    kwargs["tags"] = [BINARY, TEST, level, type, "test_srcs"] + kwargs.get("tags", [])
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
