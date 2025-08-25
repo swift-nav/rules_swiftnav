@@ -1,33 +1,31 @@
+load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
-load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path", "with_feature_set")
-load(
-    "swift_custom_features.bzl",
-    "c11_standard_feature",
-    "c17_standard_feature",
-    "c89_standard_feature",
-    "c90_standard_feature",
-    "c99_standard_feature",
-    "cxx11_standard_feature",
-    "cxx14_standard_feature",
-    "cxx17_standard_feature",
-    "cxx20_standard_feature",
-    "cxx98_standard_feature",
-    "gnu_extensions_feature",
-    "swift_relwdbg_feature",
-    "swift_rtti_feature",
-    "swift_nortti_feature",
-    "swift_exceptions_feature",
-    "swift_noexceptions_feature",
-    "swift_internal_coding_standard_feature",
-    "swift_prod_coding_standard_feature",
-    "swift_safe_coding_standard_feature",
-    "swift_portable_coding_standard_feature",
-    "swift_disable_conversion_warning_feature",
+load("swift_custom_features.bzl",
+            "gnu_extensions_feature",
+            "c89_standard_feature",
+            "c90_standard_feature",
+            "c99_standard_feature",
+            "c11_standard_feature",
+            "c17_standard_feature",
+            "cxx98_standard_feature",
+            "cxx11_standard_feature",
+            "cxx14_standard_feature",
+            "cxx17_standard_feature",
+            "cxx20_standard_feature",
+            "swift_relwdbg_feature",
+            "swift_rtti_feature",
+            "swift_nortti_feature",
+            "swift_exceptions_feature",
+            "swift_noexceptions_feature",
+            "swift_internal_coding_standard_feature",
+            "swift_prod_coding_standard_feature",
+            "swift_safe_coding_standard_feature",
+            "swift_portable_coding_standard_feature",
 )
 
-def _impl(ctx):
-    SDK_PATH_PREFIX = "wrappers/arm-none-eabi-{}"
+SDK_PATH_PREFIX = "/opt/poky-st/2.6/sysroots/x86_64-pokysdk-linux/usr/bin/arm-poky-linux-gnueabi/arm-poky-linux-gnueabi-{}"
 
+def _impl(ctx):
     tool_paths = [
         tool_path(
             name = "ar",
@@ -79,54 +77,45 @@ def _impl(ctx):
         ),
     ]
 
-    all_compile_actions = [
-        ACTION_NAMES.assemble,
-        ACTION_NAMES.c_compile,
-        ACTION_NAMES.cpp_compile,
-        ACTION_NAMES.cpp_header_parsing,
-        ACTION_NAMES.cpp_module_codegen,
-        ACTION_NAMES.cpp_module_compile,
-        ACTION_NAMES.clif_match,
-        ACTION_NAMES.linkstamp_compile,
-        ACTION_NAMES.lto_backend,
-        ACTION_NAMES.preprocess_assemble,
-    ]
-
-    opt_feature = feature(name = "opt")
-
     features = [
         feature(
             name = "default_compile_actions",
             enabled = True,
             flag_sets = [
                 flag_set(
-                    actions = all_compile_actions,
+                    actions = [
+                        ACTION_NAMES.assemble,
+                        ACTION_NAMES.c_compile,
+                        ACTION_NAMES.cpp_compile,
+                        ACTION_NAMES.cpp_header_parsing,
+                        ACTION_NAMES.cpp_module_codegen,
+                        ACTION_NAMES.cpp_module_compile,
+                        ACTION_NAMES.clif_match,
+                        ACTION_NAMES.linkstamp_compile,
+                        ACTION_NAMES.lto_backend,
+                        ACTION_NAMES.preprocess_assemble,
+                    ],
                     flag_groups = ([
                         flag_group(
                             flags = [
-                                "--sysroot={}".format(ctx.attr.sysroot),
-                                "-no-canonical-prefixes",
-                                "-fno-canonical-system-headers",
-                                "-fno-common",
-                                "-ffunction-sections",
-                                "-fdata-sections",
+                                "-march=armv7ve",
+                                "-mthumb",
+                                "-mfpu=neon",
+                                "-mfloat-abi=hard",
+                                "-mcpu=cortex-a7",
+                                "-O2",
+                                "-pipe",
+                                "-g",
+                                "-feliminate-unused-debug-types",
+                                "-fno-aggressive-loop-optimizations",
                                 # Reproducibility
                                 "-Wno-builtin-macro-redefined",
                                 "-D__DATE__=\"redacted\"",
                                 "-D__TIMESTAMP__=\"redacted\"",
                                 "-D__TIME__=\"redacted\"",
-                            ] + ctx.attr.c_opts,
+                            ],
                         ),
                     ]),
-                ),
-                flag_set(
-                    actions = all_compile_actions,
-                    flag_groups = ([
-                        flag_group(
-                            flags = ["-O2", "-g"],
-                        ),
-                    ]),
-                    with_features = [with_feature_set(features = ["opt"])],
                 ),
             ],
         ),
@@ -143,9 +132,17 @@ def _impl(ctx):
                     flag_groups = ([
                         flag_group(
                             flags = [
+                                "-march=armv7ve",
+                                "-mthumb",
+                                "-mfpu=neon",
+                                "-mfloat-abi=hard",
+                                "-mcpu=cortex-a7",
                                 "-lstdc++",
                                 "-lm",
-                            ] + ctx.attr.link_opts,
+                                "-Wl,-O1",
+                                "-Wl,--hash-style=gnu",
+                                "-Wl,--as-needed",
+                            ],
                         ),
                     ]),
                 ),
@@ -169,7 +166,6 @@ def _impl(ctx):
                 ),
             ],
         ),
-        opt_feature,
       feature(
           name = "treat_warnings_as_errors",
           flag_sets = [
@@ -206,10 +202,16 @@ def _impl(ctx):
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         features = features,
-        toolchain_identifier = "gcc-arm-embedded",
+        cxx_builtin_include_directories = [
+            "/opt/poky-st/2.6/sysroots/cortexa7t2hf-neon-poky-linux-gnueabi/usr/include",
+            "/opt/poky-st/2.6/sysroots/x86_64-pokysdk-linux/usr/lib/arm-poky-linux-gnueabi/gcc/arm-poky-linux-gnueabi/8.2.0/include",
+            "/opt/poky-st/2.6/sysroots/x86_64-pokysdk-linux/usr/lib/arm-poky-linux-gnueabi/gcc/arm-poky-linux-gnueabi/8.2.0/include-fixed",
+        ],
+        builtin_sysroot = "/opt/poky-st/2.6/sysroots/cortexa7t2hf-neon-poky-linux-gnueabi",
+        toolchain_identifier = "step-toolchain",
         host_system_name = "local",
         target_system_name = "local",
-        target_cpu = "arm",
+        target_cpu = "step",
         target_libc = "unknown",
         compiler = "gcc",
         abi_version = "unknown",
@@ -219,10 +221,6 @@ def _impl(ctx):
 
 config = rule(
     implementation = _impl,
-    attrs = {
-        "c_opts": attr.string_list(),
-        "link_opts": attr.string_list(),
-        "sysroot": attr.string(),
-    },
+    attrs = {},
     provides = [CcToolchainConfigInfo],
 )

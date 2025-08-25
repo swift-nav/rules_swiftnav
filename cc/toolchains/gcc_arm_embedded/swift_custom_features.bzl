@@ -15,12 +15,36 @@ appear in upstream in unix_cc_toolchain_config.bzl.
 
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
+    "@rules_swiftnav//cc/toolchains:gcc_llvm_flags.bzl",
+    "get_flags_for_lang_and_level",
+    "disable_conversion_warning_flags",
+)
+load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
     "feature",
     "flag_group",
     "flag_set",
     "with_feature_set",
 )
+
+_invalid_flags = [
+    "-Wmismatched-dealloc",
+    "-Wsizeof-array-div",
+    "-Wenum-int-mismatch",
+    "-Wvla-parameter",
+    "-Wenum-conversion",
+    "-Wself-move",
+    "-Wtautological-unsigned-zero-compare",
+    # Really overzealous on this toolchain
+    "-Wunused-const-variable",
+    "-Wconversion",
+    "-Wsign-conversion",
+    # This is just broken on this toolchain
+    "-Wchar-subscripts",
+]
+
+_extra_flags = [
+]
 
 _all_compile_actions = [
     ACTION_NAMES.c_compile,
@@ -437,32 +461,108 @@ swift_relwdbg_feature = feature(
     ],
 )
 
-# Clang has a set of warnings that are always enabled by default
-# which gets noisey for third party code. This feature allows disabling
-# these warnings for code we likely never intend to patch to focus on
-# warnings we care about.
-swift_no_default_warnings = feature(
-    name="no_default_warnings",
+swift_rtti_feature = feature(
+    name="rtti_feature",
+    flag_sets=[
+        flag_set(
+            actions=[ACTION_NAMES.cpp_compile],
+            flag_groups=[flag_group(flags=["-frtti"])],
+        ),
+    ],
+)
+swift_nortti_feature = feature(
+    name="nortti_feature",
+    flag_sets=[
+        flag_set(
+            actions=[ACTION_NAMES.cpp_compile],
+            flag_groups=[flag_group(flags=["-fno-rtti"])],
+        ),
+    ],
+)
+
+swift_exceptions_feature = feature(
+    name="exceptions_feature",
+    flag_sets=[
+        flag_set(
+            actions=[ACTION_NAMES.cpp_compile],
+            flag_groups=[flag_group(flags=["-fexceptions"])],
+        ),
+    ],
+)
+swift_noexceptions_feature = feature(
+    name="noexceptions_feature",
+    flag_sets=[
+        flag_set(
+            actions=[ACTION_NAMES.cpp_compile],
+            flag_groups=[flag_group(flags=["-fno-exceptions"])],
+        ),
+    ],
+)
+
+swift_internal_coding_standard_feature = feature(
+    name="internal_coding_standard",
     flag_sets=[
         flag_set(
             actions=_all_compile_actions,
             flag_groups=[
                 flag_group(
-                    flags=[
-                        "-Wno-fortify-source",
-                        "-Wno-absolute-value",
-                        "-Wno-format",
-                        "-Wno-deprecated-declarations",
-                        "-Wno-unused-but-set-variable",
-                        "-Wno-pointer-bool-conversion",
-                        "-Wno-unused-variable",
-                        "-Wno-incompatible-pointer-types-discards-qualifiers",
-                        "-Wno-implicit-const-int-float-conversion",
-                        "-Wno-implicit-function-declaration",
-                        "-Wno-mismatched-new-delete",
-                    ]
+                    flags=get_flags_for_lang_and_level(
+                        "cxx", "internal", _invalid_flags, _extra_flags
+                    )
                 )
             ],
+        ),
+    ],
+)
+
+swift_prod_coding_standard_feature = feature(
+    name="prod_coding_standard",
+    flag_sets=[
+        flag_set(
+            actions=_all_compile_actions,
+            flag_groups=[
+                flag_group(
+                    flags=get_flags_for_lang_and_level(
+                        "cxx", "prod", _invalid_flags, _extra_flags
+                    )
+                )
+            ],
+        ),
+    ],
+)
+
+swift_safe_coding_standard_feature = feature(
+    name="safe_coding_standard",
+    flag_sets=[
+        flag_set(
+            actions=_all_compile_actions,
+            flag_groups=[
+                flag_group(
+                    flags=get_flags_for_lang_and_level(
+                        "cxx", "prod", _invalid_flags, _extra_flags
+                    )
+                )
+            ],
+        ),
+    ],
+)
+
+swift_portable_coding_standard_feature = feature(
+    name="portable_coding_standard",
+    flag_sets=[
+        flag_set(
+            actions=_all_compile_actions,
+            flag_groups=[flag_group(flags=["-pedantic"])],
+        ),
+    ],
+)
+
+swift_disable_conversion_warning_feature = feature(
+    name="disable_conversion_warnings",
+    flag_sets=[
+        flag_set(
+            actions=_all_compile_actions,
+            flag_groups=[flag_group(flags=disable_conversion_warning_flags)],
         ),
     ],
 )
