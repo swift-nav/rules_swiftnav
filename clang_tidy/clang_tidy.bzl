@@ -147,7 +147,7 @@ def _clang_tidy_aspect_impl(target, ctx):
         return []
 
     tags = getattr(ctx.rule.attr, "tags", [])
-    if not LIBRARY in tags and not BINARY in tags:
+    if not "safe" in tags and not "prod" in tags:
         return []
 
     srcs = get_cc_srcs(ctx)
