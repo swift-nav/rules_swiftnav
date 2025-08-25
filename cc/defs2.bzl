@@ -23,6 +23,8 @@ UNIT = "unit"
 # Name for a integration test
 INTEGRATION = "integration"
 
+TEST_SRCS = "test_srcs"
+
 # Coding Standard levels
 #
 # Throughout this file and others there are references to coding
@@ -271,6 +273,9 @@ def _add_library(**kwargs):
     kwargs["tags"] = [LIBRARY, level] + (["portable"] if portable else []) + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
+    if "test_library" in kwargs["tags"]:
+      kwargs["tags"].append("test_srcs")
+
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
 
@@ -475,6 +480,10 @@ def swift_cc_test_library(**kwargs):
         kwargs["rtti"] = True
     if "exceptions" not in kwargs:
         kwargs["exceptions"] = True
+
+    if "tags" not in kwargs:
+      kwargs["tags"] = []
+    kwargs["tags"].append("test_library")
 
     kwargs["target_compatible_with"] = _test_compatible_with()
 
