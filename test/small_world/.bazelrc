@@ -43,22 +43,15 @@ build:coverage_aarch64_darwin --platforms=@rules_swiftnav//platforms:aarch64_dar
 # test --spawn_strategy=local
 # test --strategy=TestRunner=local
 
-coverage --spawn_strategy=local
-coverage --strategy=TestRunner=local
-coverage --action_env=COVERAGE_GCOV_PATH="/opt/homebrew/opt/llvm/bin/llvm-profdata"
-coverage --action_env=BAZEL_USE_LLVM_NATIVE_COVERAGE=1
-coverage --action_env=GCOV_PREFIX_STRIP=10
-coverage --cxxopt=-mllvm
-coverage --copt=-mllvm
-coverage --cxxopt=-system-headers-coverage
-coverage --copt=-system-headers-coverage
+# 
+
 
 
 
 # bazel coverage --config=coverage_aarch64_darwin //src/base_math:base_math_test --subcommands
 
 
-# on ubuntu!
+# on ubuntu! you do not need those options above (might be only for Mac)
 # 1.
 # bazel coverage --config=coverage_x86_64_linux //src/base_math:base_math_test --subcommands --experimental_generate_llvm_lcov --combined_report=lcov
 # 2.
