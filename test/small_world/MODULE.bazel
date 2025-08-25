@@ -1,0 +1,7 @@
+module(name = "small_world")
+
+bazel_dep(name = "rules_swiftnav")
+local_path_override(
+    module_name = "rules_swiftnav",
+    path = "../.."
+)
