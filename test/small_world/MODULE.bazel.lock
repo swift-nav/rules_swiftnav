@@ -773,7 +773,7 @@
     },
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "K778IFSIId7yJ+oQO6X/ejz8v0aF47l3FXhPHDx45gE=",
+        "bzlTransitiveDigest": "zDwq2yBSEJXdECtks4+trENu8MzrMfkm5FDsxbO1KrE=",
         "usagesDigest": "t7m5vb2wMpPdJGscilNolioLp4USsuXX/Q7D8gtmNlE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -844,7 +844,8 @@
             "attributes": {
               "build_file": "@@rules_swiftnav+//cc/toolchains/llvm20:llvm.BUILD.bzl",
               "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-ARM64.tar.xz",
-              "strip_prefix": "LLVM-20.1.7-macOS-ARM64"
+              "strip_prefix": "LLVM-20.1.7-macOS-ARM64",
+              "sha256": "6aa75de00575ad0663183b00f00f39992ded611b5136e57649ace1e6a53c0d16"
             }
           },
           "x86_64-darwin-llvm20": {

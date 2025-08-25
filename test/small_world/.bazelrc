@@ -1,1 +1,67 @@
 common --@rules_swiftnav//cc:enable_bzlmod=true
+
+# # build:use_llvm20 --platforms=@rules_swiftnav//platforms:x86_64_darwin_llvm20
+# # build:use_llvm20 --platforms=@rules_swiftnav//platforms:aarch64_darwin_llvm20
+# build:use_llvm20 --platforms=@rules_swiftnav//platforms:x86_64_linux_llvm20
+# # build:use_llvm20 --platforms=@rules_swiftnav//platforms:aarch64_linux_llvm20
+
+build:coverage_x86_64_linux --platforms=@rules_swiftnav//platforms:x86_64_linux_llvm20
+
+build:coverage_aarch64_darwin --platforms=@rules_swiftnav//platforms:aarch64_darwin_llvm20
+
+# # Overrides our custom toolchain and uses the system
+# build:system --noincompatible_enable_cc_toolchain_resolution
+
+# build:system --action_env=BAZEL_DO_NOT_DETECT_CPP_TOOLCHAIN="0"
+
+# build:system --platform_suffix=system
+
+# # build --config=system
+# build --nojava_deps
+# build --define=BAZEL_USE_SYSTEM_ZLIB=1
+# build --spawn_strategy=local
+# build --strategy=Genrule=local
+# build --strategy=CppCompile=local
+# build --strategy=TestRunner=local
+# build --strategy=Javac=local
+# build --strategy=Closure=local
+# build --strategy=GoCompile=local
+# build --strategy=GoLink=local
+# build --strategy=GoTest=local
+# build --strategy=GoVet=local
+# build --strategy=ObjcCompile=local
+# build --strategy=ObjcLink=local
+# build --strategy=SwiftCompile=local
+# build --strategy=Dart=local
+# build --strategy=Worker=local
+# build --strategy=ProtoCompile=local
+# build --strategy=PyCompile=local
+# build --strategy=PyTest=local
+# build --strategy=TypeScriptCompile=local
+# build --strategy=TypeScriptTest=local
+
+# test --spawn_strategy=local
+# test --strategy=TestRunner=local
+
+coverage --spawn_strategy=local
+coverage --strategy=TestRunner=local
+coverage --action_env=COVERAGE_GCOV_PATH="/opt/homebrew/opt/llvm/bin/llvm-profdata"
+coverage --action_env=BAZEL_USE_LLVM_NATIVE_COVERAGE=1
+coverage --action_env=GCOV_PREFIX_STRIP=10
+coverage --cxxopt=-mllvm
+coverage --copt=-mllvm
+coverage --cxxopt=-system-headers-coverage
+coverage --copt=-system-headers-coverage
+
+
+
+# bazel coverage --config=coverage_aarch64_darwin //src/base_math:base_math_test --subcommands
+
+
+# on ubuntu!
+# 1.
+# bazel coverage --config=coverage_x86_64_linux //src/base_math:base_math_test --subcommands --experimental_generate_llvm_lcov --combined_report=lcov
+# 2.
+# /home/jenkins/.cache/bazel/_bazel_jenkins/5a7b992760bae9ecbea2fa12e457bcb7/execroot/_main/bazel-out/_coverage/_coverage_report.dat
+# copy
+# 3. genhtml --output html cov.dat
