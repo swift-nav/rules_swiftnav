@@ -270,11 +270,10 @@ def _add_library(**kwargs):
         "//conditions:default": ["treat_warnings_as_errors"],
     }) + features
 
-    kwargs["tags"] = [LIBRARY, level] + (["portable"] if portable else []) + kwargs.get("tags", [])
-    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
+    is_test_library = "test_library" in kwargs.get("tags", [])
 
-    if "test_library" in kwargs["tags"]:
-      kwargs["tags"].append("test_srcs")
+    kwargs["tags"] = ["test_srcs" if is_test_library else LIBRARY, level] + (["portable"] if portable else []) + kwargs.get("tags", [])
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
@@ -374,7 +373,7 @@ def _add_test(**kwargs):
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
-    kwargs["tags"] = [BINARY, TEST, level, type, "test_srcs"] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST, level, type, "test_srcs"] + kwargs.get("tags", [])
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
