@@ -1,10 +1,8 @@
 common --@rules_swiftnav//cc:enable_bzlmod=true
 
-# # build:use_llvm20 --platforms=@rules_swiftnav//platforms:x86_64_darwin_llvm20
-# # build:use_llvm20 --platforms=@rules_swiftnav//platforms:aarch64_darwin_llvm20
-# build:use_llvm20 --platforms=@rules_swiftnav//platforms:x86_64_linux_llvm20
-# # build:use_llvm20 --platforms=@rules_swiftnav//platforms:aarch64_linux_llvm20
 
+coverage --experimental_generate_llvm_lcov
+coverage --combined_report=lcov
 build:coverage_x86_64_linux --platforms=@rules_swiftnav//platforms:x86_64_linux_llvm20
 
 build:coverage_aarch64_darwin --platforms=@rules_swiftnav//platforms:aarch64_darwin_llvm20
