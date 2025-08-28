@@ -9,4 +9,5 @@ TEST(BaseMathTest, Add) {
 
 TEST(BaseMathTest, SignPlus) {
   EXPECT_EQ(Math::sign(10), 1);
+  //EXPECT_EQ(Math::sign(-10), -1);
 }
