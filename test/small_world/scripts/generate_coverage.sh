@@ -3,15 +3,11 @@
 set -e
 
 OPEN_REPORT=false
-CREATE_ARCHIVE=false
 
 for arg in "$@"; do
     case $arg in
         --open)
             OPEN_REPORT=true
-            ;;
-        --archive)
-            CREATE_ARCHIVE=true
             ;;
     esac
 done
@@ -20,6 +16,7 @@ echo "Generating coverage report..."
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     echo "Detected macOS - using coverage configuration for Mac"
+    export JAVA_HOME=$(brew --prefix)/opt/openjdk/libexec/openjdk.jdk/Contents/Home
     bazel coverage --config=cov_mac //...
 else
     echo "Running coverage for non-Mac platform"
@@ -32,15 +29,13 @@ bazel run @lcov//:genhtml -- \
     --source-directory="$(pwd)" \
     --branch-coverage \
     --ignore-errors inconsistent,gcov,unsupported,format,category,count,unused \
+    --no-function-coverage \
+    --flat \
+    --legend \
+    --quiet \
     "$(bazel info output_path)/_coverage/_coverage_report.dat"
 
 echo "Coverage report generated in cov_html/"
-
-if [[ "$CREATE_ARCHIVE" == true ]]; then
-    echo "Creating archive cov_html.tar.gz..."
-    tar -czf cov_html.tar.gz cov_html
-    echo "Archive created: cov_html.tar.gz"
-fi
 
 if [[ "$OPEN_REPORT" == true ]]; then
     if [[ "$OSTYPE" == "darwin"* ]]; then
