@@ -1,22 +1,8 @@
-# Coverage
+# Small world integration project
 
-on `x86_64 ubuntu`:
+Small demo project to show and test `rules_swiftnav` macros and rules.
 
-lcov:
-```
-bazel coverage --config=coverage_x86_64_linux //src/base_math:base_math_test
+## Coverage
 
-cp "$(bazel info output_path)/_coverage/_coverage_report.dat" cov.dat
-
-genhtml --branch-coverage --output html cov.dat
-```
-
-Mac is not yet supported.
-
-genhtml 2.x:
-```
-bazel coverage --config=coverage_x86_64_linux //src/base_math:base_math_test
-
-bazel run @lcov//:genhtml --  --output $(pwd)/html --source-directory=$(pwd) --branch-coverage "$(bazel info output_path)/_coverage/_coverage_report.dat"
-```
-
+Coverage can be generated with `./scripts/generate_coverage.sh`.
+Tested with Bazel 8 on Mac and Ubuntu with clang toolchains.

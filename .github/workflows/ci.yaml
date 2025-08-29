@@ -38,10 +38,14 @@ jobs:
         uses: actions/cache@v4
         with:
           path: "~/.cache/bazel"
-          key: bazel
+          key: bazel-small-world-integration-project
+
+      - name: Build and generate coverage
+        run: |
+          cd test/small_world
+          ./scripts/generate_coverage.sh
 
       - name: Run format
         run: |
-          cd test/small_world
-          bazel build //...
-          ./scripts/generate_coverage.sh
+          bazel run //:buildifier
+          git diff --exit-code
