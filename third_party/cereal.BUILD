@@ -15,5 +15,7 @@ package(
 cc_library(
     name = "cereal",
     hdrs = glob(["include/**"]),
+    defines = ["CEREAL_THREAD_SAFE=1"],
     includes = ["include"],
+    linkopts = ["-lpthread"],
 )
