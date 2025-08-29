@@ -7,26 +7,41 @@ on:
       - 'main'
 
 jobs:
-
   check-formatting:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-west-2
-
-      - name: Set up cache
-        run: |
-          npm install -g bazels3cache
-          bazels3cache --bucket=${{ secrets.BAZEL_BUCKET }}
-
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
+
+      - uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
 
       - name: Run format
         run: |
-          bazel run --remote_cache=http://localhost:7777 //:buildifier
+          bazel run //:buildifier
           git diff --exit-code
+
+  small-world-integration-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - uses: bazelbuild/setup-bazelisk@v3
+
+      - name: Mount bazel cache
+        uses: actions/cache@v4
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
+
+      - name: Run format
+        run: |
+          cd test/small_world
+          bazel build //...
+          ./scripts/generate_coverage.sh
