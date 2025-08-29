@@ -1,0 +1,18 @@
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+
+swift_cc_library(
+    name = "base_math",
+    srcs = ["base_math.cc"],
+    hdrs = ["base_math.hpp"],
+    visibility = ["//visibility:public"],
+)
+
+swift_cc_test(
+    name = "base_math_test",
+    srcs = ["base_math_test.cc"],
+    type = UNIT,
+    deps = [
+        ":base_math",
+        "@googletest//:gtest_main",
+    ],
+)

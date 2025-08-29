@@ -1,0 +1,20 @@
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+
+swift_cc_library(
+    name = "old_folder_structure",
+    srcs = ["src/old_folder_structure.cc"],
+    hdrs = ["include/old_folder_structure/old_folder_structure.hpp"],
+    #includes = ["include"], THIS PREVENTS HEADER COVERAGE!
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
+
+swift_cc_test(
+    name = "old_folder_structure_test",
+    srcs = ["test/old_folder_structure_test.cc"],
+    type = UNIT,
+    deps = [
+        ":old_folder_structure",
+        "@googletest//:gtest_main",
+    ],
+)

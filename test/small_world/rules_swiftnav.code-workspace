@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"coverage-gutters.coverageBaseDir": "bazel-out/_coverage/",
+		"coverage-gutters.coverageFileNames": [
+			"_coverage_report.dat",
+		],
+		"coverage-gutters.coverageReportFileName": "cov_html/index.html",
+		"coverage-gutters.showLineCoverage": true,
+		"coverage-gutters.showRulerCoverage": true,
+		"coverage-gutters.watchOnActivate": false,
+	}
+}

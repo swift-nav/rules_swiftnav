@@ -102,7 +102,7 @@ def swift_cc_toolchain_llvm20():
         build_file = Label("@rules_swiftnav//cc/toolchains/llvm20:llvm.BUILD.bzl"),
         url = AARCH64_DARWIN_LLVM20,
         strip_prefix = "LLVM-20.1.7-macOS-ARM64",
-        # TODO: Add sha256 hash for integrity
+        sha256 = "6aa75de00575ad0663183b00f00f39992ded611b5136e57649ace1e6a53c0d16",
     )
 
     maybe(

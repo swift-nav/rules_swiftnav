@@ -66,6 +66,7 @@ filegroup(
             "lib/libclang*.a",
             "lib/liblld*.a",
         ],
+        allow_empty = True,
     ),
     # Do not include the .dylib files in the linker sandbox because they will
     # not be available at runtime. Any library linked from the toolchain should

@@ -1,0 +1,10 @@
+common --@rules_swiftnav//cc:enable_bzlmod=true
+
+coverage --experimental_generate_llvm_lcov
+coverage --combined_report=lcov
+
+# Work around for Mac: https://github.com/bazelbuild/bazel/issues/14970.
+# bazel coverage --config=cov_mac //...
+build:cov_mac --repo_env=GCOV=/Library/Developer/CommandLineTools/usr/bin/llvm-profdata
+build:cov_mac --test_env=LLVM_COV=/Library/Developer/CommandLineTools/usr/bin/llvm-cov
+build:cov_mac --copt=-ffile-compilation-dir=.
