@@ -1473,6 +1473,7 @@ def _impl(ctx):
             archiver_flags_feature,
             supports_pic_feature,
             asan_feature,
+            include_paths_feature,
             tsan_feature,
             ubsan_feature,
             macos_minimum_os_feature,
