@@ -752,7 +752,7 @@ def _impl(ctx):
                         iterate_over = "include_paths",
                     ),
                     flag_group(
-                        flags = ["-isystem", "%{system_include_paths}"],
+                        flags = ["-I", "%{system_include_paths}"],
                         iterate_over = "system_include_paths",
                     ),
                 ],
@@ -1473,6 +1473,7 @@ def _impl(ctx):
             archiver_flags_feature,
             supports_pic_feature,
             asan_feature,
+            include_paths_feature,
             tsan_feature,
             ubsan_feature,
             macos_minimum_os_feature,
