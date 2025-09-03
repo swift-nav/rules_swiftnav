@@ -55,7 +55,7 @@ elif case "$0" in /*) true;; *) false;; esac; then
   #
   # If the wrapper is relocated then this line needs to be adjusted.
 
-  execroot_path="${0%/*/*/*/*/*/*/*/*}" 
+  execroot_path="${0%/*/*/*/*/*/*/*/*}"
 
   # Legacy path for non-bazelmod
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
