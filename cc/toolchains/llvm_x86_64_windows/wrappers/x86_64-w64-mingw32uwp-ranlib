@@ -54,7 +54,7 @@ elif [ "$0" == "/"* ]; then
   # _execroot_/external/rules_swiftnav/cc/toolchain/llvm/x86_64-linux/wrappers/wrapper.
   #
   # If the wrapper is relocated then this line needs to be adjusted.
-  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}"
+  execroot_path="${0%/*/*/*/*/*/*/*/*}"
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
   exec "${tool}" "$@"
 else
