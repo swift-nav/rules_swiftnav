@@ -143,7 +143,7 @@ def _tests_warn_deprecated_declarations():
         "//conditions:default": ["-Wno-deprecated-declarations"],
     })
 
-def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
+def cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
     """Creates a cc_library stamped with non-hermetic build metadata.
 
     Creates a cc_library from the input template with values of the form @VAL@
@@ -165,14 +165,15 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
         out: The expanded source file
         template: The input template
         hdrs: See https://bazel.build/reference/be/c-cpp#cc_library.hdrs
-        includes: See https://bazel.build/reference/be/c-cpp#cc_library.includes
         defaults: Dict of default values when stamping is not enabled
-        visibility: See https://bazel.build/reference/be/common-definitions#common.visibility
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
     """
 
     source_name = name + "_"
 
     stamp_file(name = source_name, out = out, defaults = defaults, template = template)
+
+    visibility = kwargs.pop("visibility", [])
 
     # This variant has the stamped symbols in the archive
     swift_cc_library(
@@ -185,9 +186,9 @@ def cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility
     swift_cc_library(
         name = name,
         hdrs = hdrs,
-        includes = includes,
         linkstamp = source_name,
         visibility = visibility,
+        **kwargs
     )
 
 def cc_static_library(name, deps, visibility = ["//visibility:private"]):
