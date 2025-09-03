@@ -195,11 +195,6 @@ def cc_static_library(name, deps, visibility = ["//visibility:private"]):
     _cc_static_library(
         name = name,
         deps = deps,
-        target_compatible_with = select({
-            # Creating static libraries is not supported by macos yet.
-            "@platforms//os:macos": ["@platforms//:incompatible"],
-            "//conditions:default": [],
-        }),
         visibility = visibility,
     )
 
