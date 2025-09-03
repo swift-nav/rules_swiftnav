@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Copyright (C) 2025 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
@@ -29,25 +29,25 @@
 set -e
 
 # Use --actionv_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
-if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
+if [ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]; then
   set -x
 fi
 
-tool_name=$(basename "${BASH_SOURCE[0]}")
+tool_name=$(basename "$0")
 # In case the tool label is changed, a change in here is very likely needed
 # This establishes backwards compatibility with the old WORKSPACE file
 toolchain_bindir=external/x86_64-darwin-llvm20/bin
 toolchain_bindir_as_bzlmod="external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-darwin-llvm20/bin"
 
-if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
+if [ -f "${toolchain_bindir}"/"${tool_name}" ]; then
   # We're running under _execroot_, call the real tool.
   # use-case: WORKSPACE
   exec "${toolchain_bindir}"/"${tool_name}" "$@"
-elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+elif [ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]; then
   # We're running under _execroot_, call the real tool.
   # Use-case: bazelmod
   exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
-elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
+elif case "$0" in /*) true;; *) false;; esac; then
   # This branch exists because some users of the toolchain,
   # namely rules_foreign_cc, will change CWD and call $CC (this script)
   # with its absolute path.
@@ -57,20 +57,20 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   #
   # If the wrapper is relocated then this line needs to be adjusted.
 
-  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}" 
+  execroot_path="${0%/*/*/*/*/*/*/*/*}" 
 
   # Legacy path for non-bazelmod
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
-  if [[ -f "${execroot_path}/${toolchain_bindir}/${tool_name}" ]];
+  if [ -f "${execroot_path}/${toolchain_bindir}/${tool_name}" ];
   then
-    exec "${tool}" "${@}"
+    exec "${tool}" "$@"
   fi
 
   # After bazelmod migration, the directory structure is different
   tool_as_bzlmod="${execroot_path}/${toolchain_bindir_as_bzlmod}/${tool_name}"
-  if [[ -f "${tool_as_bzlmod}" ]];
+  if [ -f "${tool_as_bzlmod}" ];
   then
-    exec "${tool_as_bzlmod}" "${@}"
+    exec "${tool_as_bzlmod}" "$@"
   fi
 else
   >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."

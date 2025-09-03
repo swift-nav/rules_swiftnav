@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Copyright (C) 2022 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
@@ -29,23 +29,23 @@
 set -e
 
 # Use --action_env=SWIFTNAV_VERBOSE_TOOLCHAIN to enable
-if [[ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]]; then
+if [ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]; then
   set -x
 fi
 
-tool_name=$(basename "${BASH_SOURCE[0]}")
+tool_name=$(basename "$0")
 # In case the tool label is changed, a change in here is very likely needed
 # This establishes backwards compatibility with the old WORKSPACE file
 toolchain_bindir=external/llvm_mingw_toolchain/bin
 toolchain_bindir_as_bzlmod="external/rules_swiftnav++swift_cc_toolchain_extension+llvm_mingw_toolchain/bin"
 
-if [[ -f "${toolchain_bindir}"/"${tool_name}" ]]; then
+if [ -f "${toolchain_bindir}/${tool_name}" ]; then
   # We're running under _execroot_, call the real tool.
   exec "${toolchain_bindir}"/"${tool_name}" "$@"
-elif [[ -f "${toolchain_bindir_as_bzlmod}"/"${tool_name}" ]]; then
+elif [ -f "${toolchain_bindir_as_bzlmod}/${tool_name}" ]; then
   # We're running under _execroot_, call the real tool.
   exec "${toolchain_bindir_as_bzlmod}"/"${tool_name}" "$@"
-elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
+elif case "$0" in /*) true;; *) false;; esac; then
   # This branch exists because some users of the toolchain,
   # namely rules_foreign_cc, will change CWD and call $CC (this script)
   # with its absolute path.
@@ -54,9 +54,9 @@ elif [[ "${BASH_SOURCE[0]}" == "/"* ]]; then
   # _execroot_/external/rules_swiftnav/cc/toolchain/llvm/x86_64-linux/wrappers/wrapper.
   #
   # If the wrapper is relocated then this line needs to be adjusted.
-  execroot_path="${BASH_SOURCE[0]%/*/*/*/*/*/*/*/*}"
+  execroot_path="${0%/*/*/*/*/*/*/*/*}"
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
-  exec "${tool}" "${@}"
+  exec "${tool}" "$@"
 else
   >&2 echo "ERROR: could not find ${tool_name}; PWD=\"$(pwd)\"; PATH=\"${PATH}\"."
   exit 5
