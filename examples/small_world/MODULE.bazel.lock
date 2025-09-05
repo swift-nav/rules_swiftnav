@@ -779,7 +779,7 @@
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "zDwq2yBSEJXdECtks4+trENu8MzrMfkm5FDsxbO1KrE=",
-        "usagesDigest": "t7m5vb2wMpPdJGscilNolioLp4USsuXX/Q7D8gtmNlE=",
+        "usagesDigest": "/sZf3PVlTNvymdcfHdN7OOfvku3qw7am6KKuBGcCrbk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
