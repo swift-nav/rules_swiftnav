@@ -30,6 +30,7 @@ DEFAULT_COPTS = [
     "-Wshadow",
     "-Wsign-compare",
     "-Wstack-protector",
+    "--param ssp-buffer-size=1",
     "-Wswitch",
     "-Wswitch-default",
     "-Wswitch-enum",
