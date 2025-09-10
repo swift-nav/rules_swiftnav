@@ -29,7 +29,6 @@ DEFAULT_COPTS = [
     "-Wsequence-point",
     "-Wshadow",
     "-Wsign-compare",
-    "-Wstack-protector",
     "-Wswitch",
     "-Wswitch-default",
     "-Wswitch-enum",
