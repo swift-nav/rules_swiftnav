@@ -44,7 +44,6 @@ def cc_toolchain_config(
         "--target=" + target_system_name,
         # Security
         "-U_FORTIFY_SOURCE",  # https://github.com/google/sanitizers/issues/247
-        "-fstack-protector",
         "-fno-omit-frame-pointer",
         # Math
         # This controls whether the compiler allows contracting floating point operations.
