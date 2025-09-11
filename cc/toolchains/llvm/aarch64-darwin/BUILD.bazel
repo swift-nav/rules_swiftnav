@@ -120,7 +120,7 @@ cc_toolchain_config(
     },
     toolchain_identifier = "clang-aarch64-darwin",
     toolchain_path_prefix = "external/aarch64-darwin-llvm",
-    use_lld = False,
+    use_lld = True,
 )
 
 cc_toolchain(
