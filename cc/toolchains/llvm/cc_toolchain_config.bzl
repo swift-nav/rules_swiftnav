@@ -103,6 +103,7 @@ def cc_toolchain_config(
             ])
         else:
             link_flags.extend([
+                "-B/usr/bin",  # Tell clang where to find system linker
                 "-headerpad_max_install_names",
                 "-Wl,-no_warn_duplicate_libraries",
             ])
