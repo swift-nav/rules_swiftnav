@@ -159,6 +159,13 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
+        # Fix broken symlinks in sysroot for Bazel 8 compatibility
+        # The /lib64/ld-linux-x86-64.so.2 symlink points to absolute path which breaks in sandbox
+        patch_cmds = [
+            # Remove the broken symlink and create a relative one
+            "rm -f lib64/ld-linux-x86-64.so.2",
+            "ln -sf ../lib/x86_64-linux-gnu/ld-2.31.so lib64/ld-linux-x86-64.so.2",
+        ],
         url = "https://github.com/swift-nav/swift-toolchains/releases/download/bookworm-sysroot-beta2/debian_bookworm_x86_64_sysroot.tar.xz",
     )
 
