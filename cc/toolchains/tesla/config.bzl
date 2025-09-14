@@ -1,32 +1,30 @@
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl", "feature", "flag_group", "flag_set", "tool_path", "with_feature_set")
-load(
-    "swift_custom_features.bzl",
-    "c11_standard_feature",
-    "c17_standard_feature",
-    "c89_standard_feature",
-    "c90_standard_feature",
-    "c99_standard_feature",
-    "cxx11_standard_feature",
-    "cxx14_standard_feature",
-    "cxx17_standard_feature",
-    "cxx20_standard_feature",
-    "cxx98_standard_feature",
-    "gnu_extensions_feature",
-    "swift_relwdbg_feature",
-    "swift_rtti_feature",
-    "swift_nortti_feature",
-    "swift_exceptions_feature",
-    "swift_noexceptions_feature",
-    "swift_internal_coding_standard_feature",
-    "swift_prod_coding_standard_feature",
-    "swift_safe_coding_standard_feature",
-    "swift_portable_coding_standard_feature",
-    "swift_disable_conversion_warning_feature",
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+load("swift_custom_features.bzl",
+            "gnu_extensions_feature",
+            "c89_standard_feature",
+            "c90_standard_feature",
+            "c99_standard_feature",
+            "c11_standard_feature",
+            "c17_standard_feature",
+            "cxx98_standard_feature",
+            "cxx11_standard_feature",
+            "cxx14_standard_feature",
+            "cxx17_standard_feature",
+            "cxx20_standard_feature",
+            "swift_relwdbg_feature",
+            "swift_rtti_feature",
+            "swift_nortti_feature",
+            "swift_exceptions_feature",
+            "swift_noexceptions_feature",
+            "swift_internal_coding_standard_feature",
+            "swift_prod_coding_standard_feature",
+            "swift_safe_coding_standard_feature",
+            "swift_portable_coding_standard_feature",
 )
 
 def _impl(ctx):
-    SDK_PATH_PREFIX = "wrappers/arm-none-eabi-{}"
+    SDK_PATH_PREFIX = "/opt/tesla/{cpu}/bin/{cpu}-tesla-linux-gnu-".format(cpu = ctx.attr.cpu) + "{}"
 
     tool_paths = [
         tool_path(
@@ -39,7 +37,7 @@ def _impl(ctx):
         ),
         tool_path(
             name = "cpp",
-            path = SDK_PATH_PREFIX.format("cpp"),
+            path = SDK_PATH_PREFIX.format("gcc"),
         ),
         tool_path(
             name = "gcc",
@@ -48,10 +46,6 @@ def _impl(ctx):
         tool_path(
             name = "g++",
             path = SDK_PATH_PREFIX.format("g++"),
-        ),
-        tool_path(
-            name = "gcov",
-            path = SDK_PATH_PREFIX.format("gcov"),
         ),
         tool_path(
             name = "ld",
@@ -79,17 +73,33 @@ def _impl(ctx):
         ),
     ]
 
-    all_compile_actions = [
+    common_compile_flags = [
+        "-D_FORTIFY_SOURCE=1",
+        "-fstack-protector-strong",
+        "-Wl,-z,relro,-z,now",
+        "-fPIC",
+        "-fPIE",
+        # Reproducibility
+        "-Wno-builtin-macro-redefined",
+        "-D__DATE__=\"redacted\"",
+        "-D__TIMESTAMP__=\"redacted\"",
+        "-D__TIME__=\"redacted\"",
+    ]
+
+    compile_actions = [
         ACTION_NAMES.assemble,
         ACTION_NAMES.c_compile,
-        ACTION_NAMES.cpp_compile,
-        ACTION_NAMES.cpp_header_parsing,
-        ACTION_NAMES.cpp_module_codegen,
-        ACTION_NAMES.cpp_module_compile,
         ACTION_NAMES.clif_match,
         ACTION_NAMES.linkstamp_compile,
         ACTION_NAMES.lto_backend,
         ACTION_NAMES.preprocess_assemble,
+    ]
+
+    cpp_compile_actions = [
+        ACTION_NAMES.cpp_compile,
+        ACTION_NAMES.cpp_header_parsing,
+        ACTION_NAMES.cpp_module_codegen,
+        ACTION_NAMES.cpp_module_compile,
     ]
 
     opt_feature = feature(name = "opt")
@@ -100,27 +110,26 @@ def _impl(ctx):
             enabled = True,
             flag_sets = [
                 flag_set(
-                    actions = all_compile_actions,
+                    actions = compile_actions,
                     flag_groups = ([
                         flag_group(
-                            flags = [
-                                "--sysroot={}".format(ctx.attr.sysroot),
-                                "-no-canonical-prefixes",
-                                "-fno-canonical-system-headers",
-                                "-fno-common",
-                                "-ffunction-sections",
-                                "-fdata-sections",
-                                # Reproducibility
-                                "-Wno-builtin-macro-redefined",
-                                "-D__DATE__=\"redacted\"",
-                                "-D__TIMESTAMP__=\"redacted\"",
-                                "-D__TIME__=\"redacted\"",
-                            ] + ctx.attr.c_opts,
+                            flags = common_compile_flags,
                         ),
                     ]),
                 ),
                 flag_set(
-                    actions = all_compile_actions,
+                    actions = cpp_compile_actions,
+                    flag_groups = ([
+                        flag_group(
+                            flags = common_compile_flags + [
+                                "-Wno-noexcept-type",
+                                "-std=c++14",
+                            ],
+                        ),
+                    ]),
+                ),
+                flag_set(
+                    actions = compile_actions + cpp_compile_actions,
                     flag_groups = ([
                         flag_group(
                             flags = ["-O2", "-g"],
@@ -145,24 +154,9 @@ def _impl(ctx):
                             flags = [
                                 "-lstdc++",
                                 "-lm",
-                            ] + ctx.attr.link_opts,
-                        ),
-                    ]),
-                ),
-            ],
-        ),
-        feature(
-            name = "default_strip_flags",
-            enabled = True,
-            flag_sets = [
-                flag_set(
-                    actions = [
-                        ACTION_NAMES.strip,
-                    ],
-                    flag_groups = ([
-                        flag_group(
-                            flags = [
-                                "--strip-unneeded",
+                                "-Wl,-O1",
+                                "-Wl,--hash-style=gnu",
+                                "-Wl,--as-needed",
                             ],
                         ),
                     ]),
@@ -206,10 +200,16 @@ def _impl(ctx):
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         features = features,
-        toolchain_identifier = "gcc-arm-embedded",
+        cxx_builtin_include_directories = [
+            "/opt/tesla/{cpu}/{cpu}-tesla-linux-gnu/include".format(cpu = ctx.attr.cpu),
+            "/opt/tesla/{cpu}/{cpu}-tesla-linux-gnu/sysroot/usr/include".format(cpu = ctx.attr.cpu),
+            "/opt/tesla/{cpu}/lib/gcc/{cpu}-tesla-linux-gnu/7.4.0/include".format(cpu = ctx.attr.cpu),
+            "/opt/tesla/{cpu}/lib/gcc/{cpu}-tesla-linux-gnu/7.4.0/include-fixed".format(cpu = ctx.attr.cpu),
+        ],
+        toolchain_identifier = "tesla-toolchain",
         host_system_name = "local",
         target_system_name = "local",
-        target_cpu = "arm",
+        target_cpu = ctx.attr.cpu,
         target_libc = "unknown",
         compiler = "gcc",
         abi_version = "unknown",
@@ -220,9 +220,7 @@ def _impl(ctx):
 config = rule(
     implementation = _impl,
     attrs = {
-        "c_opts": attr.string_list(),
-        "link_opts": attr.string_list(),
-        "sysroot": attr.string(),
+        "cpu": attr.string(mandatory = True),
     },
     provides = [CcToolchainConfigInfo],
 )
