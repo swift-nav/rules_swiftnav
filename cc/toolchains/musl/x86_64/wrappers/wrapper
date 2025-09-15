@@ -33,7 +33,10 @@ if [ -n "$SWIFTNAV_VERBOSE_TOOLCHAIN" ]; then
   set -x
 fi
 
-tool_name=$(basename "$0")
+BASENAME=/usr/bin/basename
+[ -x "$BASENAME" ] || BASENAME="basename"
+
+tool_name=$($BASENAME "$0")
 toolchain_bindir=external/x86_64-linux-musl/bin
 toolchain_bindir_as_bzlmod="external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-linux-musl/bin"
 
@@ -55,7 +58,7 @@ elif case "$0" in /*) true;; *) false;; esac; then
   #
   # If the wrapper is relocated then this line needs to be adjusted.
 
-  execroot_path="${0%/*/*/*/*/*/*/*/*}" 
+  execroot_path="${0%/*/*/*/*/*/*/*/*}"
 
   # Legacy path for non-bazelmod
   tool="${execroot_path}/${toolchain_bindir}/${tool_name}"
