@@ -93,8 +93,31 @@ def _cc_static_library_impl(ctx):
         )
         _run_ar_mri(ctx, cc_toolchain, script_file, output_lib, libs)
 
+    cc_infos = [dep[CcInfo] for dep in ctx.attr.deps if CcInfo in dep]
+    merged_cc_info = cc_common.merge_cc_infos(cc_infos = cc_infos)
+
+    library_to_link = cc_common.create_library_to_link(
+        actions = ctx.actions,
+        static_library = output_lib,
+    )
+    linker_input = cc_common.create_linker_input(
+        owner = ctx.label,
+        libraries = depset([library_to_link]),
+    )
+    linking_context = cc_common.create_linking_context(
+        linker_inputs = depset([linker_input]),
+    )
+
+    final_cc_info = CcInfo(
+        compilation_context = merged_cc_info.compilation_context,
+        linking_context = cc_common.merge_linking_contexts(
+            linking_contexts = [merged_cc_info.linking_context, linking_context],
+        ),
+    )
+
     return [
         DefaultInfo(files = depset([output_lib])),
+        final_cc_info,
     ]
 
 cc_static_library = rule(
