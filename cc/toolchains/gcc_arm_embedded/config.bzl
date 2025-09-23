@@ -23,6 +23,8 @@ load(
     "swift_safe_coding_standard_feature",
     "swift_portable_coding_standard_feature",
     "swift_disable_conversion_warning_feature",
+    "stack_protector_feature",
+    "strong_stack_protector_feature",
 )
 
 def _impl(ctx):
@@ -201,6 +203,8 @@ def _impl(ctx):
             swift_prod_coding_standard_feature,
             swift_safe_coding_standard_feature,
             swift_portable_coding_standard_feature,
+            stack_protector_feature,
+            strong_stack_protector_feature,
     ]
 
     return cc_common.create_cc_toolchain_config_info(

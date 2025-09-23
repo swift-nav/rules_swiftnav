@@ -1,3 +1,4 @@
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@rules_cc//cc/private/toolchain:unix_cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_cc//cc/toolchains:cc_toolchain.bzl", "cc_toolchain")
 load(
@@ -13,18 +14,31 @@ load(
     "cxx20_standard_feature",
     "cxx98_standard_feature",
     "gnu_extensions_feature",
-    "swift_relwdbg_feature",
-    "swift_rtti_feature",
-    "swift_nortti_feature",
-    "swift_exceptions_feature",
-    "swift_noexceptions_feature",
-    "swift_internal_coding_standard_feature",
-    "swift_prod_coding_standard_feature",
-    "swift_safe_coding_standard_feature",
-    "swift_portable_coding_standard_feature",
     "swift_disable_conversion_warning_feature",
     "swift_disable_warnings_for_test_targets_feature",
+    "swift_exceptions_feature",
+    "swift_internal_coding_standard_feature",
+    "swift_noexceptions_feature",
+    "swift_nortti_feature",
+    "swift_portable_coding_standard_feature",
+    "swift_prod_coding_standard_feature",
+    "swift_relwdbg_feature",
+    "swift_rtti_feature",
+    "swift_safe_coding_standard_feature",
 )
+
+_all_compile_actions = [
+    ACTION_NAMES.c_compile,
+    ACTION_NAMES.cpp_compile,
+    ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.assemble,
+    ACTION_NAMES.preprocess_assemble,
+    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.cpp_module_compile,
+    ACTION_NAMES.cpp_module_codegen,
+    ACTION_NAMES.clif_match,
+    ACTION_NAMES.lto_backend,
+]
 
 package(default_visibility = ["//visibility:public"])
 
@@ -44,35 +58,75 @@ cc_toolchain_config(
         "/usr/lib/gcc/x86_64-linux-gnu/11/include",
         "/usr/lib/gcc/x86_64-linux-gnu/11/include-fixed",
     ],
-    cxx_flags = ["-std=c++17"],
+    cxx_flags = select({
+        "@rules_swiftnav//cc:global_cxx17": ["-std=c++17"],
+        "@rules_swiftnav//cc:global_cxx20": ["-std=c++20"],
+        "@rules_swiftnav//cc:global_cxx23": ["-std=c++23"],
+        "//conditions:default": ["-std=c++14"],
+    }),
     dbg_compile_flags = ["-g"],
-    host_system_name = "local",
     features = [
-            gnu_extensions_feature,
-            c89_standard_feature,
-            c90_standard_feature,
-            c99_standard_feature,
-            c11_standard_feature,
-            c17_standard_feature,
-            cxx98_standard_feature,
-            cxx11_standard_feature,
-            cxx14_standard_feature,
-            cxx17_standard_feature,
-            cxx20_standard_feature,
-            swift_stdlib_feature,
-            swift_libcpp_feature,
-            swift_relwdbg_feature,
-            swift_rtti_feature,
-            swift_nortti_feature,
-            swift_exceptions_feature,
-            swift_noexceptions_feature,
-            swift_internal_coding_standard_feature,
-            swift_prod_coding_standard_feature,
-            swift_safe_coding_standard_feature,
-            swift_portable_coding_standard_feature,
-            swift_disable_conversion_warning_feature,
-            swift_disable_warnings_for_test_targets_feature,
+        feature(
+            name = "stack_protector",
+            flag_sets = [
+                flag_set(
+                    actions = [_all_compile_actions],
+                    flag_groups = (
+                        [
+                            flag_group(
+                                flags = ["-fstack-protector"],
+                            ),
+                        ],
+                    ),
+                    with_features = [
+                        with_feature_set(
+                            not_features = ["strong_stack_protector"],
+                        ),
+                    ],
+                ),
+            ],
+        ),
+        feature(
+            name = "strong_stack_protector",
+            flag_sets = [
+                flag_set(
+                    actions = [_all_compile_actions],
+                    flag_groups = (
+                        [
+                            flag_group(
+                                flags = ["-fstack-protector=strong"],
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        ),
+        gnu_extensions_feature,
+        c89_standard_feature,
+        c90_standard_feature,
+        c99_standard_feature,
+        c11_standard_feature,
+        c17_standard_feature,
+        cxx98_standard_feature,
+        cxx11_standard_feature,
+        cxx14_standard_feature,
+        cxx17_standard_feature,
+        cxx20_standard_feature,
+        swift_stdlib_feature,
+        swift_libcpp_feature,
+        swift_relwdbg_feature,
+        swift_rtti_feature,
+        swift_nortti_feature,
+        swift_exceptions_feature,
+        swift_noexceptions_feature,
+        swift_internal_coding_standard_feature,
+        swift_prod_coding_standard_feature,
+        swift_safe_coding_standard_feature,
+        swift_portable_coding_standard_feature,
+        swift_disable_conversion_warning_feature,
+        swift_disable_warnings_for_test_targets_feature,
     ],
+    host_system_name = "local",
     link_flags = [
         "-lstdc++",
         "-fuse-ld=gold",

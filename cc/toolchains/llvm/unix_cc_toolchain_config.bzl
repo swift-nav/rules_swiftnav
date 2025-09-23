@@ -52,6 +52,8 @@ load(
     "swift_portable_coding_standard_feature",
     "swift_disable_conversion_warning_feature",
     "swift_disable_warnings_for_test_targets_feature",
+    "stack_protector_feature",
+    "strong_stack_protector_feature",
 )
 
 def _target_os_version(ctx):
@@ -1475,6 +1477,8 @@ def _impl(ctx):
             swift_portable_coding_standard_feature,
             swift_disable_conversion_warning_feature,
             swift_disable_warnings_for_test_targets_feature,
+            stack_protector_feature,
+            strong_stack_protector_feature,
         ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
@@ -1540,6 +1544,8 @@ def _impl(ctx):
             swift_portable_coding_standard_feature,
             swift_disable_conversion_warning_feature,
             swift_disable_warnings_for_test_targets_feature,
+            stack_protector_feature,
+            strong_stack_protector_feature,
         ]
 
     return cc_common.create_cc_toolchain_config_info(

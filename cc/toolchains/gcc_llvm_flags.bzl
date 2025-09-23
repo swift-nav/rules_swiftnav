@@ -122,6 +122,7 @@ disable_conversion_warning_flags = [
     "-Wno-sign-conversion",
     "-Wno-implicit-int-conversion",
     "-Wno-implicit-int-float-conversion",
+    "-Wno-shorten-64-to-32",
 ]
 
 disable_warnings_for_test_targets_flags = [

@@ -466,3 +466,38 @@ swift_no_default_warnings = feature(
         ),
     ],
 )
+
+stack_protector_feature = feature(
+    name = "stack_protector",
+    flag_sets = [
+        flag_set(
+            actions = [_all_compile_actions],
+            flag_groups = 
+                [
+                    flag_group(
+                        flags = ["-fstack-protector"],
+                    ),
+                ],
+            with_features = [
+                with_feature_set(
+                    not_features = ["strong_stack_protector"],
+                ),
+            ],
+        ),
+    ],
+)
+
+strong_stack_protector_feature = feature(
+    name = "strong_stack_protector",
+    flag_sets = [
+        flag_set(
+            actions = [_all_compile_actions],
+            flag_groups = 
+                [
+                    flag_group(
+                        flags = ["-fstack-protector=strong"],
+                    ),
+                ],
+        ),
+    ],
+)
