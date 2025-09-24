@@ -289,10 +289,13 @@ def swift_add_library(**kwargs):
         "//conditions:default": ["treat_warnings_as_errors"],
     }) + features
 
-    is_test_library = "test_library" in kwargs.get("tags", [])
+    is_test_library = level == "test"
 
     kwargs["tags"] = ["test_srcs" if is_test_library else LIBRARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", [])
-    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
+    if level == "test":
+      kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+    else:
+      kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
