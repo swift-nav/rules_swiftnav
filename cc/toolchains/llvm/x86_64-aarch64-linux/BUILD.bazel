@@ -134,7 +134,10 @@ cc_toolchain_config(
         "strip": "wrappers/llvm-strip",
     },
     toolchain_identifier = "clang-x86_64-linux",
-    toolchain_path_prefix = "external/x86_64-linux-llvm",
+    toolchain_path_prefix = select({
+        "@rules_swiftnav//cc:_enable_bzlmod": "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-linux-llvm",
+        "//conditions:default": "external/x86_64-linux-llvm",
+    }),
 )
 
 cc_toolchain(
