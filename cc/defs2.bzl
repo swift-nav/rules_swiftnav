@@ -191,7 +191,11 @@ def _get_warnings_features(level):
 
 def _get_stack_protector_feature(value):
   if value == None:
-    return "stack_protector"
+    return select({
+      Label("@rules_swiftnav//cc:_strong_stack_protector"): ["strong_stack_protector"],
+      "//conditions:default": ["stack_protector"],
+    })
+
   if value == "strong":
     return "strong_stack_protector"
   fail("Invalid stack protector option, must either \"strong\" or not specified")
@@ -219,10 +223,11 @@ def _validate_copts_nocopts(level, portable, copts, nocopts):
         if len(nocopts) > 0:
             fail("Passing nocopts to production or safe targets is not allowed. Only adding flags via copts is permitted")
 
-    if copts != None and copts != []:
-      fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
-    if nocopts != None and nocopts != []:
-      fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
+    if portable:
+      if copts != None and copts != []:
+        fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
+      if nocopts != None and nocopts != []:
+        fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
 
 
 def _build_copts(copts, nocopts):
@@ -279,14 +284,14 @@ def swift_add_library(**kwargs):
         copts.append(i)
 
     kwargs["copts"] = copts
-    kwargs["features"] = [stack_protector_feature] + warnings_features + lang_standard_feature + lang_extensions_feature + exceptions_rtti_features + select({
+    kwargs["features"] = warnings_features + lang_standard_feature + lang_extensions_feature + stack_protector_feature + exceptions_rtti_features + select({
         Label("//cc:_disable_warnings_as_errors"): [],
         "//conditions:default": ["treat_warnings_as_errors"],
     }) + features
 
     is_test_library = "test_library" in kwargs.get("tags", [])
 
-    kwargs["tags"] = ["test_srcs" if is_test_library else LIBRARY, level] + (["portable"] if portable else []) + kwargs.get("tags", [])
+    kwargs["tags"] = ["test_srcs" if is_test_library else LIBRARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
     _create_srcs(**kwargs)
@@ -330,12 +335,12 @@ def swift_add_binary(**kwargs):
         copts.append(i)
 
     kwargs["copts"] = copts
-    kwargs["features"] = [stack_protector_feature] + warnings_features + lang_standard_feature + lang_extensions_feature + exceptions_rtti_features + select({
+    kwargs["features"] = warnings_features + lang_standard_feature + lang_extensions_feature + stack_protector_feature + exceptions_rtti_features + select({
         Label("//cc:_disable_warnings_as_errors"): [],
         "//conditions:default": ["treat_warnings_as_errors"],
     }) + features
 
-    kwargs["tags"] = [BINARY, level] + (["portable"] if portable else []) + kwargs.get("tags", [])
+    kwargs["tags"] = [BINARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
     _create_srcs(**kwargs)
@@ -379,7 +384,7 @@ def swift_add_test(**kwargs):
         copts.append(i)
 
     kwargs["copts"] = copts
-    kwargs["features"] = [stack_protector_feature] + warnings_features + lang_standard_feature + lang_extensions_feature + exceptions_rtti_features + select({
+    kwargs["features"] = warnings_features + lang_standard_feature + lang_extensions_feature + stack_protector_feature + exceptions_rtti_features + select({
         Label("//cc:_disable_warnings_as_errors"): [],
         "//conditions:default": ["treat_warnings_as_errors"],
     }) + ["disable_warnings_for_test_targets"] + features
@@ -391,7 +396,7 @@ def swift_add_test(**kwargs):
     if not (type == UNIT or type == INTEGRATION):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
-    kwargs["tags"] = [TEST, level, type, "test_srcs"] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST, "internal" if level == "test" else level, type, "test_srcs"] + kwargs.get("tags", [])
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
@@ -408,7 +413,7 @@ def swift_add_c_test(**kwargs):
 
 STAMPED_LIB_SUFFIX = ".stamped"
 
-def swift_add_cc_stamped_library(name, out, template, hdrs, includes, defaults, visibility = None):
+def swift_add_cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
     """Creates a cc_library stamped with non-hermetic build metadata.
 
     Creates a cc_library from the input template with values of the form @VAL@
@@ -439,6 +444,8 @@ def swift_add_cc_stamped_library(name, out, template, hdrs, includes, defaults, 
 
     stamp_file(name = source_name, out = out, defaults = defaults, template = template)
 
+    visibility = kwargs.pop("visibility", [])
+
     # This variant has the stamped symbols in the archive
     swift_add_safe_portable_cc_library(
         name = name + STAMPED_LIB_SUFFIX,
@@ -450,9 +457,9 @@ def swift_add_cc_stamped_library(name, out, template, hdrs, includes, defaults, 
     swift_add_safe_portable_cc_library(
         name = name,
         hdrs = hdrs,
-        includes = includes,
         linkstamp = source_name,
         visibility = visibility,
+        **kwargs
     )
 
 def _assert_no_reserved_keys(**kwargs):
@@ -593,7 +600,7 @@ def swift_add_test_portable_c_binary(**kwargs):
   swift_add_binary(lang = "c", level = TEST, portable = True, **kwargs)
 
 
-def swift_cc_static_library(name, deps, visibility = ["//visibility:private"]):
+def swift_add_cc_static_library(name, deps, visibility = ["//visibility:private"]):
     _cc_static_library(
         name = name,
         deps = deps,

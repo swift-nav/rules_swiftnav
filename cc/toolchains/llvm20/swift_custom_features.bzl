@@ -21,6 +21,31 @@ load(
     "flag_set",
     "with_feature_set",
 )
+load(
+    "@rules_swiftnav//cc/toolchains:gcc_llvm_flags.bzl",
+    "disable_conversion_warning_flags",
+    "disable_warnings_for_test_targets_flags",
+    "get_flags_for_lang_and_level",
+)
+
+_invalid_flags = [
+  "-Wbool-compare",
+  "-Wmaybe-uninitialized",
+  "-Wmemset-elt-size",
+  "-Wmismatched-dealloc",
+  "-Wmissing-attributes",
+  "-Wmultistatement-macros",
+  "-Wrestrict",
+  "-Wclobbered",
+  "-Wenum-int-mismatch",
+  "-Wnonnull-compare",
+  "-Wopenmp-simd",
+  "-Wvla-parameter",
+  "-Wzero-length-bounds",
+]
+
+_extra_flags = [
+]
 
 _all_compile_actions = [
     ACTION_NAMES.c_compile,
@@ -437,32 +462,127 @@ swift_relwdbg_feature = feature(
     ],
 )
 
-# Clang has a set of warnings that are always enabled by default
-# which gets noisey for third party code. This feature allows disabling
-# these warnings for code we likely never intend to patch to focus on
-# warnings we care about.
-swift_no_default_warnings = feature(
-    name="no_default_warnings",
-    flag_sets=[
+swift_rtti_feature = feature(
+    name = "rtti_feature",
+    flag_sets = [
         flag_set(
-            actions=_all_compile_actions,
-            flag_groups=[
+            actions = [ACTION_NAMES.cpp_compile],
+            flag_groups = [flag_group(flags = ["-frtti"])],
+        ),
+    ],
+)
+swift_nortti_feature = feature(
+    name = "nortti_feature",
+    flag_sets = [
+        flag_set(
+            actions = [ACTION_NAMES.cpp_compile],
+            flag_groups = [flag_group(flags = ["-fno-rtti"])],
+        ),
+    ],
+)
+
+swift_exceptions_feature = feature(
+    name = "exceptions_feature",
+    flag_sets = [
+        flag_set(
+            actions = [ACTION_NAMES.cpp_compile],
+            flag_groups = [flag_group(flags = ["-fexceptions"])],
+        ),
+    ],
+)
+swift_noexceptions_feature = feature(
+    name = "noexceptions_feature",
+    flag_sets = [
+        flag_set(
+            actions = [ACTION_NAMES.cpp_compile],
+            flag_groups = [flag_group(flags = ["-fno-exceptions"])],
+        ),
+    ],
+)
+
+swift_internal_coding_standard_feature = feature(
+    name = "internal_coding_standard",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [
                 flag_group(
-                    flags=[
-                        "-Wno-fortify-source",
-                        "-Wno-absolute-value",
-                        "-Wno-format",
-                        "-Wno-deprecated-declarations",
-                        "-Wno-unused-but-set-variable",
-                        "-Wno-pointer-bool-conversion",
-                        "-Wno-unused-variable",
-                        "-Wno-incompatible-pointer-types-discards-qualifiers",
-                        "-Wno-implicit-const-int-float-conversion",
-                        "-Wno-implicit-function-declaration",
-                        "-Wno-mismatched-new-delete",
-                    ]
-                )
+                    flags = get_flags_for_lang_and_level(
+                        "cxx",
+                        "internal",
+                        _invalid_flags,
+                        _extra_flags,
+                    ),
+                ),
             ],
+        ),
+    ],
+)
+
+swift_prod_coding_standard_feature = feature(
+    name = "prod_coding_standard",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [
+                flag_group(
+                    flags = get_flags_for_lang_and_level(
+                        "cxx",
+                        "prod",
+                        _invalid_flags,
+                        _extra_flags,
+                    ),
+                ),
+            ],
+        ),
+    ],
+)
+
+swift_safe_coding_standard_feature = feature(
+    name = "safe_coding_standard",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [
+                flag_group(
+                    flags = get_flags_for_lang_and_level(
+                        "cxx",
+                        "prod",
+                        _invalid_flags,
+                        _extra_flags,
+                    ),
+                ),
+            ],
+        ),
+    ],
+)
+
+swift_portable_coding_standard_feature = feature(
+    name = "portable_coding_standard",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = ["-pedantic"])],
+        ),
+    ],
+)
+
+swift_disable_conversion_warning_feature = feature(
+    name = "disable_conversion_warnings",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = disable_conversion_warning_flags)],
+        ),
+    ],
+)
+
+swift_disable_warnings_for_test_targets_feature = feature(
+    name = "disable_warnings_for_test_targets",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = disable_warnings_for_test_targets_flags)],
         ),
     ],
 )
@@ -471,18 +591,13 @@ stack_protector_feature = feature(
     name = "stack_protector",
     flag_sets = [
         flag_set(
-            actions = [_all_compile_actions],
-            flag_groups = 
-                [
-                    flag_group(
-                        flags = ["-fstack-protector"],
-                    ),
-                ],
-            with_features = [
-                with_feature_set(
-                    not_features = ["strong_stack_protector"],
-                ),
-            ],
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = ["-fstack-protector"])],
+        with_features = [
+          with_feature_set(
+          not_features = ["strong_stack_protector"],
+          ),
+        ],
         ),
     ],
 )
@@ -491,13 +606,8 @@ strong_stack_protector_feature = feature(
     name = "strong_stack_protector",
     flag_sets = [
         flag_set(
-            actions = [_all_compile_actions],
-            flag_groups = 
-                [
-                    flag_group(
-                        flags = ["-fstack-protector=strong"],
-                    ),
-                ],
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = ["-fstack-protector-strong"])],
         ),
     ],
 )

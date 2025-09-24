@@ -80,6 +80,8 @@ def process_deps_for_target(name):
     #process_deps_for_target(t)
 
 def process_target_list(json):
+    if 'results' not in json:
+        return
     for t in json['results']:
         maybe_add_target(t)
 

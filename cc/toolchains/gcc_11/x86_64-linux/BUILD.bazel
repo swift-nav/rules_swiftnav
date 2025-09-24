@@ -94,7 +94,7 @@ cc_toolchain_config(
                     flag_groups = (
                         [
                             flag_group(
-                                flags = ["-fstack-protector=strong"],
+                                flags = ["-fstack-protector-strong"],
                             ),
                         ],
                     ),
