@@ -652,7 +652,10 @@ def swift_c_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations()
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
