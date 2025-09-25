@@ -592,11 +592,15 @@ def swift_cc_test_library(**kwargs):
             be relative to the package this macro is called from.
     """
 
-    _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
-
+    nocopts = kwargs.pop("nocopts", [])  # pop because nocopts is a deprecated cc* attr.
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", [])
+    standard = kwargs.pop("standard", None)
+
+    copts = _common_cc_opts(nocopts, pedantic = False)
+    cxxopts = _common_cxx_standard_opts(standard)
+
+    kwargs["copts"] = copts + cxxopts + local_includes + kwargs.get("copts", [])
 
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
 
@@ -648,7 +652,10 @@ def swift_c_test(name, type, **kwargs):
 
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations()
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
