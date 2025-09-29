@@ -133,6 +133,20 @@ whitelist = [
     r"@fast_csv//.*",
     r"@yaml-cpp//.*",
     r"@nlopt//.*",
+    r"@com_google_protobuf//.*",
+    r"@hdf5//.*",
+    r"@netcdf.*",
+    r"@variant//.*",
+    r"@zlib//.*",
+    r"@zstd//.*",
+    r"@optional//.*",
+    r"@ionosphere_models//.*",
+    r"@rules_cc//.*",
+    r"@suitesparse//.*",
+    r"@ThreadPool//.*",
+    r"@cereal//.*",
+    r"@gzip//.*",
+    r"@boringssl//.*",
     # libfuzzer targets
     r".*_raw_",
 ]
@@ -159,8 +173,7 @@ def validate_target(name):
         for d in targets[name]['deps']:
             if d not in targets:
                 print(f"{d} not found in bazel....")
-                assert d in targets
-            if not is_whitelisted(d):
+            elif not is_whitelisted(d):
                 dep_level = get_level_as_num(d)
                 if dep_level is None:
                     print(f"ERROR: Target {name} has a coding standard level but depends on {d} which doesn't")

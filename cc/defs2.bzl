@@ -240,6 +240,13 @@ def _construct_local_includes(local_includes):
         ret += construct_local_include(path)
     return ret
 
+# Handle whether to link statically
+def _link_static(linkstatic = True):
+    return select({
+        Label("@rules_swiftnav//cc:_enable_shared"): False,
+        "//conditions:default": linkstatic,
+    })
+
 # Disable building when --//:disable_tests=true or when building on windows
 def _test_compatible_with():
     return select({
@@ -297,6 +304,8 @@ def swift_add_library(**kwargs):
     else:
       kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
+
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
 
@@ -345,6 +354,8 @@ def swift_add_binary(**kwargs):
 
     kwargs["tags"] = [BINARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
+
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     _create_srcs(**kwargs)
     _create_hdrs(**kwargs)
@@ -400,6 +411,8 @@ def swift_add_test(**kwargs):
         fail("The 'type' attribute must be either UNIT or INTEGRATION")
 
     kwargs["tags"] = [TEST, "internal" if level == "test" else level, type, "test_srcs"] + kwargs.get("tags", [])
+
+    kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
