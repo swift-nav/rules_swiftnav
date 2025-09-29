@@ -1,31 +1,7 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@rules_cc//cc/private/toolchain:unix_cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_cc//cc/toolchains:cc_toolchain.bzl", "cc_toolchain")
-load(
-    "swift_custom_features.bzl",
-    "c11_standard_feature",
-    "c17_standard_feature",
-    "c89_standard_feature",
-    "c90_standard_feature",
-    "c99_standard_feature",
-    "cxx11_standard_feature",
-    "cxx14_standard_feature",
-    "cxx17_standard_feature",
-    "cxx20_standard_feature",
-    "cxx98_standard_feature",
-    "gnu_extensions_feature",
-    "swift_disable_conversion_warning_feature",
-    "swift_disable_warnings_for_test_targets_feature",
-    "swift_exceptions_feature",
-    "swift_internal_coding_standard_feature",
-    "swift_noexceptions_feature",
-    "swift_nortti_feature",
-    "swift_portable_coding_standard_feature",
-    "swift_prod_coding_standard_feature",
-    "swift_relwdbg_feature",
-    "swift_rtti_feature",
-    "swift_safe_coding_standard_feature",
-)
+load(":config.bzl", "config")
 
 _all_compile_actions = [
     ACTION_NAMES.c_compile,
@@ -42,137 +18,12 @@ _all_compile_actions = [
 
 package(default_visibility = ["//visibility:public"])
 
-cc_toolchain_config(
-    name = "local-x86_64-linux",
-    abi_libc_version = "unknown",
-    abi_version = "unknown",
-    compiler = "gcc-11",
-    coverage_compile_flags = ["--coverage"],
-    coverage_link_flags = ["--coverage"],
-    cpu = "k8",
-    cxx_builtin_include_directories = [
-        "/usr/include",
-        "/usr/include/c++/11",
-        "/usr/include/x86_64-linux-gnu/c++/11",
-        "/usr/include/c++/11/backward",
-        "/usr/lib/gcc/x86_64-linux-gnu/11/include",
-        "/usr/lib/gcc/x86_64-linux-gnu/11/include-fixed",
-    ],
-    cxx_flags = select({
-        "@rules_swiftnav//cc:global_cxx17": ["-std=c++17"],
-        "@rules_swiftnav//cc:global_cxx20": ["-std=c++20"],
-        "@rules_swiftnav//cc:global_cxx23": ["-std=c++23"],
-        "//conditions:default": ["-std=c++14"],
-    }),
-    dbg_compile_flags = ["-g"],
-    features = [
-        feature(
-            name = "stack_protector",
-            flag_sets = [
-                flag_set(
-                    actions = [_all_compile_actions],
-                    flag_groups = (
-                        [
-                            flag_group(
-                                flags = ["-fstack-protector"],
-                            ),
-                        ],
-                    ),
-                    with_features = [
-                        with_feature_set(
-                            not_features = ["strong_stack_protector"],
-                        ),
-                    ],
-                ),
-            ],
-        ),
-        feature(
-            name = "strong_stack_protector",
-            flag_sets = [
-                flag_set(
-                    actions = [_all_compile_actions],
-                    flag_groups = (
-                        [
-                            flag_group(
-                                flags = ["-fstack-protector-strong"],
-                            ),
-                        ],
-                    ),
-                ),
-            ],
-        ),
-        gnu_extensions_feature,
-        c89_standard_feature,
-        c90_standard_feature,
-        c99_standard_feature,
-        c11_standard_feature,
-        c17_standard_feature,
-        cxx98_standard_feature,
-        cxx11_standard_feature,
-        cxx14_standard_feature,
-        cxx17_standard_feature,
-        cxx20_standard_feature,
-        swift_stdlib_feature,
-        swift_libcpp_feature,
-        swift_relwdbg_feature,
-        swift_rtti_feature,
-        swift_nortti_feature,
-        swift_exceptions_feature,
-        swift_noexceptions_feature,
-        swift_internal_coding_standard_feature,
-        swift_prod_coding_standard_feature,
-        swift_safe_coding_standard_feature,
-        swift_portable_coding_standard_feature,
-        swift_disable_conversion_warning_feature,
-        swift_disable_warnings_for_test_targets_feature,
-    ],
-    host_system_name = "local",
-    link_flags = [
-        "-lstdc++",
-        "-fuse-ld=gold",
-        "-Wl,-no-as-needed",
-        "-Wl,-z,relro,-z,now",
-        "-B/usr/bin",
-        "-pass-exit-codes",
-        "-lm",
-    ],
-    opt_compile_flags = [
-        "-g0",
-        "-O2",
-        "-D_FORTIFY_SOURCE=1",
-        "-DNDEBUG",
-        "-ffunction-sections",
-        "-fdata-sections",
-    ],
-    opt_link_flags = ["-Wl,--gc-sections"],
-    supports_start_end_lib = True,
-    target_libc = "glibc",
-    target_system_name = "local",
-    tool_paths = {
-        "ar": "/usr/bin/ar",
-        "as": "/usr/bin/as",
-        "cpp": "/usr/bin/cpp-11",
-        "gcc": "/usr/bin/gcc-11",
-        "g++": "/usr/bin/g++-11",
-        "gcov": "/usr/bin/gcov-11",
-        "ld": "/usr/bin/g++-11",
-        "nm": "/usr/bin/nm",
-        "objcopy": "/usr/bin/objcopy",
-        "objdump": "/usr/bin/objdump",
-        "ranlib": "/usr/bin/ranlib",
-        "strip": "/usr/bin/strip",
-    },
-    toolchain_identifier = "cc-gcc-x86_64-linux",
-    unfiltered_compile_flags = [
-        "-fno-canonical-system-headers",
-        "-Wno-builtin-macro-redefined",
-        "-D__DATE__=\"redacted\"",
-        "-D__TIMESTAMP__=\"redacted\"",
-        "-D__TIME__=\"redacted\"",
-    ],
-)
-
 filegroup(name = "empty")
+
+config(
+    name = "config",
+    link_flags = ["-lm", "-latomic", "-lstdc++"],
+)
 
 cc_toolchain(
     name = "cc-gcc-x86_64-linux",
@@ -185,12 +36,12 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 0,
-    toolchain_config = ":local-x86_64-linux",
+    toolchain_config = ":config",
     toolchain_identifier = "cc-gcc-x86_64-linux",
 )
 
 toolchain(
-    name = "cc-toolchain-x86_64-linux",
+    name = "gcc_11_system_toolchain",
     exec_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
@@ -198,6 +49,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
+        "@rules_swiftnav//cc/constraints:gcc_11_system_toolchain",
     ],
     toolchain = ":cc-gcc-x86_64-linux",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
