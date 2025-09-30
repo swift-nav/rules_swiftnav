@@ -41,9 +41,12 @@ _invalid_flags = [
     "-Wunused-const-variable",
     "-Wconversion",
     "-Wsign-conversion",
+    "-Wfloat-conversion",
 ]
 
-_extra_flags = []
+_extra_flags = [
+  "-Wno-float-conversion",
+]
 
 
 _all_compile_actions = [

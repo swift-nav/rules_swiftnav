@@ -106,6 +106,7 @@ def _impl(ctx):
                             flags = [
                                 "--sysroot={}".format(ctx.attr.sysroot),
                                 "-no-canonical-prefixes",
+                                "-fno-canonical-system-headers",
                                 # Reproducibility
                                 "-Wno-builtin-macro-redefined",
                                 "-D__DATE__=\"redacted\"",
