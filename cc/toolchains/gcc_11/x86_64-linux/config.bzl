@@ -141,7 +141,11 @@ def _impl(ctx):
                     flag_group(
                         # Security hardening requires optimization.
                         # We need to undef it as some distributions now have it enabled by default.
-                        flags = ["-U_FORTIFY_SOURCE"],
+                        flags = [
+                          "-U_FORTIFY_SOURCE",
+                          "-no-canonical-prefixes",
+                          "-fno-canonical-system-headers",
+                        ],
                     ),
                 ],
                 with_features = [
