@@ -46,6 +46,7 @@ _invalid_flags = [
 
 _extra_flags = [
   "-Wno-float-conversion",
+  "-Wno-aggressive-loop-optimizations",
 ]
 
 
