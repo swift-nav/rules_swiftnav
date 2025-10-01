@@ -600,10 +600,7 @@ def swift_c_test_library(**kwargs):
     standard = kwargs.pop("standard", 99)
 
     kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
-    kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
-    kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
-    kwargs["name"] = name
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
