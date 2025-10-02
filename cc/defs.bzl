@@ -583,7 +583,7 @@ def swift_c_test_library(**kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
 
     Args:
-        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_test
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
 
             The following additional attributes are supported:
 
