@@ -1,6 +1,6 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
-load("//cc:defs.bzl", "BINARY", "LIBRARY")
+load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY")
 load("//cc_files:get_cc_files.bzl", "get_cc_srcs")
 
 def _flatten(input_list):
@@ -149,6 +149,9 @@ def _clang_tidy_aspect_impl(target, ctx):
     tags = getattr(ctx.rule.attr, "tags", [])
     if not LIBRARY in tags and not BINARY in tags:
         return []
+
+    if TEST_LIBRARY in tags:
+      return []
 
     srcs = get_cc_srcs(ctx)
 

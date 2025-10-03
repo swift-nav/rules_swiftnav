@@ -29,22 +29,30 @@ load(
 )
 
 _invalid_flags = [
-  "-Wbool-compare",
-  "-Wmaybe-uninitialized",
-  "-Wmemset-elt-size",
-  "-Wmismatched-dealloc",
-  "-Wmissing-attributes",
-  "-Wmultistatement-macros",
-  "-Wrestrict",
-  "-Wclobbered",
-  "-Wenum-int-mismatch",
-  "-Wnonnull-compare",
-  "-Wopenmp-simd",
-  "-Wvla-parameter",
-  "-Wzero-length-bounds",
+    "-Wstring-compare",
+    "-Wbool-compare",
+    "-Wmaybe-uninitialized",
+    "-Wclobbered",
+    "-Wmemset-elt-size",
+    "-Wmismatched-dealloc",
+    "-Wmissing-attributes",
+    "-Wmultistatement-macros",
+    "-Wrestrict",
+    "-Wenum-int-mismatch",
+    "-Wformat-overflow",
+    "-Wformat-truncation",
+    "-Wnonnull-compare",
+    "-Wopenmp-simd",
+    "-Wvla-parameter",
+    "-Wzero-length-bounds",
+    "-Wself-move",
+    "-Wtautological-unsigned-zero-compare",
+    "-Wno-tautological-unsigned-zero-compare",
 ]
 
 _extra_flags = [
+  # Technically correct but very overzealous
+  "-Wno-unused-const-variable",
 ]
 
 _all_compile_actions = [
@@ -101,342 +109,342 @@ _lto_index_actions = [
     ACTION_NAMES.lto_index_for_nodeps_dynamic_library,
 ]
 
-gnu_extensions_feature = feature(name="gnu_extensions")
+gnu_extensions_feature = feature(name = "gnu_extensions")
 
 c89_standard_feature = feature(
-    name="c89",
-    provides=["c_standard"],
-    flag_sets=[
+    name = "c89",
+    provides = ["c_standard"],
+    flag_sets = [
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c89"],
+                        flags = ["-std=c89"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu89"],
+                        flags = ["-std=gnu89"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 c90_standard_feature = feature(
-    name="c90",
-    provides=["c_standard"],
-    flag_sets=[
+    name = "c90",
+    provides = ["c_standard"],
+    flag_sets = [
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c90"],
+                        flags = ["-std=c90"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu90"],
+                        flags = ["-std=gnu90"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 c99_standard_feature = feature(
-    name="c99",
-    provides=["c_standard"],
-    flag_sets=[
+    name = "c99",
+    provides = ["c_standard"],
+    flag_sets = [
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c99"],
+                        flags = ["-std=c99"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu99"],
+                        flags = ["-std=gnu99"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 c11_standard_feature = feature(
-    name="c11",
-    provides=["c_standard"],
-    flag_sets=[
+    name = "c11",
+    provides = ["c_standard"],
+    flag_sets = [
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c11"],
+                        flags = ["-std=c11"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu11"],
+                        flags = ["-std=gnu11"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 c17_standard_feature = feature(
-    name="c17",
-    provides=["c_standard"],
-    flag_sets=[
+    name = "c17",
+    provides = ["c_standard"],
+    flag_sets = [
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c17"],
+                        flags = ["-std=c17"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=[ACTION_NAMES.c_compile],
-            flag_groups=(
+            actions = [ACTION_NAMES.c_compile],
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu17"],
+                        flags = ["-std=gnu17"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 cxx98_standard_feature = feature(
-    name="c++98",
-    provides=["cxx_standard"],
-    flag_sets=[
+    name = "c++98",
+    provides = ["cxx_standard"],
+    flag_sets = [
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c++98"],
+                        flags = ["-std=c++98"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu++98"],
+                        flags = ["-std=gnu++98"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 cxx11_standard_feature = feature(
-    name="c++11",
-    provides=["cxx_standard"],
-    flag_sets=[
+    name = "c++11",
+    provides = ["cxx_standard"],
+    flag_sets = [
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c++0x"],
+                        flags = ["-std=c++0x"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu++0x"],
+                        flags = ["-std=gnu++0x"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 cxx14_standard_feature = feature(
-    name="c++14",
-    provides=["cxx_standard"],
-    flag_sets=[
+    name = "c++14",
+    provides = ["cxx_standard"],
+    flag_sets = [
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c++14"],
+                        flags = ["-std=c++14"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu++14"],
+                        flags = ["-std=gnu++14"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 cxx17_standard_feature = feature(
-    name="c++17",
-    provides=["cxx_standard"],
-    flag_sets=[
+    name = "c++17",
+    provides = ["cxx_standard"],
+    flag_sets = [
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c++17"],
+                        flags = ["-std=c++17"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu++17"],
+                        flags = ["-std=gnu++17"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
     ],
 )
 
 cxx20_standard_feature = feature(
-    name="c++20",
-    provides=["cxx_standard"],
-    flag_sets=[
+    name = "c++20",
+    provides = ["cxx_standard"],
+    flag_sets = [
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=c++20"],
+                        flags = ["-std=c++20"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(not_features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(not_features = ["gnu_extensions"]),
             ],
         ),
         flag_set(
-            actions=_all_cpp_compile_actions,
-            flag_groups=(
+            actions = _all_cpp_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=["-std=gnu++20"],
+                        flags = ["-std=gnu++20"],
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["gnu_extensions"]),
+            with_features = [
+                with_feature_set(features = ["gnu_extensions"]),
             ],
         ),
         # clang is aggresive about removing features from the standard.
         flag_set(
-            actions=_preprocessor_compile_actions,
-            flag_groups=(
+            actions = _preprocessor_compile_actions,
+            flag_groups = (
                 [
                     flag_group(
-                        flags=[
+                        flags = [
                             # This is a workaround for memory_resource being experimental only
                             # in the llvm-14 libc++ impelmentation.
                             "-DSWIFTNAV_EXPERIMENTAL_MEMORY_RESOURCE",
@@ -445,19 +453,19 @@ cxx20_standard_feature = feature(
                     ),
                 ]
             ),
-            with_features=[
-                with_feature_set(features=["libcpp"]),
+            with_features = [
+                with_feature_set(features = ["libcpp"]),
             ],
         ),
     ],
 )
 
 swift_relwdbg_feature = feature(
-    name="relwdbg",
-    flag_sets=[
+    name = "relwdbg",
+    flag_sets = [
         flag_set(
-            actions=_all_compile_actions,
-            flag_groups=[flag_group(flags=["-O2", "-g"])],
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = ["-O2", "-g"])],
         ),
     ],
 )

@@ -211,3 +211,14 @@ platform(
     ],
     visibility = ["//visibility:public"],
 )
+
+# GCC 11 provided by the host system
+platform(
+  name = "gcc_11_system",
+  constraint_values = [
+    "@platforms//os:linux",
+    "@platforms//cpu:x86_64",
+    "@rules_swiftnav//cc/constraints:gcc_11_system_toolchain",
+  ],
+  visibility = ["//visibility:public"],
+)
