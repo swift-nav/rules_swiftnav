@@ -298,7 +298,7 @@ def swift_add_library(**kwargs):
 
     is_test_library = level == "test"
 
-    kwargs["tags"] = [LIBRARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", [])
+    kwargs["tags"] = [LIBRARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", []) + (["test_library"] if is_test_library else [])
     if level == "test":
       kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
     else:
