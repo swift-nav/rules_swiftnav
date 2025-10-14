@@ -1,18 +1,21 @@
 load("@rules_swiftnav//cc:defs2.bzl", "UNIT", "swift_add_prod_cc_library", "swift_add_cc_test")
 
 swift_add_prod_cc_library(
-    name = "base_math",
-    srcs = ["base_math.cc"],
-    hdrs = ["base_math.hpp"],
+    name = "use_external_dep",
+    srcs = ["use_external_dep.cc"],
+    hdrs = ["use_external_dep.hpp"],
     visibility = ["//visibility:public"],
+    deps = [
+        "@eigen",
+    ],
 )
 
 swift_add_cc_test(
-    name = "base_math_test",
-    srcs = ["base_math_test.cc"],
+    name = "use_external_dep_test",
+    srcs = ["use_external_dep_test.cc"],
     type = UNIT,
     deps = [
-        ":base_math",
+        ":use_external_dep",
         "@googletest//:gtest_main",
     ],
 )

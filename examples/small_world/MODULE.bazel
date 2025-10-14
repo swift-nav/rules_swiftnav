@@ -25,6 +25,8 @@ register_toolchains(
     "@rules_swiftnav//cc/toolchains/llvm20/x86_64-linux:cc-toolchain-x86_64-linux",
 )
 
+bazel_dep(name = "eigen", version = "5.0.0")
+
 bazel_dep(name = "googletest", version = "1.16.0", dev_dependency = True)
 bazel_dep(name = "lcov", version = "2.3.1", dev_dependency = True)
 
