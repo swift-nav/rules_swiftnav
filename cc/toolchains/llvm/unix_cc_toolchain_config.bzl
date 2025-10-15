@@ -1545,7 +1545,7 @@ def _impl(ctx):
             swift_disable_conversion_warning_feature,
             swift_disable_warnings_for_test_targets_feature,
             stack_protector_feature,
-            stack_protector_feature,
+            strong_stack_protector_feature,
         ]
 
     return cc_common.create_cc_toolchain_config_info(
