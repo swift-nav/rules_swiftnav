@@ -119,7 +119,7 @@ cc_toolchain_config(
         "strip": "wrappers/llvm-strip",
     },
     toolchain_identifier = "clang-x86_64-darwin",
-    toolchain_path_prefix = "external/x86_64-darwin-llvm20",
+    toolchain_path_prefix = "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-darwin-llvm20",
 )
 
 cc_toolchain(
