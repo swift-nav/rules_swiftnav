@@ -117,9 +117,7 @@ cc_toolchain_config(
     abi_version = "clang",
     builtin_sysroot = select({
         "@rules_swiftnav//cc:_use_libcpp": None,
-        # When bzlmod is enabled but libcpp is not, use the bzlmod path
-        "@rules_swiftnav//cc:_enable_bzlmod_not_libcpp": "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-sysroot",
-        "//conditions:default": "external/x86_64-sysroot",
+        "//conditions:default": "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-sysroot",
     }),
     compiler = "clang",
     cxx_builtin_include_directories = select({
@@ -148,7 +146,7 @@ cc_toolchain_config(
         "strip": "wrappers/llvm-strip",
     },
     toolchain_identifier = "clang-x86_64-linux",
-    toolchain_path_prefix = "external/x86_64-linux-llvm20",
+    toolchain_path_prefix = "external/rules_swiftnav++swift_cc_toolchain_extension+x86_64-linux-llvm20",
 )
 
 cc_toolchain(
