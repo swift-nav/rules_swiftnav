@@ -136,7 +136,8 @@ def aarch64_sysroot():
     maybe(
         http_archive,
         name = "aarch64-sysroot",
-        sha256 = "4e4cbbed33e78602a5f038305514307a5bd9baa6f6330f433fa4dffb3e9e9ad1",
+        #sha256 = "4e4cbbed33e7860222f038305514307a5bd9baa6f6330f433fa4dffb3e9e9ad1",
+        integrity = "sha256-0wPPP694BMndJMm2sWfQNF1B1/5L+300rdOrNC9qI2w=",
         build_file_content = """
 filegroup(
     name = "aarch64-sysroot",
@@ -144,14 +145,15 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_aarch64_sysroot.tar.xz",
+        urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/906cc7c6bf47d4bd969a3221fc0602c6b3153caa/debian_bullseye_arm64_sysroot.tar.xz"],
     )
 
 def x86_64_sysroot():
     maybe(
         http_archive,
         name = "x86_64-sysroot",
-        sha256 = "cfa444ecc4fcc858acc045e72403efd54dab734bdad4ddec30aad8826916a617",
+        #sha256 = "84656a6df544e11f62169cfe3ab6e41bb4346a62d3ba2a045dc5a0a2ecea94a3",
+        integrity = "sha256-XfW+k1e0Jc3XDZLUaX0H59VdepI/A3wi3ICnjoWELSw=",
         build_file_content = """
 filegroup(
     name = "x86_64-sysroot",
@@ -159,7 +161,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_x86_64_sysroot.tar.xz",
+        urls = ["https://commondatastorage.googleapis.com/chrome-linux-sysroot/toolchain/4f611ec025be98214164d4bf9fbe8843f58533f7/debian_bullseye_amd64_sysroot.tar.xz"],
     )
 
 def register_swift_cc_toolchains():
