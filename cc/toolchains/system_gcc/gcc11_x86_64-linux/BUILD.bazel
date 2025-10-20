@@ -85,7 +85,7 @@ cc_toolchain(
 )
 
 toolchain(
-    name = "cc-toolchain-x86_64-linux",
+    name = "system-cc-toolchain-x86_64-linux",
     exec_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
@@ -93,6 +93,7 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
+        "@rules_swiftnav//cc/constraints:gcc_11_system_toolchain",
     ],
     toolchain = ":cc-gcc-x86_64-linux",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
