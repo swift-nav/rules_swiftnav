@@ -20,8 +20,13 @@ constraint_value(
 )
 
 constraint_value(
-  name = "gcc_11_system_toolchain",
-  constraint_setting = ":toolchain",
+    name = "gcc_11_system_toolchain",
+    constraint_setting = ":toolchain",
+)
+
+constraint_value(
+    name = "gcc_12_system_toolchain",
+    constraint_setting = ":toolchain",
 )
 
 constraint_value(

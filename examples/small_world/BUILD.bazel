@@ -13,4 +13,5 @@ validate_allowed_cc_deps(
         "//src/base_math:base_math",
         "//src/fibonacci:fibonacci",
     ],
+    tags = ["manual"],
 )

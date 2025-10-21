@@ -579,6 +579,33 @@ def swift_cc_tool(**kwargs):
 
     native.cc_binary(**kwargs)
 
+def swift_c_test_library(**kwargs):
+    """Wraps cc_library to enforce Swift test library conventions.
+
+    Args:
+        **kwargs: See https://bazel.build/reference/be/c-cpp#cc_library
+
+            The following additional attributes are supported:
+
+            local_includes: List of local (non-public) include paths. Prefer
+            this to passing local includes using copts. Paths are expected to
+            be relative to the package this macro is called from.
+    """
+
+    _ = kwargs.pop("nocopts", [])  # To handle API compatibility.
+
+    local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
+
+    extensions = kwargs.pop("extensions", False)
+    standard = kwargs.pop("standard", 99)
+
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
+    kwargs["linkstatic"] = kwargs.get("linkstatic", True)
+    kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
+    kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+
+    native.cc_library(**kwargs)
+
 def swift_cc_test_library(**kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
 

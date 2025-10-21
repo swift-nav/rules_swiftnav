@@ -41,7 +41,7 @@ cc_toolchain(
 )
 
 toolchain(
-    name = "gcc_11_system_toolchain",
+    name = "system-cc-toolchain-x86_64-linux",
     exec_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
