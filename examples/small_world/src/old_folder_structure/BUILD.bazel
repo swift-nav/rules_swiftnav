@@ -1,6 +1,6 @@
-load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_test")
 
-swift_cc_library(
+cc_library(
     name = "old_folder_structure",
     srcs = ["src/old_folder_structure.cc"],
     hdrs = ["include/old_folder_structure/old_folder_structure.hpp"],
