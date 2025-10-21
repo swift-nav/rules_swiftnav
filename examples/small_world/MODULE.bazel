@@ -20,11 +20,16 @@ use_repo(
 )
 
 register_toolchains(
+    # llvm14
     "@rules_swiftnav//cc/toolchains/llvm/aarch64-darwin:cc-toolchain-aarch64-darwin",
+    "@rules_swiftnav//cc/toolchains/llvm/x86_64-linux:cc-toolchain-x86_64-linux",
+    # llvm20
     "@rules_swiftnav//cc/toolchains/llvm20/aarch64-darwin:cc-toolchain-aarch64-darwin",
     "@rules_swiftnav//cc/toolchains/llvm20/x86_64-darwin:cc-toolchain-x86_64-darwin",
     "@rules_swiftnav//cc/toolchains/llvm20/aarch64-linux:cc-toolchain-aarch64-linux",
     "@rules_swiftnav//cc/toolchains/llvm20/x86_64-linux:cc-toolchain-x86_64-linux",
+    # system gcc
+    "@rules_swiftnav//cc/toolchains/system_gcc/gcc11_x86_64-linux:system-cc-toolchain-x86_64-linux",
 )
 
 bazel_dep(name = "googletest", version = "1.16.0", dev_dependency = True)
@@ -35,4 +40,15 @@ bazel_dep(
     name = "buildifier_prebuilt",
     version = "8.2.0.2",
     dev_dependency = True,
+)
+
+# bazel run @hedron_compile_commands//:refresh_all
+# bazel run @hedron_compile_commands//:refresh_all -- --config=system-gcc
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "4f28899228fb3ad0126897876f147ca15026151e",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+    # Replace the commit hash (above) with the latest (https://github.com/hedronvision/bazel-compile-commands-extractor/commits/main).
+    # Even better, set up Renovate and let it do the work for you (see "Suggestion: Updates" in the README).
 )
