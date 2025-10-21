@@ -5,6 +5,7 @@ swift_cc_library(
     srcs = ["base_math.cc"],
     hdrs = ["base_math.hpp"],
     visibility = ["//visibility:public"],
+    standard = "20"
 )
 
 swift_cc_test(
