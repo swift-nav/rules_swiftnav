@@ -24,30 +24,30 @@ load(
 load(
     "@rules_swiftnav//cc/toolchains:gcc_llvm_flags.bzl",
     "disable_conversion_warning_flags",
-    "disable_warnings_for_test_targets_flags",
     "get_flags_for_lang_and_level",
 )
 
 _invalid_flags = [
-    "-Wstring-compare",
-    "-Wbool-compare",
-    "-Wmaybe-uninitialized",
-    "-Wclobbered",
-    "-Wmemset-elt-size",
     "-Wmismatched-dealloc",
-    "-Wmissing-attributes",
-    "-Wmultistatement-macros",
-    "-Wrestrict",
+    "-Wsizeof-array-div",
+    "-Wstring-compare",
+    "-Wenum-conversion",
     "-Wenum-int-mismatch",
-    "-Wformat-overflow",
-    "-Wformat-truncation",
-    "-Wnonnull-compare",
-    "-Wopenmp-simd",
     "-Wvla-parameter",
     "-Wzero-length-bounds",
+    "-Wself-move",
+    "-Wtautological-unsigned-zero-compare",
+    "-Wno-tautological-unsigned-zero-compare",
+    # Really overzealous on this toolchain, especially with C code
+    "-Wunused-const-variable",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wfloat-conversion",
 ]
 
 _extra_flags = [
+    "-Wno-float-conversion",
+    "-Wno-aggressive-loop-optimizations",
 ]
 
 _all_compile_actions = [
@@ -576,16 +576,6 @@ swift_disable_conversion_warning_feature = feature(
         flag_set(
             actions = _all_compile_actions,
             flag_groups = [flag_group(flags = disable_conversion_warning_flags)],
-        ),
-    ],
-)
-
-swift_disable_warnings_for_test_targets_feature = feature(
-    name = "disable_warnings_for_test_targets",
-    flag_sets = [
-        flag_set(
-            actions = _all_compile_actions,
-            flag_groups = [flag_group(flags = disable_warnings_for_test_targets_flags)],
         ),
     ],
 )
