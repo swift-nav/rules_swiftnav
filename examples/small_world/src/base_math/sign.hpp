@@ -1,5 +1,5 @@
-#ifndef BASE_MATH_HPP
-#define BASE_MATH_HPP
+#ifndef SIGN_HPP
+#define SIGN_HPP
 
 int add(int x, int y);
 

@@ -10,7 +10,6 @@ buildifier(
 validate_allowed_cc_deps(
     name = "validate_deps",
     targets = [
-        "//src/base_math:base_math",
         "//src/fibonacci:fibonacci",
     ],
     tags = ["manual"],
