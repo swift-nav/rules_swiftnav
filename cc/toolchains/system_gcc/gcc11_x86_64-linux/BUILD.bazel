@@ -22,7 +22,11 @@ filegroup(name = "empty")
 
 config(
     name = "config",
-    link_flags = ["-lm", "-latomic", "-lstdc++"],
+    link_flags = [
+        "-lm",
+        "-latomic",
+        "-lstdc++",
+    ],
 )
 
 cc_toolchain(

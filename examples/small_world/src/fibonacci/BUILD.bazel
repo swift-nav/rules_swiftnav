@@ -1,5 +1,5 @@
-load("@rules_swiftnav//cc:defs2.bzl", "UNIT", "swift_add_safe_cc_library", "swift_add_cc_test")
-    
+load("@rules_swiftnav//cc:defs2.bzl", "UNIT", "swift_add_cc_test", "swift_add_safe_cc_library")
+
 swift_add_safe_cc_library(
     name = "fibonacci",
     srcs = ["fibonacci.cc"],

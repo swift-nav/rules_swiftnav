@@ -9,8 +9,8 @@ buildifier(
 # Run with: bazel build //:validate_deps
 validate_allowed_cc_deps(
     name = "validate_deps",
+    tags = ["manual"],
     targets = [
         "//src/fibonacci:fibonacci",
     ],
-    tags = ["manual"],
 )
