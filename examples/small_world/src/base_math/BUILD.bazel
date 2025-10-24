@@ -1,18 +1,37 @@
 load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
 
 swift_cc_library(
-    name = "base_math",
-    srcs = ["base_math.cc"],
-    hdrs = ["base_math.hpp"],
+    name = "add",
+    srcs = ["add.cc"],
+    hdrs = ["add.hpp"],
+    standard = 20,
     visibility = ["//visibility:public"],
 )
 
 swift_cc_test(
-    name = "base_math_test",
-    srcs = ["base_math_test.cc"],
+    name = "add_test",
+    srcs = ["add_test.cc"],
     type = UNIT,
     deps = [
-        ":base_math",
+        ":add",
+        "@googletest//:gtest_main",
+    ],
+)
+
+swift_cc_library(
+    name = "sign",
+    srcs = ["sign.cc"],
+    hdrs = ["sign.hpp"],
+    standard = 20,
+    visibility = ["//visibility:public"],
+)
+
+swift_cc_test(
+    name = "sign_test",
+    srcs = ["sign_test.cc"],
+    type = UNIT,
+    deps = [
+        ":sign",
         "@googletest//:gtest_main",
     ],
 )
