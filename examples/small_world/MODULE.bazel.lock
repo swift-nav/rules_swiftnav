@@ -42,6 +42,8 @@
     "https://bcr.bazel.build/modules/buildifier_prebuilt/8.2.0.2/source.json": "51eb0a4b38aaaeab7fa64361576d616c4d8bfd0f17a0a10184aeab7084d79f8e",
     "https://bcr.bazel.build/modules/buildozer/7.1.2/MODULE.bazel": "2e8dd40ede9c454042645fd8d8d0cd1527966aa5c919de86661e62953cd73d84",
     "https://bcr.bazel.build/modules/buildozer/7.1.2/source.json": "c9028a501d2db85793a6996205c8de120944f50a0d570438fcae0457a5f9d1f8",
+    "https://bcr.bazel.build/modules/eigen/5.0.0/MODULE.bazel": "65aa1b3dfcf3b22bd45150ed4ab5bfade7cdda3ca85735fb466d45386a1722c0",
+    "https://bcr.bazel.build/modules/eigen/5.0.0/source.json": "954b73ff6d95db6b6f3fed1435cd75db95bab109d83b31fd43ffaacea7e6cd72",
     "https://bcr.bazel.build/modules/google_benchmark/1.8.2/MODULE.bazel": "a70cf1bba851000ba93b58ae2f6d76490a9feb74192e57ab8e8ff13c34ec50cb",
     "https://bcr.bazel.build/modules/googletest/1.11.0/MODULE.bazel": "3a83f095183f66345ca86aa13c58b59f9f94a2f81999c093d4eeaa2d262d12f4",
     "https://bcr.bazel.build/modules/googletest/1.14.0.bcr.1/MODULE.bazel": "22c31a561553727960057361aa33bf20fb2e98584bc4fec007906e27053f80c6",
@@ -778,8 +780,8 @@
     },
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "zDwq2yBSEJXdECtks4+trENu8MzrMfkm5FDsxbO1KrE=",
-        "usagesDigest": "zhynMdOFUVVMdnsmvkEf+0ZpkwApqRyhSbD9DRT+6Vk=",
+        "bzlTransitiveDigest": "12yxB33CfN0W3lUInFcfNacHnoMCa5xr0Kc+SXv/k4o=",
+        "usagesDigest": "f0HeWlPNwuIAtqAe+Vv26z6zmEtpRchgfWRCvQ5pK3c=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -883,9 +885,9 @@
           "aarch64-sysroot": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
             "attributes": {
-              "sha256": "4e4cbbed33e78602a5f038305514307a5bd9baa6f6330f433fa4dffb3e9e9ad1",
+              "sha256": "edb3599237a755287a3ca3c94bdd64eb7552b768e927a9d125473d0b846f91f4",
               "build_file_content": "\nfilegroup(\n    name = \"aarch64-sysroot\",\n    srcs = glob([\"*/**\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_aarch64_sysroot.tar.xz"
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_aarch64_sysroot.tar.xz"
             }
           },
           "llvm_mingw_toolchain": {
@@ -900,9 +902,9 @@
           "x86_64-sysroot": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
             "attributes": {
-              "sha256": "cfa444ecc4fcc858acc045e72403efd54dab734bdad4ddec30aad8826916a617",
+              "sha256": "4235d41632c677d0c71e8e3b40abcf2b67e991e6b66a08cdf9d1e54a54de8869",
               "build_file_content": "\nfilegroup(\n    name = \"x86_64-sysroot\",\n    srcs = glob([\"*/**\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_x86_64_sysroot.tar.xz"
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_x86_64_sysroot.tar.xz"
             }
           },
           "aarch64-linux-musl": {

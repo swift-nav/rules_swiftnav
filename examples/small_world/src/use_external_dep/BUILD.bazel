@@ -1,0 +1,21 @@
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+
+swift_cc_library(
+    name = "use_external_dep",
+    srcs = ["use_external_dep.cc"],
+    hdrs = ["use_external_dep.hpp"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@eigen",
+    ],
+)
+
+swift_cc_test(
+    name = "use_external_dep_test",
+    srcs = ["use_external_dep_test.cc"],
+    type = UNIT,
+    deps = [
+        ":use_external_dep",
+        "@googletest//:gtest_main",
+    ],
+)

@@ -5,7 +5,7 @@ swift_cc_library(
     srcs = ["fibonacci.cc"],
     hdrs = ["fibonacci.hpp"],
     visibility = ["//visibility:public"],
-    deps = ["//src/base_math"],
+    deps = ["//src/base_math:add"],
 )
 
 swift_cc_test(

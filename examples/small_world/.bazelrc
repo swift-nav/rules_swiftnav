@@ -10,3 +10,5 @@ coverage --combined_report=lcov
 build:cov_mac --repo_env=GCOV=/Library/Developer/CommandLineTools/usr/bin/llvm-profdata
 build:cov_mac --test_env=LLVM_COV=/Library/Developer/CommandLineTools/usr/bin/llvm-cov
 build:cov_mac --copt=-ffile-compilation-dir=.
+
+build:system-gcc --platforms=@rules_swiftnav//platforms:x86_64_linux_gcc11_system
