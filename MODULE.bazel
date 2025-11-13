@@ -69,6 +69,6 @@ use_repo(yocto_generic_ext, "yocto_generic")
 # Register the buildifier toolchain
 bazel_dep(
     name = "buildifier_prebuilt",
-    version = "8.2.0.2",
+    version = "8.2.1",
     dev_dependency = True,
 )
