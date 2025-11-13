@@ -1,3 +1,4 @@
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load(":choose_clang_format.bzl", "choose_clang_format")
 
 filegroup(
