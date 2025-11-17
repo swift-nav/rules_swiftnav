@@ -8,6 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("@rules_swiftnav//cc/toolchains/llvm20:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_swiftnav//cc/toolchains/llvm20:target_triplets.bzl", "AARCH64_LINUX", "X86_64_LINUX")
 
