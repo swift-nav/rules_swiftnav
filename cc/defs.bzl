@@ -10,6 +10,7 @@
 
 """Swift wrappers for native cc rules."""
 
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test", "cc_binary")
 load("//stamp:stamp_file.bzl", "stamp_file")
 load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
@@ -246,7 +247,7 @@ def swift_c_library(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
-    native.cc_library(**kwargs)
+    cc_library(**kwargs)
 
 def swift_cc_library(**kwargs):
     """Wraps cc_library to enforce standards for a production c++ library.
@@ -299,7 +300,7 @@ def swift_cc_library(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
-    native.cc_library(**kwargs)
+    cc_library(**kwargs)
 
 def swift_c_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production c library.
@@ -343,7 +344,7 @@ def swift_c_tool_library(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
-    native.cc_library(**kwargs)
+    cc_library(**kwargs)
 
 def swift_cc_tool_library(**kwargs):
     """Wraps cc_library to enforce standards for a non-production c++ library.
@@ -390,7 +391,7 @@ def swift_cc_tool_library(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
-    native.cc_library(**kwargs)
+    cc_library(**kwargs)
 
 def swift_c_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production c binary.
@@ -438,7 +439,7 @@ def swift_c_binary(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
-    native.cc_binary(**kwargs)
+    cc_binary(**kwargs)
 
 def swift_cc_binary(**kwargs):
     """Wraps cc_binary to enforce standards for a production c++ binary.
@@ -488,7 +489,7 @@ def swift_cc_binary(**kwargs):
 
     kwargs["tags"] = [BINARY] + kwargs.get("tags", [])
 
-    native.cc_binary(**kwargs)
+    cc_binary(**kwargs)
 
 def swift_c_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production c binary.
@@ -531,7 +532,7 @@ def swift_c_tool(**kwargs):
 
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
-    native.cc_binary(**kwargs)
+    cc_binary(**kwargs)
 
 def swift_cc_tool(**kwargs):
     """Wraps cc_binary to enforce standards for a non-production c++ binary.
@@ -577,7 +578,7 @@ def swift_cc_tool(**kwargs):
 
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
-    native.cc_binary(**kwargs)
+    cc_binary(**kwargs)
 
 def swift_c_test_library(**kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
@@ -604,7 +605,7 @@ def swift_c_test_library(**kwargs):
     kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
-    native.cc_library(**kwargs)
+    cc_library(**kwargs)
 
 def swift_cc_test_library(**kwargs):
     """Wraps cc_library to enforce Swift test library conventions.
@@ -635,7 +636,7 @@ def swift_cc_test_library(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
-    native.cc_library(**kwargs)
+    cc_library(**kwargs)
 
 def swift_c_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions for C code.
@@ -690,7 +691,7 @@ def swift_c_test(name, type, **kwargs):
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
-    native.cc_test(**kwargs)
+    cc_test(**kwargs)
 
 def swift_cc_test(name, type, **kwargs):
     """Wraps cc_test to enforce Swift testing conventions.
@@ -742,4 +743,4 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
-    native.cc_test(**kwargs)
+    cc_test(**kwargs)
