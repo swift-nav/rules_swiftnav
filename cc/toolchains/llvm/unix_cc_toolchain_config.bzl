@@ -14,7 +14,6 @@
 
 """A Starlark cc_toolchain configuration rule"""
 
-load("@rules_cc//cc:defs.bzl", "CcToolchainConfigInfo")
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load(
     "@bazel_tools//tools/cpp:cc_toolchain_config_lib.bzl",
@@ -29,6 +28,7 @@ load(
     "variable_with_value",
     "with_feature_set",
 )
+load("@rules_cc//cc:defs.bzl", "CcToolchainConfigInfo")
 load(
     "swift_custom_features.bzl",
     "c11_standard_feature",
