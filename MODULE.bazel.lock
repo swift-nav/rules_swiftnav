@@ -158,6 +158,220 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//cc:extensions.bzl%swift_cc_toolchain_extension": {
+      "general": {
+        "bzlTransitiveDigest": "12yxB33CfN0W3lUInFcfNacHnoMCa5xr0Kc+SXv/k4o=",
+        "usagesDigest": "zUsxDYgSpiCcTmwQ9zP7K4nryOgkyyAWe0jA04p1/sI=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "aarch64-darwin-llvm": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm:llvm.BUILD.bzl",
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//cc/toolchains/llvm:llvm.patch"
+              ],
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/llvm-14.0.0/clang%2Bllvm-14.0.0-arm64-apple-darwin.tar.gz",
+              "strip_prefix": "clang+llvm-14.0.0-arm64-apple-darwin",
+              "sha256": "f826ee92c3fedb92bad2f9f834d96f6b9db3192871bfe434124bca848ba9a2a3"
+            }
+          },
+          "x86_64-darwin-llvm": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//cc/toolchains/llvm:llvm.patch"
+              ],
+              "build_file": "@@//cc/toolchains/llvm:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-apple-darwin.tar.xz",
+              "strip_prefix": "clang+llvm-14.0.0-x86_64-apple-darwin",
+              "sha256": "cf5af0f32d78dcf4413ef6966abbfd5b1445fe80bba57f2ff8a08f77e672b9b3"
+            }
+          },
+          "aarch64-linux-llvm": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//cc/toolchains/llvm:llvm.patch"
+              ],
+              "build_file": "@@//cc/toolchains/llvm:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-aarch64-linux-gnu.tar.xz",
+              "strip_prefix": "clang+llvm-14.0.0-aarch64-linux-gnu",
+              "sha256": "1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee"
+            }
+          },
+          "x86_64-linux-llvm": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm:llvm.BUILD.bzl",
+              "patch_args": [
+                "-p1"
+              ],
+              "patches": [
+                "@@//cc/toolchains/llvm:llvm.patch"
+              ],
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
+              "strip_prefix": "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
+              "sha256": "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5"
+            }
+          },
+          "aarch64-darwin-llvm20": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-ARM64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-macOS-ARM64",
+              "sha256": "6aa75de00575ad0663183b00f00f39992ded611b5136e57649ace1e6a53c0d16"
+            }
+          },
+          "x86_64-darwin-llvm20": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-X64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-macOS-X64",
+              "sha256": "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
+            }
+          },
+          "aarch64-linux-llvm20": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-ARM64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-Linux-ARM64",
+              "sha256": "832f2802a29457dc758f56e26e98558c6cd0e45fcd07186f540cb6e7f4e59385"
+            }
+          },
+          "x86_64-linux-llvm20": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
+              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-X64.tar.xz",
+              "strip_prefix": "LLVM-20.1.7-Linux-X64",
+              "sha256": "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
+            }
+          },
+          "aarch64-sysroot": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "sha256": "edb3599237a755287a3ca3c94bdd64eb7552b768e927a9d125473d0b846f91f4",
+              "build_file_content": "\nfilegroup(\n    name = \"aarch64-sysroot\",\n    srcs = glob([\"*/**\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_aarch64_sysroot.tar.xz"
+            }
+          },
+          "llvm_mingw_toolchain": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/llvm_x86_64_windows:toolchain.BUILD",
+              "sha256": "21458febf5d2c918df922dd0da60137a8787e5e6b427925a1977c882fc79b550",
+              "strip_prefix": "llvm-mingw-20241203-ucrt-ubuntu-20.04-x86_64",
+              "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20241203/llvm-mingw-20241203-ucrt-ubuntu-20.04-x86_64.tar.xz"
+            }
+          },
+          "x86_64-sysroot": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "sha256": "4235d41632c677d0c71e8e3b40abcf2b67e991e6b66a08cdf9d1e54a54de8869",
+              "build_file_content": "\nfilegroup(\n    name = \"x86_64-sysroot\",\n    srcs = glob([\"*/**\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_x86_64_sysroot.tar.xz"
+            }
+          },
+          "aarch64-linux-musl": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/musl/aarch64:musl.BUILD.bzl",
+              "sha256": "a6650541dcc778b79add1dd7369869d5d38ddefa9362b7e32d4cc1267fa7977e",
+              "strip_prefix": "output",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/aarch64-linux-musl-cross.tar.gz"
+            }
+          },
+          "arm-linux-musleabihf": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/musl/armhf:musl.BUILD.bzl",
+              "sha256": "7b310a8bf70500a4072f87c3292321fc4f7b91cc67a85a31e7cf13508fa24a3c",
+              "strip_prefix": "output",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/arm-linux-musleabihf-cross.tar.gz"
+            }
+          },
+          "x86_64-linux-musl": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/musl/x86_64:musl.BUILD.bzl",
+              "sha256": "594395e60bc93acd7eb049f6d8c28a9c5ad5b6060b230e94f19cd8c005cd3a91",
+              "strip_prefix": "output",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/x86_64-linux-musl-cross.tar.gz"
+            }
+          },
+          "gcc_arm_gnu_8_3_toolchain": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/gcc_arm_gnu_8_3:toolchain.BUILD",
+              "sha256": "8ce3e7688a47d8cd2d8e8323f147104ae1c8139520eca50ccf8a7fa933002731",
+              "strip_prefix": "gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-gnu-8.3/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz"
+            }
+          },
+          "x86_64_linux_gcc_arm_embedded_toolchain": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
+              "sha256": "97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3",
+              "strip_prefix": "gcc-arm-none-eabi-10.3-2021.10",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
+            }
+          },
+          "darwin_gcc_arm_embedded_toolchain": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
+              "sha256": "fb613dacb25149f140f73fe9ff6c380bb43328e6bf813473986e9127e2bc283b",
+              "strip_prefix": "gcc-arm-none-eabi-10.3-2021.10",
+              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "",
+            "rules_swiftnav",
+            ""
+          ]
+        ]
+      }
+    },
+    "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
+      "general": {
+        "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
+        "usagesDigest": "KEppC6mqTNrGwvOvac8QYe7gzk51ix6lwruc6EzBEEc=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "yocto_generic": {
+            "repoRuleId": "@@//cc/toolchains/yocto_generic:yocto_generic.bzl%yocto_generic",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
     "@@aspect_bazel_lib+//lib:extensions.bzl%toolchains": {
       "general": {
         "bzlTransitiveDigest": "jvgjnlydnSzRfwVmnrCIkyUgc+t3A6YLJWH5/lbXq38=",
