@@ -213,6 +213,32 @@ platform(
 )
 
 platform(
+    name = "aarch64_bullseye_llvm20_graviton2",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "@rules_swiftnav//cc/constraints:graviton2",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:llvm20_toolchain",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+platform(
+    name = "aarch64_bullseye_llvm20_graviton3",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "@rules_swiftnav//cc/constraints:graviton3",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:llvm20_toolchain",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# GCC system
+
+platform(
     name = "x86_64_linux_gcc11_system",
     constraint_values = [
         "@platforms//os:linux",
