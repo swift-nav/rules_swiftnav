@@ -118,7 +118,7 @@ def _any_of_in(keys, features):
 
 def _check_features_misuse(features):
     if "gnu_extensions" in features:
-        fail("Do not enable gnu_extensions features manually, pass extensions=True instead")
+        fail("Do not enable gnu_extensions feature manually, pass extensions=True instead")
     if _any_of_in(["c89", "c90", "c99", "c11", "c17", "c++98", "c++11", "c++14", "c++17", "c++20", "c++23"], features):
         fail("Do not set language standards manually, pass standard=n instead")
     if _any_of_in(["prod_coding_standard", "internal_coding_standard", "safe_coding_standard", "portable_coding_standard"], features):
@@ -146,7 +146,7 @@ def _get_lang_features(lang, extensions, standard, portable):
         lang_standard_feature = select({
             Label("@rules_swiftnav//cc:cxx17"): ["c++17"],
             Label("@rules_swiftnav//cc:cxx20"): ["c++20"],
-            Label("@rules_swiftnav//cc:cxx23"): ["c++23"],
+            Label("@rules_swiftnav//cc:cxx23"): ["c++23"],  # currently not yet implemented in toolchains!
             "//conditions:default": ["c++14"],
         })
 
