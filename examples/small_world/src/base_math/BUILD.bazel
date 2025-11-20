@@ -1,6 +1,7 @@
 load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+load("@rules_swiftnav//cc:defs2.bzl", "swift_add_cc_test", "swift_add_prod_cc_library")
 
-swift_cc_library(
+swift_add_prod_cc_library(
     name = "add",
     srcs = ["add.cc"],
     hdrs = ["add.hpp"],
@@ -8,7 +9,7 @@ swift_cc_library(
     visibility = ["//visibility:public"],
 )
 
-swift_cc_test(
+swift_add_cc_test(
     name = "add_test",
     srcs = ["add_test.cc"],
     type = UNIT,

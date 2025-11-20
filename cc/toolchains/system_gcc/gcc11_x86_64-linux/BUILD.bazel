@@ -1,74 +1,34 @@
+load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("@rules_cc//cc/private/toolchain:unix_cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_cc//cc/toolchains:cc_toolchain.bzl", "cc_toolchain")
+load(":config.bzl", "config")
+
+_all_compile_actions = [
+    ACTION_NAMES.c_compile,
+    ACTION_NAMES.cpp_compile,
+    ACTION_NAMES.linkstamp_compile,
+    ACTION_NAMES.assemble,
+    ACTION_NAMES.preprocess_assemble,
+    ACTION_NAMES.cpp_header_parsing,
+    ACTION_NAMES.cpp_module_compile,
+    ACTION_NAMES.cpp_module_codegen,
+    ACTION_NAMES.clif_match,
+    ACTION_NAMES.lto_backend,
+]
 
 package(default_visibility = ["//visibility:public"])
 
-cc_toolchain_config(
-    name = "local-x86_64-linux",
-    abi_libc_version = "unknown",
-    abi_version = "unknown",
-    compiler = "gcc-11",
-    coverage_compile_flags = ["--coverage"],
-    coverage_link_flags = ["--coverage"],
-    cpu = "k8",
-    cxx_builtin_include_directories = [
-        "/usr/include",
-        "/usr/include/c++/11",
-        "/usr/include/x86_64-linux-gnu/c++/11",
-        "/usr/include/c++/11/backward",
-        "/usr/lib/gcc/x86_64-linux-gnu/11/include",
-        "/usr/lib/gcc/x86_64-linux-gnu/11/include-fixed",
-    ],
-    cxx_flags = ["-std=c++17"],
-    dbg_compile_flags = ["-g"],
-    host_system_name = "local",
+filegroup(name = "empty")
+
+config(
+    name = "config",
     link_flags = [
-        "-lstdc++",
-        "-fuse-ld=gold",
-        "-Wl,-no-as-needed",
-        "-Wl,-z,relro,-z,now",
-        "-B/usr/bin",
-        "-pass-exit-codes",
         "-lm",
-    ],
-    opt_compile_flags = [
-        "-g0",
-        "-O2",
-        "-D_FORTIFY_SOURCE=1",
-        "-DNDEBUG",
-        "-ffunction-sections",
-        "-fdata-sections",
-    ],
-    opt_link_flags = ["-Wl,--gc-sections"],
-    supports_start_end_lib = True,
-    target_libc = "glibc",
-    target_system_name = "local",
-    tool_paths = {
-        "ar": "/usr/bin/ar",
-        "as": "/usr/bin/as",
-        "cpp": "/usr/bin/cpp-11",
-        "gcc": "/usr/bin/gcc-11",
-        "g++": "/usr/bin/g++-11",
-        "gcov": "/usr/bin/gcov-11",
-        "ld": "/usr/bin/g++-11",
-        "nm": "/usr/bin/nm",
-        "objcopy": "/usr/bin/objcopy",
-        "objdump": "/usr/bin/objdump",
-        "ranlib": "/usr/bin/ranlib",
-        "strip": "/usr/bin/strip",
-    },
-    toolchain_identifier = "cc-gcc-x86_64-linux",
-    unfiltered_compile_flags = [
-        "-fno-canonical-system-headers",
-        "-Wno-builtin-macro-redefined",
-        "-D__DATE__=\"redacted\"",
-        "-D__TIMESTAMP__=\"redacted\"",
-        "-D__TIME__=\"redacted\"",
+        "-latomic",
+        "-lstdc++",
     ],
 )
-
-filegroup(name = "empty")
 
 cc_toolchain(
     name = "cc-gcc-x86_64-linux",
@@ -81,7 +41,7 @@ cc_toolchain(
     objcopy_files = ":empty",
     strip_files = ":empty",
     supports_param_files = 0,
-    toolchain_config = ":local-x86_64-linux",
+    toolchain_config = ":config",
     toolchain_identifier = "cc-gcc-x86_64-linux",
 )
 

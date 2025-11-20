@@ -1,6 +1,6 @@
-load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+load("@rules_swiftnav//cc:defs2.bzl", "UNIT", "swift_add_cc_test", "swift_add_safe_cc_library")
 
-swift_cc_library(
+swift_add_safe_cc_library(
     name = "fibonacci",
     srcs = ["fibonacci.cc"],
     hdrs = ["fibonacci.hpp"],
@@ -8,7 +8,7 @@ swift_cc_library(
     deps = ["//src/base_math:add"],
 )
 
-swift_cc_test(
+swift_add_cc_test(
     name = "fibonacci_test",
     srcs = ["fibonacci_test.cc"],
     type = UNIT,

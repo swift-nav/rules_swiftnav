@@ -30,6 +30,18 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "strong_stack_protector",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_strong_stack_protector",
+    flag_values = {":strong_stack_protector": "true"},
+    visibility = ["//visibility:public"],
+)
+
 # Enable warnings in tests for deprecated declarations with --@rules_swiftnav//cc:tests_warn_deprecated_declarations=true
 bool_flag(
     name = "tests_warn_deprecated_declarations",
@@ -214,5 +226,14 @@ py_binary(
     ],
     args = [
     ],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "checktags",
+    srcs = [
+        "checktags.py",
+    ],
+    args = [],
     visibility = ["//visibility:public"],
 )

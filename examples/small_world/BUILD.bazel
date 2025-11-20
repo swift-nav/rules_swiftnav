@@ -1,0 +1,11 @@
+load("@rules_swiftnav//cc:check_allowed_cc_deps.bzl", "validate_allowed_cc_deps")
+
+# Validation target to check allowed C/C++ dependencies
+# Run with: bazel build //:validate_deps
+validate_allowed_cc_deps(
+    name = "validate_deps",
+    tags = ["manual"],
+    targets = [
+        "//src/fibonacci:fibonacci",
+    ],
+)

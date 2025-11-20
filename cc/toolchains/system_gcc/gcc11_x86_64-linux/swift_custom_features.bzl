@@ -45,9 +45,14 @@ _invalid_flags = [
     "-Wopenmp-simd",
     "-Wvla-parameter",
     "-Wzero-length-bounds",
+    "-Wself-move",
+    "-Wtautological-unsigned-zero-compare",
+    "-Wno-tautological-unsigned-zero-compare",
 ]
 
 _extra_flags = [
+    # Technically correct but very overzealous
+    "-Wno-unused-const-variable",
 ]
 
 _all_compile_actions = [
