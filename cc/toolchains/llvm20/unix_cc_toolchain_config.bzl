@@ -28,6 +28,7 @@ load(
     "variable_with_value",
     "with_feature_set",
 )
+load("@rules_cc//cc:defs.bzl", "CcToolchainConfigInfo")
 load(
     "swift_custom_features.bzl",
     "c11_standard_feature",

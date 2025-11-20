@@ -1,3 +1,5 @@
+load("@rules_python//python:py_binary.bzl", "py_binary")
+
 exports_files(
     glob(["*.bzl"]) + glob(["*.py"]),
     visibility = ["//visibility:public"],
