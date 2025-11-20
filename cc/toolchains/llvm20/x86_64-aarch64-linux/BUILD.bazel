@@ -8,6 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("@rules_swiftnav//cc/toolchains/llvm20:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_swiftnav//cc/toolchains/llvm20:target_triplets.bzl", "AARCH64_LINUX", "X86_64_LINUX")
 
@@ -102,13 +103,18 @@ cc_toolchain_config(
     abi_libc_version = "glibc_unknown",
     abi_version = "clang",
     builtin_sysroot = select({
-        # _use_libcpp case needs to be implemented properly here!
+        "@rules_swiftnav//cc:_use_libcpp": None,
         "//conditions:default": "external/rules_swiftnav++swift_cc_toolchain_extension+aarch64-sysroot",
     }),
     compiler = "clang",
     cxx_builtin_include_directories = [
         "%sysroot%/usr/include",
     ],
+    extra_copts = select({
+        "@rules_swiftnav//cc/constraints:graviton2": ["-mcpu=neoverse-n1"],
+        "@rules_swiftnav//cc/constraints:graviton3": ["-mcpu=neoverse-512tvb"],
+        "//conditions:default": [],
+    }),
     host_system_name = X86_64_LINUX,
     target_cpu = "aarch64",
     target_libc = "glibc_unknown",
@@ -152,6 +158,42 @@ toolchain(
     target_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:aarch64",
+        "@rules_swiftnav//cc/constraints:llvm20_toolchain",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-aarch64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+toolchain(
+    name = "cc-toolchain-aarch64-bullseye-graviton2",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:graviton2",
+        "@rules_swiftnav//cc/constraints:llvm20_toolchain",
+    ],
+    target_settings = None,
+    toolchain = ":cc-clang-x86_64-aarch64-linux",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+toolchain(
+    name = "cc-toolchain-aarch64-bullseye-graviton3",
+    exec_compatible_with = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:linux",
+    ],
+    target_compatible_with = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+        "@rules_swiftnav//cc/constraints:glibc_2_31",
+        "@rules_swiftnav//cc/constraints:graviton3",
         "@rules_swiftnav//cc/constraints:llvm20_toolchain",
     ],
     target_settings = None,

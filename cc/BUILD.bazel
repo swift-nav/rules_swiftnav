@@ -10,6 +10,7 @@
 
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag", "string_flag")
+load("@rules_python//python:py_binary.bzl", "py_binary")
 
 exports_files(
     glob(["*.bzl"]),
@@ -30,15 +31,15 @@ config_setting(
 )
 
 bool_flag(
-  name = "strong_stack_protector",
-  build_setting_default = False,
-  visibility = ["//visibility:public"],
+    name = "strong_stack_protector",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
 )
 
 config_setting(
-  name = "_strong_stack_protector",
-  flag_values = {":strong_stack_protector": "true"},
-  visibility = ["//visibility:public"],
+    name = "_strong_stack_protector",
+    flag_values = {":strong_stack_protector": "true"},
+    visibility = ["//visibility:public"],
 )
 
 # Enable warnings in tests for deprecated declarations with --@rules_swiftnav//cc:tests_warn_deprecated_declarations=true
@@ -174,7 +175,6 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
-
 selects.config_setting_group(
     name = "enable_symbolizer_x86_64_linux",
     match_all = [
@@ -230,10 +230,10 @@ py_binary(
 )
 
 py_binary(
-  name = "checktags",
-  srcs = [
-    "checktags.py",
-  ],
-  args = [],
-  visibility = ["//visibility:public"],
+    name = "checktags",
+    srcs = [
+        "checktags.py",
+    ],
+    args = [],
+    visibility = ["//visibility:public"],
 )

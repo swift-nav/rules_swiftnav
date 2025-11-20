@@ -51,8 +51,8 @@ _invalid_flags = [
 ]
 
 _extra_flags = [
-  # Technically correct but very overzealous
-  "-Wno-unused-const-variable",
+    # Technically correct but very overzealous
+    "-Wno-unused-const-variable",
 ]
 
 _all_compile_actions = [
@@ -601,11 +601,11 @@ stack_protector_feature = feature(
         flag_set(
             actions = _all_compile_actions,
             flag_groups = [flag_group(flags = ["-fstack-protector"])],
-        with_features = [
-          with_feature_set(
-          not_features = ["strong_stack_protector"],
-          ),
-        ],
+            with_features = [
+                with_feature_set(
+                    not_features = ["strong_stack_protector"],
+                ),
+            ],
         ),
     ],
 )

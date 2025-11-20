@@ -170,35 +170,35 @@ def _get_exceptions_rtti_features(level, lang, exceptions, rtti):
         return []
 
     if level == "test":
-      # RTTI and exceptions default to on for tests and test libraries
-      if rtti == None:
-        rtti = True
-      if exceptions == None:
-        exceptions = True
+        # RTTI and exceptions default to on for tests and test libraries
+        if rtti == None:
+            rtti = True
+        if exceptions == None:
+            exceptions = True
 
     return select({
         Label("@rules_swiftnav//cc:_enable_exceptions"): ["exceptions_feature"],
-        "//conditions:default": ["exceptions_feature" if exceptions  else "noexceptions_feature"],
+        "//conditions:default": ["exceptions_feature" if exceptions else "noexceptions_feature"],
     }) + select({
         Label("@rules_swiftnav//cc:_enable_rtti"): ["rtti_feature"],
-        "//conditions:default": ["rtti_feature" if rtti  else "nortti_feature"],
+        "//conditions:default": ["rtti_feature" if rtti else "nortti_feature"],
     })
 
 def _get_warnings_features(level):
     if level == "test":
-      return ["internal_coding_standard"]
+        return ["internal_coding_standard"]
     return [level + "_coding_standard"]
 
 def _get_stack_protector_feature(value):
-  if value == None:
-    return select({
-      Label("@rules_swiftnav//cc:_strong_stack_protector"): ["strong_stack_protector"],
-      "//conditions:default": ["stack_protector"],
-    })
+    if value == None:
+        return select({
+            Label("@rules_swiftnav//cc:_strong_stack_protector"): ["strong_stack_protector"],
+            "//conditions:default": ["stack_protector"],
+        })
 
-  if value == "strong":
-    return "strong_stack_protector"
-  fail("Invalid stack protector option, must either \"strong\" or not specified")
+    if value == "strong":
+        return "strong_stack_protector"
+    fail("Invalid stack protector option, must either \"strong\" or not specified")
 
 def _check_copts_misuse(copt_flag, key, copts, nocopts):
     """
@@ -224,11 +224,10 @@ def _validate_copts_nocopts(level, portable, copts, nocopts):
             fail("Passing nocopts to production or safe targets is not allowed. Only adding flags via copts is permitted")
 
     if portable:
-      if copts != None and copts != []:
-        fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
-      if nocopts != None and nocopts != []:
-        fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
-
+        if copts != None and copts != []:
+            fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
+        if nocopts != None and nocopts != []:
+            fail("Don't use copts for portable targets, use a method which isn't going to break compatibility with other compilers such as moving them to .bazelrc or environment variables")
 
 def _build_copts(copts, nocopts):
     return [f for f in copts if f not in nocopts]
@@ -300,9 +299,9 @@ def swift_add_library(**kwargs):
 
     kwargs["tags"] = [LIBRARY, "internal" if level == "test" else level] + (["portable"] if portable else []) + kwargs.get("tags", []) + (["test_library"] if is_test_library else [])
     if level == "test":
-      kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
+        kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
     else:
-      kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
+        kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", [])
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
@@ -422,10 +421,10 @@ def swift_add_test(**kwargs):
     native.cc_test(**kwargs)
 
 def swift_add_cc_test(**kwargs):
-  swift_add_test(lang = "cc", **kwargs)
+    swift_add_test(lang = "cc", **kwargs)
 
 def swift_add_c_test(**kwargs):
-  swift_add_test(lang = "c", **kwargs)
+    swift_add_test(lang = "c", **kwargs)
 
 STAMPED_LIB_SUFFIX = ".stamped"
 
@@ -484,137 +483,135 @@ def _assert_no_reserved_keys(**kwargs):
     if "level" in kwargs:
         fail("Do not try to specify coding standard manually")
     if "portable" in kwargs:
-      fail("Do not try to control portability manually")
+        fail("Do not try to control portability manually")
 
 def swift_add_safe_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = SAFE, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = SAFE, portable = False, **kwargs)
 
 def swift_add_prod_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = PROD, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = PROD, portable = False, **kwargs)
 
 def swift_add_internal_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = INTERNAL, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = INTERNAL, portable = False, **kwargs)
 
 def swift_add_test_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = TEST, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = TEST, portable = False, **kwargs)
 
 def swift_add_safe_portable_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = SAFE, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = SAFE, portable = True, **kwargs)
 
 def swift_add_prod_portable_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = PROD, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = PROD, portable = True, **kwargs)
 
 def swift_add_internal_portable_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = INTERNAL, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = INTERNAL, portable = True, **kwargs)
 
 def swift_add_test_portable_cc_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "cc", level = TEST, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "cc", level = TEST, portable = True, **kwargs)
 
 def swift_add_safe_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = SAFE, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = SAFE, portable = False, **kwargs)
 
 def swift_add_prod_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = PROD, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = PROD, portable = False, **kwargs)
 
 def swift_add_internal_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = INTERNAL, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = INTERNAL, portable = False, **kwargs)
 
 def swift_add_test_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = TEST, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = TEST, portable = False, **kwargs)
 
 def swift_add_safe_portable_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = SAFE, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = SAFE, portable = True, **kwargs)
 
 def swift_add_prod_portable_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = PROD, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = PROD, portable = True, **kwargs)
 
 def swift_add_internal_portable_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = INTERNAL, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = INTERNAL, portable = True, **kwargs)
 
 def swift_add_test_portable_c_library(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_library(lang = "c", level = TEST, portable = True, **kwargs)
-
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_library(lang = "c", level = TEST, portable = True, **kwargs)
 
 def swift_add_safe_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = SAFE, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = SAFE, portable = False, **kwargs)
 
 def swift_add_prod_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = PROD, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = PROD, portable = False, **kwargs)
 
 def swift_add_internal_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = INTERNAL, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = INTERNAL, portable = False, **kwargs)
 
 def swift_add_test_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = TEST, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = TEST, portable = False, **kwargs)
 
 def swift_add_safe_portable_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = SAFE, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = SAFE, portable = True, **kwargs)
 
 def swift_add_prod_portable_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = PROD, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = PROD, portable = True, **kwargs)
 
 def swift_add_internal_portable_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = INTERNAL, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = INTERNAL, portable = True, **kwargs)
 
 def swift_add_test_portable_cc_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "cc", level = TEST, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "cc", level = TEST, portable = True, **kwargs)
 
 def swift_add_safe_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = SAFE, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = SAFE, portable = False, **kwargs)
 
 def swift_add_prod_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = PROD, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = PROD, portable = False, **kwargs)
 
 def swift_add_internal_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = INTERNAL, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = INTERNAL, portable = False, **kwargs)
 
 def swift_add_test_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = TEST, portable = False, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = TEST, portable = False, **kwargs)
 
 def swift_add_safe_portable_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = SAFE, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = SAFE, portable = True, **kwargs)
 
 def swift_add_prod_portable_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = PROD, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = PROD, portable = True, **kwargs)
 
 def swift_add_internal_portable_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = INTERNAL, portable = True, **kwargs)
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = INTERNAL, portable = True, **kwargs)
 
 def swift_add_test_portable_c_binary(**kwargs):
-  _assert_no_reserved_keys(**kwargs)
-  swift_add_binary(lang = "c", level = TEST, portable = True, **kwargs)
-
+    _assert_no_reserved_keys(**kwargs)
+    swift_add_binary(lang = "c", level = TEST, portable = True, **kwargs)
 
 def swift_add_cc_static_library(name, deps, visibility = ["//visibility:private"]):
     _cc_static_library(
@@ -627,5 +624,3 @@ def swift_add_cc_static_library(name, deps, visibility = ["//visibility:private"
         }),
         visibility = visibility,
     )
-
-

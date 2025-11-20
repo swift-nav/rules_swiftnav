@@ -1,4 +1,5 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("@rules_cc//cc/private/toolchain:unix_cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_cc//cc/toolchains:cc_toolchain.bzl", "cc_toolchain")
 load(":config.bzl", "config")
@@ -22,7 +23,11 @@ filegroup(name = "empty")
 
 config(
     name = "config",
-    link_flags = ["-lm", "-latomic", "-lstdc++"],
+    link_flags = [
+        "-lm",
+        "-latomic",
+        "-lstdc++",
+    ],
 )
 
 cc_toolchain(

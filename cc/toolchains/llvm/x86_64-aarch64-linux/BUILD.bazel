@@ -8,6 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load("@rules_swiftnav//cc/toolchains/llvm:cc_toolchain_config.bzl", "cc_toolchain_config")
 load("@rules_swiftnav//cc/toolchains/llvm:target_triplets.bzl", "AARCH64_LINUX", "X86_64_LINUX")
 
@@ -115,7 +116,7 @@ cc_toolchain_config(
         "//conditions:default": [],
     }),
     host_system_name = X86_64_LINUX,
-    target_cpu = "k8",
+    target_cpu = "k8",  # this should be aarch64?
     target_libc = "glibc_unknown",
     target_system_name = AARCH64_LINUX,
     tool_paths = {
@@ -125,7 +126,7 @@ cc_toolchain_config(
         "gcov": "wrappers/llvm-profdata",
         "llvm-cov": "wrappers/llvm-cov",
         "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "wrappers/ld.ldd",
+        "ld": "wrappers/ld.ldd",  # This should be ld.lld?
         "nm": "wrappers/llvm-nm",
         "objcopy": "wrappers/llvm-objcopy",
         "objdump": "wrappers/llvm-objdump",

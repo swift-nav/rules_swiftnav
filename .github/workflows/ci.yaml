@@ -23,7 +23,7 @@ jobs:
 
       - name: Run format
         run: |
-          bazel run //:buildifier
+          bazel run //tools/buildifier:buildifier
           git diff --exit-code
 
   example-small-world:
@@ -47,5 +47,6 @@ jobs:
 
       - name: Run format
         run: |
-          bazel run //:buildifier
+          cd examples/small_world
+          bazel run //tools/buildifier:buildifier
           git diff --exit-code

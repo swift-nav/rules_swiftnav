@@ -151,7 +151,7 @@ def _clang_tidy_aspect_impl(target, ctx):
         return []
 
     if TEST_LIBRARY in tags:
-      return []
+        return []
 
     srcs = get_cc_srcs(ctx)
 

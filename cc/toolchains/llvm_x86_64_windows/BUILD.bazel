@@ -8,6 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@rules_cc//cc:defs.bzl", "cc_toolchain")
 load(":config.bzl", "config")
 
 filegroup(name = "empty")

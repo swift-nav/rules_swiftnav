@@ -132,5 +132,4 @@ cc_static_library = rule(
         ),
     },
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
 )

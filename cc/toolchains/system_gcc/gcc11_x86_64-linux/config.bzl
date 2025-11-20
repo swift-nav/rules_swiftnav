@@ -25,6 +25,8 @@ load(
     "cxx20_standard_feature",
     "cxx98_standard_feature",
     "gnu_extensions_feature",
+    "stack_protector_feature",
+    "strong_stack_protector_feature",
     "swift_disable_conversion_warning_feature",
     "swift_disable_warnings_for_test_targets_feature",
     "swift_exceptions_feature",
@@ -36,8 +38,6 @@ load(
     "swift_relwdbg_feature",
     "swift_rtti_feature",
     "swift_safe_coding_standard_feature",
-    "stack_protector_feature",
-    "strong_stack_protector_feature",
 )
 
 all_compile_actions = [
@@ -93,6 +93,7 @@ lto_index_actions = [
     ACTION_NAMES.lto_index_for_dynamic_library,
     ACTION_NAMES.lto_index_for_nodeps_dynamic_library,
 ]
+
 def _impl(ctx):
     # Note that we also set --coverage for c++-link-nodeps-dynamic-library. The
     # generated code contains references to gcov symbols, and the dynamic linker
@@ -142,9 +143,9 @@ def _impl(ctx):
                         # Security hardening requires optimization.
                         # We need to undef it as some distributions now have it enabled by default.
                         flags = [
-                          "-U_FORTIFY_SOURCE",
-                          "-no-canonical-prefixes",
-                          "-fno-canonical-system-headers",
+                            "-U_FORTIFY_SOURCE",
+                            "-no-canonical-prefixes",
+                            "-fno-canonical-system-headers",
                         ],
                     ),
                 ],
@@ -244,21 +245,20 @@ def _impl(ctx):
         enabled = True,
     )
 
-
     tool_paths = [
-        tool_path(name = "ar", path =  "/usr/bin/ar"),
-        tool_path(name = "as", path =  "/usr/bin/as"),
-        tool_path(name = "cpp", path =  "/usr/bin/cpp-11"),
-        tool_path(name = "gcc", path =  "/usr/bin/gcc-11"),
-        tool_path(name = "g++", path =  "/usr/bin/g++-11"),
-        tool_path(name = "gcov", path =  "/usr/bin/gcov-11"),
-        tool_path(name = "ld", path =  "/usr/bin/g++-11"),
-        tool_path(name = "nm", path =  "/usr/bin/nm"),
-        tool_path(name = "objcopy", path =  "/usr/bin/objcopy"),
-        tool_path(name = "objdump", path =  "/usr/bin/objdump"),
-        tool_path(name = "ranlib", path =  "/usr/bin/ranlib"),
-        tool_path(name = "strip", path =  "/usr/bin/strip"),
-      ]
+        tool_path(name = "ar", path = "/usr/bin/ar"),
+        tool_path(name = "as", path = "/usr/bin/as"),
+        tool_path(name = "cpp", path = "/usr/bin/cpp-11"),
+        tool_path(name = "gcc", path = "/usr/bin/gcc-11"),
+        tool_path(name = "g++", path = "/usr/bin/g++-11"),
+        tool_path(name = "gcov", path = "/usr/bin/gcov-11"),
+        tool_path(name = "ld", path = "/usr/bin/g++-11"),
+        tool_path(name = "nm", path = "/usr/bin/nm"),
+        tool_path(name = "objcopy", path = "/usr/bin/objcopy"),
+        tool_path(name = "objdump", path = "/usr/bin/objdump"),
+        tool_path(name = "ranlib", path = "/usr/bin/ranlib"),
+        tool_path(name = "strip", path = "/usr/bin/strip"),
+    ]
 
     features = [
         gnu_extensions_feature,
@@ -549,7 +549,7 @@ def _impl(ctx):
         treat_warnings_as_errors_feature,
         archive_param_file_feature,
         sysroot_feature,
-    ] +  [
+    ] + [
         # append swiftnavs custom features here
         gnu_extensions_feature,
         c89_standard_feature,
@@ -599,7 +599,7 @@ def _impl(ctx):
     )
 
 config = rule(
-  implementation = _impl,
+    implementation = _impl,
     attrs = {
         "cpu": attr.string(),
         "compiler": attr.string(),
@@ -630,6 +630,5 @@ config = rule(
             name = "xcode_config_label",
         )),
     },
-  provides = [CcToolchainConfigInfo],
+    provides = [CcToolchainConfigInfo],
 )
-

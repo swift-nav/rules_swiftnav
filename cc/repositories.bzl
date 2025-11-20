@@ -136,7 +136,7 @@ def aarch64_sysroot():
     maybe(
         http_archive,
         name = "aarch64-sysroot",
-        sha256 = "4e4cbbed33e78602a5f038305514307a5bd9baa6f6330f433fa4dffb3e9e9ad1",
+        sha256 = "edb3599237a755287a3ca3c94bdd64eb7552b768e927a9d125473d0b846f91f4",
         build_file_content = """
 filegroup(
     name = "aarch64-sysroot",
@@ -144,14 +144,14 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_aarch64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_aarch64_sysroot.tar.xz",
     )
 
 def x86_64_sysroot():
     maybe(
         http_archive,
         name = "x86_64-sysroot",
-        sha256 = "cfa444ecc4fcc858acc045e72403efd54dab734bdad4ddec30aad8826916a617",
+        sha256 = "4235d41632c677d0c71e8e3b40abcf2b67e991e6b66a08cdf9d1e54a54de8869",
         build_file_content = """
 filegroup(
     name = "x86_64-sysroot",
@@ -159,7 +159,7 @@ filegroup(
     visibility = ["//visibility:public"],
 )
     """,
-        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v3/debian_bullseye_x86_64_sysroot.tar.xz",
+        url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_x86_64_sysroot.tar.xz",
     )
 
 def register_swift_cc_toolchains():

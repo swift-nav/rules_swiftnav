@@ -16,8 +16,8 @@ DependencyLevelInfo = provider(
     fields = {
         "level": "Dependency level (0=internal, 1=prod, 2=safe, None=no level)",
         "portable": "Whether the target is portable",
-        "label": "The target's label"
-    }
+        "label": "The target's label",
+    },
 )
 
 def _get_coding_level_from_tags(tags):
@@ -76,7 +76,7 @@ def _check_allowed_cc_deps_impl(target, ctx):
             return [DependencyLevelInfo(
                 level = None,
                 portable = current_portable,
-                label = label_str
+                label = label_str,
             )]
 
     # Check dependencies
@@ -104,7 +104,7 @@ def _check_allowed_cc_deps_impl(target, ctx):
                 target.label,
                 _level_to_str(current_level),
                 dep_info.label,
-                _level_to_str(dep_level)
+                _level_to_str(dep_level),
             )
             fail(error_msg)
 
@@ -113,7 +113,7 @@ def _check_allowed_cc_deps_impl(target, ctx):
             error_msg = ("ERROR: Target {} is marked as portable but depends on {} which is not portable. " +
                          "Portable targets can only depend on other portable targets.").format(
                 target.label,
-                dep_info.label
+                dep_info.label,
             )
             fail(error_msg)
 
@@ -121,22 +121,23 @@ def _check_allowed_cc_deps_impl(target, ctx):
     return [DependencyLevelInfo(
         level = current_level,
         portable = current_portable,
-        label = label_str
+        label = label_str,
     )]
 
 check_allowed_cc_deps = aspect(
     implementation = _check_allowed_cc_deps_impl,
     attr_aspects = ["deps"],
-    attrs = {}
+    attrs = {},
 )
 
 def _validate_allowed_deps_rule_impl(ctx):
     """Rule that applies the validation aspect to specified targets."""
+
     # This rule doesn't produce any output, it just triggers the aspect
     output = ctx.actions.declare_file(ctx.label.name + ".validation")
     ctx.actions.write(
         output = output,
-        content = "Allowed C/C++ dependency validation passed\n"
+        content = "Allowed C/C++ dependency validation passed\n",
     )
     return [DefaultInfo(files = depset([output]))]
 
@@ -145,10 +146,10 @@ validate_allowed_cc_deps = rule(
     attrs = {
         "targets": attr.label_list(
             aspects = [check_allowed_cc_deps],
-            doc = "Targets to validate"
-        )
+            doc = "Targets to validate",
+        ),
     },
-    doc = "Validates allowed C/C++ dependencies for specified targets"
+    doc = "Validates allowed C/C++ dependencies for specified targets",
 )
 
 def validate_all_allowed_cc_deps(name, targets = ["//..."]):
@@ -161,5 +162,5 @@ def validate_all_allowed_cc_deps(name, targets = ["//..."]):
     validate_allowed_cc_deps(
         name = name,
         targets = targets,
-        tags = ["manual"]  # Don't build by default, only when explicitly requested
+        tags = ["manual"],  # Don't build by default, only when explicitly requested
     )
