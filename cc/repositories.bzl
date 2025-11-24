@@ -158,6 +158,22 @@ filegroup(
     srcs = glob(["*/**"]),
     visibility = ["//visibility:public"],
 )
+
+cc_import(
+    name = "libblas",
+    # The file valid at link time (must end in .so for Bazel)
+    interface_library = "usr/lib/x86_64-linux-gnu/libblas.so",
+    # The file valid at runtime (the actual versioned file)
+    shared_library = "usr/lib/x86_64-linux-gnu/blas/libblas.so.3.9.0",
+    visibility = ["//visibility:public"],
+)
+
+cc_import(
+    name = "liblapack",
+    interface_library = "usr/lib/x86_64-linux-gnu/liblapack.so",
+    shared_library = "usr/lib/x86_64-linux-gnu/lapack/liblapack.so.3.9.0",
+    visibility = ["//visibility:public"],
+)
     """,
         url = "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_x86_64_sysroot.tar.xz",
     )
