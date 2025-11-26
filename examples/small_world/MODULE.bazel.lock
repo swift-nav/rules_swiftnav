@@ -994,7 +994,7 @@
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "12yxB33CfN0W3lUInFcfNacHnoMCa5xr0Kc+SXv/k4o=",
-        "usagesDigest": "ERDL0ysViqFEo88Hj1RddRIYlWKuJUfAPOpySr9o0Mg=",
+        "usagesDigest": "/urZsYbl6cYH+ZPJh2T+7fn42FeBx2XoL8nSSAKZg4k=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
