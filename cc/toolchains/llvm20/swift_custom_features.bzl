@@ -371,9 +371,6 @@ cxx20_standard_feature = feature(
             flag_groups = ([
                 flag_group(
                     flags = [
-                        # This is a workaround for memory_resource being experimental only
-                        # in the llvm-14 libc++ impelmentation.
-                        "-DSWIFTNAV_EXPERIMENTAL_MEMORY_RESOURCE",
                         "-D_LIBCPP_ENABLE_CXX20_REMOVED_FEATURES",
                     ],
                 ),
