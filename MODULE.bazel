@@ -21,7 +21,6 @@ bazel_dep(name = "rules_cc", version = "0.2.14")
 bazel_dep(name = "rules_pkg", version = "1.1.0")
 bazel_dep(name = "rules_oci", version = "1.8.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
-bazel_dep(name = "rules_python", version = "1.6.3")
 
 # Register module extensions
 swift_cc_toolchain_ext = use_extension("@rules_swiftnav//cc:extensions.bzl", "swift_cc_toolchain_extension")
