@@ -116,24 +116,24 @@ def _symbolizer_env(val):
         # The + operator is not supported on dict and select types so we need to be
         # clever here.
         Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_linux"): dict(val, **{
-            "ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
-            "UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
-            "MSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
-            "TSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm//:symbolizer)",
+            "ASAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm20//:symbolizer)",
+            "UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm20//:symbolizer)",
+            "MSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm20//:symbolizer)",
+            "TSAN_SYMBOLIZER_PATH": "$(location @x86_64-linux-llvm20//:symbolizer)",
         }),
         Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_darwin"): dict(val, **{
-            "ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
-            "UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
-            "MSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
-            "TSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm//:symbolizer)",
+            "ASAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm20//:symbolizer)",
+            "UBSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm20//:symbolizer)",
+            "MSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm20//:symbolizer)",
+            "TSAN_SYMBOLIZER_PATH": "$(location @x86_64-darwin-llvm20//:symbolizer)",
         }),
         "//conditions:default": {},
     })
 
 def _symbolizer_data():
     return select({
-        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm//:symbolizer"],
-        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm//:symbolizer"],
+        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_linux"): ["@x86_64-linux-llvm20//:symbolizer"],
+        Label("@rules_swiftnav//cc:enable_symbolizer_x86_64_darwin"): ["@x86_64-darwin-llvm20//:symbolizer"],
         "//conditions:default": [],
     })
 

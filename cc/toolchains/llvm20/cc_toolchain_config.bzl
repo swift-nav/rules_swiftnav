@@ -8,7 +8,7 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@rules_swiftnav//cc/toolchains/llvm:target_triplets.bzl", "is_target_triplet")
+load("@rules_swiftnav//cc/toolchains/llvm20:target_triplets.bzl", "is_target_triplet")
 load(
     "unix_cc_toolchain_config.bzl",
     unix_cc_toolchain_config = "cc_toolchain_config",
