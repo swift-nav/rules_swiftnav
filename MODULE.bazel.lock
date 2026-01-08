@@ -161,7 +161,7 @@
   "moduleExtensions": {
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "12yxB33CfN0W3lUInFcfNacHnoMCa5xr0Kc+SXv/k4o=",
+        "bzlTransitiveDigest": "vlClpEXa5CG1/AQypckcrTM3nczXJzcrQ2b2NLqRjMI=",
         "usagesDigest": "AwVpeCMh/RBTRuNMSnWAKOGpU+RjaSUf8XZodkJ7HSI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

@@ -6,7 +6,7 @@ constraint_setting(name = "libc")
 
 constraint_setting(
     name = "toolchain",
-    default_constraint_value = ":llvm_toolchain",
+    default_constraint_value = ":llvm20_toolchain",
 )
 
 constraint_value(
