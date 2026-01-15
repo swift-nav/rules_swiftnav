@@ -14,11 +14,6 @@ shift
 OUTPUT=$1
 shift
 
-# .clang-tidy config file has to be placed in the current working directory
-if [ ! -f ".clang-tidy" ]; then
-    ln -s $CONFIG .clang-tidy
-fi
-
 # clang-tidy doesn't create a patchfile if there are no errors.
 # make sure the output exists, and empty if there are no errors,
 # so the build system will not be confused.
