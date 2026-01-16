@@ -32,6 +32,7 @@ filegroup(
     srcs = select(
         {
             "@bazel_tools//src/conditions:darwin_x86_64": ["@x86_64-darwin-llvm20//:clang-tidy"],
+            "@rules_swiftnav//platforms:aarch64_darwin": ["@aarch64-darwin-llvm20//:clang-tidy"],
             "@bazel_tools//src/conditions:linux_x86_64": ["@x86_64-linux-llvm20//:clang-tidy"],
             "//conditions:default": [":clang_tidy_bin"],
         },
