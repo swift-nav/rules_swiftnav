@@ -7,38 +7,22 @@ on:
       - 'main'
 
 jobs:
-  check-formatting:
+  example-small-world:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
-      - uses: bazel-contrib/setup-bazel@0.15.0
-
-      - name: Mount bazel cache
-        uses: actions/cache@v4
+      - uses: bazel-contrib/setup-bazel@0.16.0
         with:
-          path: "~/.cache/bazel"
-          key: bazel
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
 
       - name: Run format
         run: |
           bazel run //tools/buildifier:buildifier
           git diff --exit-code
-
-  example-small-world:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v5
-
-      - uses: bazel-contrib/setup-bazel@0.15.0
-
-      - name: Mount bazel cache
-        uses: actions/cache@v4
-        with:
-          path: "~/.cache/bazel"
-          key: bazel-example-small-world
 
       - name: Build and generate coverage
         run: |

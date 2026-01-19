@@ -22,7 +22,7 @@ def _run_tidy(ctx, wrapper, exe, additional_deps, config, flags, compilation_con
     else:
         args.add(exe.files_to_run.executable)
 
-    args.add(config.path)
+    args.add("--config-file={}".format(config.path))
 
     args.add(outfile.path)  # this is consumed by the wrapper script
     args.add("--export-fixes", outfile.path)

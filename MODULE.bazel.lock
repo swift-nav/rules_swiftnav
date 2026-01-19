@@ -161,8 +161,8 @@
   "moduleExtensions": {
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "12yxB33CfN0W3lUInFcfNacHnoMCa5xr0Kc+SXv/k4o=",
-        "usagesDigest": "AwVpeCMh/RBTRuNMSnWAKOGpU+RjaSUf8XZodkJ7HSI=",
+        "bzlTransitiveDigest": "vlClpEXa5CG1/AQypckcrTM3nczXJzcrQ2b2NLqRjMI=",
+        "usagesDigest": "X2MmsJHcNvSPKLFpaqCPuqUdq1tJpODi9GbVLbCgv1g=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -360,7 +360,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "OMBTQWM8/9oD6a75Mw5A6jSuBmGyVklqkr50OBjZS0Q=",
+        "usagesDigest": "YAQarw7g54va1+R//CyAkb2H6tAdycD60tuTFQuFofI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

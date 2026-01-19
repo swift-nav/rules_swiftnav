@@ -1,7 +1,5 @@
 common --@rules_swiftnav//cc:enable_bzlmod=true
 
-build:aarch64_darwin_llvm20 --platforms @rules_swiftnav//platforms:aarch64_darwin_llvm20
-
 coverage --experimental_generate_llvm_lcov
 coverage --combined_report=lcov
 

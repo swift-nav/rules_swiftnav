@@ -921,7 +921,7 @@
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "vlClpEXa5CG1/AQypckcrTM3nczXJzcrQ2b2NLqRjMI=",
-        "usagesDigest": "6qhW23l4R3Xb8lf1/3z+C92oUN1xoKn3A6r6ywVNptM=",
+        "usagesDigest": "mXZ7TdhI2cfIXAsJjn1dffWWSAmkdOCl8gy4rhilApk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

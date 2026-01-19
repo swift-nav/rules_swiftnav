@@ -20,9 +20,9 @@ choose_clang_format(
 filegroup(
     name = "_clang_format_bin",
     srcs = select({
-        "@rules_swiftnav//platforms:aarch64_darwin": ["@aarch64-darwin-llvm//:clang-format"],
-        "@bazel_tools//src/conditions:darwin_x86_64": ["@x86_64-darwin-llvm//:clang-format"],
-        "@bazel_tools//src/conditions:linux_x86_64": ["@x86_64-linux-llvm//:clang-format"],
+        "@rules_swiftnav//platforms:aarch64_darwin": ["@aarch64-darwin-llvm20//:clang-format"],
+        "@bazel_tools//src/conditions:darwin_x86_64": ["@x86_64-darwin-llvm20//:clang-format"],
+        "@bazel_tools//src/conditions:linux_x86_64": ["@x86_64-linux-llvm20//:clang-format"],
         "//conditions:default": [":clang_format_bin"],
     }),
     visibility = ["//visibility:public"],
