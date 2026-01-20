@@ -107,7 +107,7 @@ cc_toolchain_config(
     target_libc = "macosx",
     target_system_name = AARCH64_DARWIN,
     tool_paths = {
-        "ar": "/usr/bin/libtool",
+        "ar": "wrappers/llvm-ar",
         "cpp": "wrappers/clang-cpp",
         "gcc": "wrappers/clang",
         "gcov": "wrappers/llvm-profdata",
