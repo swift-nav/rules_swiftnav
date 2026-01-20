@@ -29,6 +29,7 @@ load(
     "with_feature_set",
 )
 load("@rules_cc//cc:defs.bzl", "CcToolchainConfigInfo")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load(
     "swift_custom_features.bzl",
     "c11_standard_feature",
