@@ -61,6 +61,7 @@ filegroup(
         ":wrappers",
         "@aarch64-darwin-llvm20//:ar",
         "@aarch64-darwin-llvm20//:clang",
+        "@aarch64-darwin-llvm20//:ld",
         "@aarch64-darwin-llvm20//:lib",
     ],
 )
@@ -112,7 +113,7 @@ cc_toolchain_config(
         "gcov": "wrappers/llvm-profdata",
         "llvm-cov": "wrappers/llvm-cov",
         "llvm-profdata": "wrappers/llvm-profdata",
-        "ld": "/usr/bin/ld",
+        "ld": "wrappers/ld.lld",
         "nm": "wrappers/llvm-nm",
         "objcopy": "wrappers/llvm-objcopy",
         "objdump": "wrappers/llvm-objdump",
@@ -120,7 +121,6 @@ cc_toolchain_config(
     },
     toolchain_identifier = "clang-aarch64-darwin",
     toolchain_path_prefix = "external/rules_swiftnav++swift_cc_toolchain_extension+aarch64-darwin-llvm20",
-    use_lld = False,
 )
 
 cc_toolchain(
