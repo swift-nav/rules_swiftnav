@@ -23,6 +23,11 @@ bazel_dep(name = "rules_oci", version = "2.2.6")
 bazel_dep(name = "rules_python", version = "1.7.0")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 
+# rules_oci brings in a very old version of aspect_bazel_lib,
+# so we need to explicitly depend on a newer version here to get the latest features and fixes
+# especially for Bazel 9
+bazel_dep(name = "aspect_bazel_lib", version = "2.22.5")
+
 # Register module extensions
 swift_cc_toolchain_ext = use_extension("@rules_swiftnav//cc:extensions.bzl", "swift_cc_toolchain_extension")
 use_repo(
