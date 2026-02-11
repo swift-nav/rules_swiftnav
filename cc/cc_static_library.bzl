@@ -1,4 +1,8 @@
+"""Rules for creating static libraries by merging multiple static libraries."""
+
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 
 def _get_linker_inputs(deps):
     lib_sets = []
