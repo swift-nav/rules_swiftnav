@@ -195,6 +195,7 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+# This flag is a no-op and will be removed soon!
 bool_flag(
     name = "enable_bzlmod",
     build_setting_default = False,
