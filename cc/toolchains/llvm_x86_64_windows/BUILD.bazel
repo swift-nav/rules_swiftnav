@@ -91,10 +91,7 @@ filegroup(
 
 config(
     name = "config",
-    sysroot = select({
-        "@rules_swiftnav//cc:_enable_bzlmod": "external/rules_swiftnav++swift_cc_toolchain_extension+llvm_mingw_toolchain",
-        "//conditions:default": "external/llvm_mingw_toolchain",
-    }),
+    sysroot = "external/rules_swiftnav++swift_cc_toolchain_extension+llvm_mingw_toolchain",
 )
 
 cc_toolchain(
