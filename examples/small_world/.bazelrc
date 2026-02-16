@@ -1,5 +1,3 @@
-common --@rules_swiftnav//cc:enable_bzlmod=true
-
 coverage --experimental_generate_llvm_lcov
 coverage --combined_report=lcov
 
