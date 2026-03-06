@@ -1059,22 +1059,6 @@
         ]
       }
     },
-    "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
-      "general": {
-        "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "HZgc4wfuORiP8kK1SBEAaPjEDtoubZc9wsW+WudmfC0=",
-        "recordedFileInputs": {},
-        "recordedDirentsInputs": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "yocto_generic": {
-            "repoRuleId": "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic.bzl%yocto_generic",
-            "attributes": {}
-          }
-        },
-        "recordedRepoMappingEntries": []
-      }
-    },
     "@@tar.bzl+//tar:extensions.bzl%toolchains": {
       "general": {
         "bzlTransitiveDigest": "/2afh6fPjq/rcyE/jztQDK3ierehmFFngfvmqyRv72M=",
