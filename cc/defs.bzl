@@ -149,13 +149,11 @@ def cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
 
     Creates a cc_library from the input template with values of the form @VAL@
     substituted with values from the workspace status program. This typically
-    includes version control information, timestamps, and other similiar
-    data. The output file is only compiled into the final resulting binary.
+    includes version control information, timestamps, and other similar
+    data. The generated source is compiled directly into the library archive.
 
-    Also creates an additional library target appended with ".stamped". This
-    variant has the stamped symbols included directly into the resulting
-    artifact. Its only intended to be used when creating a static archive
-    bundle with cc_static_archive.
+    Also creates an additional library target appended with ".stamped" as an
+    alias kept for backwards compatibility with cc_static_archive consumers.
 
     Currently only stable status variables are supported.
 
@@ -176,20 +174,19 @@ def cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
 
     visibility = kwargs.pop("visibility", [])
 
-    # This variant has the stamped symbols in the archive
-    swift_cc_library(
-        name = name + STAMPED_LIB_SUFFIX,
-        srcs = [source_name],
-        visibility = visibility,
-    )
-
-    # This variant forwards the stamped symbols to the final link
     swift_cc_library(
         name = name,
         hdrs = hdrs,
-        linkstamp = source_name,
+        srcs = [source_name],
         visibility = visibility,
         **kwargs
+    )
+
+    # Alias kept for backwards compatibility with cc_static_archive consumers
+    native.alias(
+        name = name + STAMPED_LIB_SUFFIX,
+        actual = name,
+        visibility = visibility,
     )
 
 def cc_static_library(name, deps, visibility = ["//visibility:private"]):
