@@ -1,3 +1,10 @@
+# Compile all swift targets and all other codes with C++17 standards
+build --@rules_swiftnav//cc:cxx_standard=17
+build --@rules_swiftnav//cc:global_cxx_standard=17
+
+# Mark external include paths as system
+build --features=external_include_paths
+
 coverage --experimental_generate_llvm_lcov
 coverage --combined_report=lcov
 
