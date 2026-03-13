@@ -1062,7 +1062,7 @@
     "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "HZgc4wfuORiP8kK1SBEAaPjEDtoubZc9wsW+WudmfC0=",
+        "usagesDigest": "8ElJLgG1wyuLaCmx26rcXjfqtU2lbfwgoeWmWFL+yO0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
