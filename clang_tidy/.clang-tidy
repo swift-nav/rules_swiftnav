@@ -1,5 +1,5 @@
 ---
-# Clang-Tidy 20 Swift Navigation Configuration
+# Clang-Tidy 20 Swift Navigation - Merged Configuration
 
 Checks: >
   -*,
@@ -19,7 +19,75 @@ Checks: >
   modernize-use-nullptr,
   modernize-use-override,
   modernize-use-using,
+  performance-for-range-copy,
+  performance-move-const-arg,
+  performance-unnecessary-copy-initialization,
+  performance-unnecessary-value-param,
+  readability-container-size-empty,
+  readability-else-after-return,
+  readability-redundant-smartptr-get,
+  misc-throw-by-value-catch-by-reference,
+  misc-definitions-in-headers,
+  misc-include-cleaner,
+  misc-misplaced-const,
+  misc-redundant-expression,
+  misc-uniqueptr-reset-release,
+  misc-use-anonymous-namespace,
+  misc-use-internal-linkage,
+  google-readability-avoid-underscore-in-googletest-name,
+  modernize-avoid-bind,
+  modernize-deprecated-headers,
+  modernize-make-shared,
+  modernize-make-unique,
+  modernize-pass-by-value,
+  modernize-replace-auto-ptr,
+  modernize-use-auto,
+  modernize-use-bool-literals,
+  modernize-use-default-member-init,
+  modernize-use-equals-default,
+  modernize-use-equals-delete,
   modernize-use-nodiscard,
+  modernize-use-noexcept,
+  modernize-use-transparent-functors,
+  performance-inefficient-string-concatenation,
+  performance-inefficient-vector-operation,
+  performance-no-automatic-move,
+  performance-trivially-destructible,
+  performance-type-promotion-in-math-fn,
+  readability-braces-around-statements,
+  readability-const-return-type,
+  readability-convert-member-functions-to-static,
+  readability-function-cognitive-complexity,
+  readability-function-size,
+  readability-identifier-naming,
+  readability-implicit-bool-conversion,
+  readability-inconsistent-declaration-parameter-name,
+  readability-make-member-function-const,
+  readability-math-missing-parentheses,
+  readability-qualified-auto,
+  readability-redundant-access-specifiers,
+  readability-redundant-control-flow,
+  readability-redundant-declaration,
+  readability-redundant-inline-specifier,
+  readability-simplify-boolean-expr,
+  readability-uniqueptr-delete-release,
+  cppcoreguidelines-special-member-functions,
+  cppcoreguidelines-missing-std-forward,
+  cppcoreguidelines-noexcept-swap,
+  cppcoreguidelines-rvalue-reference-param-not-moved
+
+# Checks from original .clang-tidy treated as errors
+# Checks from .clang-tidy-optional treated as warnings (not listed here)
+WarningsAsErrors: >
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  concurrency-*,
+  portability-*,
+  modernize-use-emplace,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-using,
   performance-for-range-copy,
   performance-move-const-arg,
   performance-unnecessary-copy-initialization,
@@ -30,15 +98,79 @@ Checks: >
   misc-throw-by-value-catch-by-reference,
   misc-uniqueptr-reset-release
 
-# --- Warning Handling ---
-WarningsAsErrors: 'bugprone-*,cert-*,clang-analyzer-*,concurrency-*'
-
 # --- Check-Specific Options ---
 CheckOptions:
-  - key:             Standard
-    value:           '17'
-  - key:             performance-for-range-copy.WarnOnAllAutoCopies
-    value:           'true'
-  - key:             bugprone-argument-comment.StrictMode
-    value:           'true'
-...
+  - key: Standard
+    value: "17"
+  - key: performance-for-range-copy.WarnOnAllAutoCopies
+    value: "true"
+  - key: bugprone-argument-comment.StrictMode
+    value: "true"
+
+  # --- Complexity & Size Limits ---
+  - key: readability-function-cognitive-complexity.Threshold
+    value: "20"
+  - key: readability-function-size.LineThreshold
+    value: "100"
+
+  # --- Identifier Naming ---
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.ClassMemberSuffix
+    value: ""
+  - key: readability-identifier-naming.ConstantVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantVariablePrefix
+    value: c
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstexprVariablePrefix
+    value: c
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: c
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: c
+  - key: readability-identifier-naming.MemberConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.MemberConstantPrefix
+    value: c
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: "_"
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: ""
+  - key: readability-identifier-naming.PublicMemberSuffix
+    value: ""
+  - key: readability-identifier-naming.StaticConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.StaticConstantPrefix
+    value: c
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypedefCase
+    value: lower_case
+  - key: readability-identifier-naming.TypedefSuffix
+    value: "_t"
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.TemplateParameterIgnoredRegexp
+    value: "expr-type"
+
+  # --- Modernization & Style Fine-tuning ---
+  - key: readability-braces-around-statements.ShortStatementLines
+    value: "1"
+  - key: modernize-use-auto.MinTypeNameLength
+    value: "5"
