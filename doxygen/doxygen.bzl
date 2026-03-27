@@ -47,7 +47,7 @@ def _swift_doxygen_impl(ctx):
         sed "s|@DOXYGEN_EXCLUDE@|$DOXYGEN_EXCLUDE|g" | \
         sed "s|@PROJECT_SOURCE_DIR@|$EXEC_ROOT|g" > _processed_Doxyfile
 
-        PATH=$PATH:/usr/bin:/usr/local/bin:/opt/homebrew/bin doxygen _processed_Doxyfile
+        PATH=$PATH doxygen _processed_Doxyfile
         """.format(original_config = config.path),
     )
 
