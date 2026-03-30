@@ -39,6 +39,8 @@ TEST_SRCS = "test_srcs"
 
 STAMPED_LIB_SUFFIX = ".stamped"
 
+NO_LINT = "no-lint"
+
 # Form the c standard string
 def _c_standard(extensions = False, standard = 99):
     extensions = "gnu" if extensions else "c"
@@ -342,6 +344,8 @@ def swift_c_tool_library(**kwargs):
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
+    kwargs["tags"] = [NO_LINT] + kwargs.get("tags", [])
+
     cc_library(**kwargs)
 
 def swift_cc_tool_library(**kwargs):
@@ -388,6 +392,8 @@ def swift_cc_tool_library(**kwargs):
     kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
+
+    kwargs["tags"] = [NO_LINT] + kwargs.get("tags", [])
 
     cc_library(**kwargs)
 
@@ -530,6 +536,8 @@ def swift_c_tool(**kwargs):
 
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
+    kwargs["tags"] = [NO_LINT] + kwargs.get("tags", [])
+
     cc_binary(**kwargs)
 
 def swift_cc_tool(**kwargs):
@@ -576,6 +584,8 @@ def swift_cc_tool(**kwargs):
 
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
 
+    kwargs["tags"] = [NO_LINT] + kwargs.get("tags", [])
+
     cc_binary(**kwargs)
 
 def swift_c_test_library(**kwargs):
@@ -600,7 +610,7 @@ def swift_c_test_library(**kwargs):
 
     kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
-    kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST_LIBRARY, NO_LINT] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
     cc_library(**kwargs)
@@ -628,7 +638,7 @@ def swift_cc_test_library(**kwargs):
 
     kwargs["copts"] = copts + cxxopts + local_includes + kwargs.get("copts", [])
 
-    kwargs["tags"] = [TEST_LIBRARY] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST_LIBRARY, NO_LINT] + kwargs.get("tags", [])
 
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
@@ -686,7 +696,7 @@ def swift_c_test(name, type, **kwargs):
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
-    kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST, type, NO_LINT] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
     cc_test(**kwargs)
@@ -738,7 +748,7 @@ def swift_cc_test(name, type, **kwargs):
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["name"] = name
-    kwargs["tags"] = [TEST, type] + kwargs.get("tags", [])
+    kwargs["tags"] = [TEST, type, NO_LINT] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
 
     cc_test(**kwargs)
