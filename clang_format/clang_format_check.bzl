@@ -1,7 +1,7 @@
 load("//cc_files:get_cc_files.bzl", "get_cc_files")
 
 def _check_format(ctx, exe, config, infile, clang_format_bin):
-    output = ctx.actions.declare_file(infile.path + ".clang-format.txt")
+    output = ctx.actions.declare_file(infile.path + "." + ctx.label.name + ".clang-format.txt")
 
     args = ctx.actions.args()
 
