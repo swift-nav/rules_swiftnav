@@ -9,6 +9,9 @@
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
 exports_files(
-    glob(["*.bzl", "*.sh"]),
+    glob([
+        "*.bzl",
+        "*.sh",
+    ]),
     visibility = ["//visibility:public"],
 )
