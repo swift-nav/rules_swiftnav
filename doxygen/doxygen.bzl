@@ -21,13 +21,9 @@ def _swift_doxygen_impl(ctx):
     # this performs a CMake-like replacement of @VAR@ based on the vars dict
     config = configure_file_impl(ctx, vars, ctx.attr.name + "_Doxyfile")[0].files.to_list()[0]
 
-    # Create a processed config file for sed operations
-    processed_config = ctx.actions.declare_file(ctx.attr.name + "_processed_Doxyfile")
-
-    # First action: Create the processed config file and apply sed replacements
     ctx.actions.run_shell(
-        inputs = [config],
-        outputs = [processed_config],
+        inputs = [config] + ctx.files.deps,
+        outputs = [doxygen_out],
         env = vars,
         command = """
         DOXYGEN_DOT_FOUND=NO
@@ -38,9 +34,10 @@ def _swift_doxygen_impl(ctx):
             DOXYGEN_DOT_PATH=$(which dot)
         fi
 
-        PRW=`pwd`
+        EXEC_ROOT=$(pwd)
 
-        # Apply backward compatibility sed replacements
+        # Apply backward compatibility sed replacements into a temp file within
+        # this sandbox so all $EXEC_ROOT-expanded paths point to the correct location.
         sed "s|@DOXYGEN_DOT_FOUND@|$DOXYGEN_DOT_FOUND|g" {original_config} | \
         sed "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" | \
         sed "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" | \
@@ -48,18 +45,10 @@ def _swift_doxygen_impl(ctx):
         sed "s|@PROJECT_NAME@|$PROJECT_NAME|g" | \
         sed "s|@STABLE_GIT_TAG@|$STABLE_GIT_TAG|g" | \
         sed "s|@DOXYGEN_EXCLUDE@|$DOXYGEN_EXCLUDE|g" | \
-        sed "s|@PROJECT_SOURCE_DIR@|$PRW|g" > {processed_config}
-        """.format(original_config = config.path, processed_config = processed_config.path),
-    )
+        sed "s|@PROJECT_SOURCE_DIR@|$EXEC_ROOT|g" > _processed_Doxyfile
 
-    # Second action: Run doxygen with the processed config
-    ctx.actions.run_shell(
-        inputs = [processed_config] + ctx.files.deps,
-        outputs = [doxygen_out],
-        env = vars,
-        command = """
-        PATH=$PATH doxygen {config}
-        """.format(config = processed_config.path),
+        PATH=$PATH doxygen _processed_Doxyfile
+        """.format(original_config = config.path),
     )
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
