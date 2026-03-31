@@ -382,7 +382,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "Wp1yS8VmVZn+1/i6Lsr4sJZy/CR1BmZOYn3niJcutp0=",
+        "usagesDigest": "+lvP3nsERIZe0efEK2tvOXAvOXcr0N5HA5o2uglYevM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
