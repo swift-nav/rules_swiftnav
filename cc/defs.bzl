@@ -417,6 +417,8 @@ def swift_c_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _create_srcs(**kwargs)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
@@ -467,6 +469,8 @@ def swift_cc_binary(**kwargs):
             nocopts: List of flags to remove from the default compile
             options. Use judiciously.
     """
+    _create_srcs(**kwargs)
+
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     nocopts = kwargs.pop("nocopts", [])
