@@ -195,6 +195,30 @@ config_setting(
     visibility = ["//visibility:public"],
 )
 
+bool_flag(
+    name = "enable_sanitizer_ignorelist",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_enable_sanitizer_ignorelist",
+    flag_values = {":enable_sanitizer_ignorelist": "true"},
+    visibility = ["//visibility:public"],
+)
+
+label_flag(
+    name = "sanitizer_ignorelist",
+    build_setting_default = "@rules_swiftnav//cc:_default_sanitizer_ignorelist",
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "_default_sanitizer_ignorelist",
+    srcs = [],
+    visibility = ["//visibility:public"],
+)
+
 py_binary(
     name = "fix_include_guards",
     srcs = [

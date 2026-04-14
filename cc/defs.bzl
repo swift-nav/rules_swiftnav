@@ -139,6 +139,22 @@ def _symbolizer_data():
         "//conditions:default": [],
     })
 
+def _sanitizer_ignorelist_copts():
+    return select({
+        Label("@rules_swiftnav//cc:_enable_sanitizer_ignorelist"): [
+            "-fsanitize-ignorelist=$(execpath @rules_swiftnav//cc:sanitizer_ignorelist)",
+        ],
+        "//conditions:default": [],
+    })
+
+def _sanitizer_ignorelist_additional_compiler_inputs():
+    return select({
+        Label("@rules_swiftnav//cc:_enable_sanitizer_ignorelist"): [
+            Label("@rules_swiftnav//cc:sanitizer_ignorelist"),
+        ],
+        "//conditions:default": [],
+    })
+
 # Handle whether to enable -Wdeprecated-declarations in tests.
 def _tests_warn_deprecated_declarations():
     return select({
@@ -241,7 +257,8 @@ def swift_c_library(**kwargs):
 
     c_standard = _c_standard(extensions, standard)
 
-    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
@@ -294,7 +311,8 @@ def swift_cc_library(**kwargs):
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
-    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["tags"] = [LIBRARY] + kwargs.get("tags", [])
 
@@ -340,7 +358,8 @@ def swift_c_tool_library(**kwargs):
 
     c_standard = _c_standard(extensions, standard)
 
-    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
@@ -389,7 +408,8 @@ def swift_cc_tool_library(**kwargs):
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
-    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["linkstatic"] = _link_static(kwargs.get("linkstatic", True))
 
@@ -435,7 +455,8 @@ def swift_c_binary(**kwargs):
     standard = kwargs.pop("standard", 99)
     c_standard = _c_standard(extensions, standard)
 
-    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
@@ -489,7 +510,8 @@ def swift_cc_binary(**kwargs):
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
-    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
@@ -534,7 +556,8 @@ def swift_c_tool(**kwargs):
 
     c_standard = _c_standard(extensions, standard)
 
-    kwargs["copts"] = copts + c_standard + kwargs.get("copts", [])
+    kwargs["copts"] = copts + c_standard + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
@@ -582,7 +605,8 @@ def swift_cc_tool(**kwargs):
 
     cxxopts = _common_cxx_opts(exceptions, rtti, standard)
 
-    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
 
@@ -612,7 +636,8 @@ def swift_c_test_library(**kwargs):
     extensions = kwargs.pop("extensions", False)
     standard = kwargs.pop("standard", 99)
 
-    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
+    kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
     kwargs["tags"] = [TEST_LIBRARY, NO_LINT] + kwargs.get("tags", [])
     kwargs["target_compatible_with"] = kwargs.get("target_compatible_with", []) + _test_compatible_with()
@@ -640,7 +665,8 @@ def swift_cc_test_library(**kwargs):
     copts = _common_cc_opts(nocopts, pedantic = False)
     cxxopts = _common_cxx_standard_opts(standard)
 
-    kwargs["copts"] = copts + cxxopts + local_includes + kwargs.get("copts", [])
+    kwargs["copts"] = copts + cxxopts + local_includes + kwargs.get("copts", []) + _sanitizer_ignorelist_copts()
+    kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
 
     kwargs["tags"] = [TEST_LIBRARY, NO_LINT] + kwargs.get("tags", [])
 
@@ -696,6 +722,11 @@ def swift_c_test(name, type, **kwargs):
     standard = kwargs.pop("standard", 99)
 
     kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _c_standard(extensions, standard)
+    # TODO(bazel9): additional_compiler_inputs is only available on cc_test with Bazel 9+
+    # (on Bazel 8, native.cc_test is used which lacks the attribute; the Starlark rewrite
+    # shipping in Bazel 9 adds it). Re-enable once the project moves to Bazel 9:
+    #   kwargs["copts"] += _sanitizer_ignorelist_copts()
+    #   kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
@@ -748,6 +779,11 @@ def swift_cc_test(name, type, **kwargs):
     local_includes = _construct_local_includes(kwargs.pop("local_includes", []))
 
     kwargs["copts"] = local_includes + kwargs.get("copts", []) + _tests_warn_deprecated_declarations() + _common_cxx_standard_opts(kwargs.pop("standard", []))
+    # TODO(bazel9): additional_compiler_inputs is only available on cc_test with Bazel 9+
+    # (on Bazel 8, native.cc_test is used which lacks the attribute; the Starlark rewrite
+    # shipping in Bazel 9 adds it). Re-enable once the project moves to Bazel 9:
+    #   kwargs["copts"] += _sanitizer_ignorelist_copts()
+    #   kwargs["additional_compiler_inputs"] = kwargs.get("additional_compiler_inputs", []) + _sanitizer_ignorelist_additional_compiler_inputs()
     kwargs["data"] = kwargs.get("data", []) + _symbolizer_data()
     kwargs["env"] = _symbolizer_env(kwargs.get("env", {}))
     kwargs["linkstatic"] = kwargs.get("linkstatic", True)
