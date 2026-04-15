@@ -24,6 +24,10 @@ jobs:
           bazel run //tools/buildifier:buildifier
           git diff --exit-code
 
+      - name: Run tools tests
+        run: |
+          bazel test //tools/...
+
       - name: Build and generate coverage
         run: |
           cd examples/small_world
