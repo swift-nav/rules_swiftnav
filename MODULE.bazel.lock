@@ -100,8 +100,8 @@
     "https://bcr.bazel.build/modules/rules_cc/0.0.9/MODULE.bazel": "836e76439f354b89afe6a911a7adf59a6b2518fafb174483ad78a2a2fde7b1c5",
     "https://bcr.bazel.build/modules/rules_cc/0.1.1/MODULE.bazel": "2f0222a6f229f0bf44cd711dc13c858dad98c62d52bd51d8fc3a764a83125513",
     "https://bcr.bazel.build/modules/rules_cc/0.1.5/MODULE.bazel": "88dfc9361e8b5ae1008ac38f7cdfd45ad738e4fa676a3ad67d19204f045a1fd8",
-    "https://bcr.bazel.build/modules/rules_cc/0.2.14/MODULE.bazel": "353c99ed148887ee89c54a17d4100ae7e7e436593d104b668476019023b58df8",
-    "https://bcr.bazel.build/modules/rules_cc/0.2.14/source.json": "55d0a4587c5592fad350f6e698530f4faf0e7dd15e69d43f8d87e220c78bea54",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.17/MODULE.bazel": "1849602c86cb60da8613d2de887f9566a6d354a6df6d7009f9d04a14402f9a84",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.17/source.json": "3832f45d145354049137c0090df04629d9c2b5493dc5c2bf46f1834040133a07",
     "https://bcr.bazel.build/modules/rules_foreign_cc/0.9.0/MODULE.bazel": "c9e8c682bf75b0e7c704166d79b599f93b72cfca5ad7477df596947891feeef6",
     "https://bcr.bazel.build/modules/rules_fuzzing/0.5.2/MODULE.bazel": "40c97d1144356f52905566c55811f13b299453a14ac7769dfba2ac38192337a8",
     "https://bcr.bazel.build/modules/rules_fuzzing/0.5.2/source.json": "c8b1e2c717646f1702290959a3302a178fb639d987ab61d548105019f11e527e",
@@ -183,8 +183,8 @@
   "moduleExtensions": {
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "vlClpEXa5CG1/AQypckcrTM3nczXJzcrQ2b2NLqRjMI=",
-        "usagesDigest": "yxVO9WmTWf7hryFE0MgtJ7qTyELIiI4mUke/dc4JhhY=",
+        "bzlTransitiveDigest": "rarf5Jc5pJlZfj9/KuPWyPGcZq+MhgrG/UaIxpi3XLo=",
+        "usagesDigest": "SfnvkablERPMDNpAVl7A9I3eqHXEVcN5/j+L9bVD06w=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -264,7 +264,7 @@
               "build_file": "@@//cc/toolchains/llvm20:llvm.BUILD.bzl",
               "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-X64.tar.xz",
               "strip_prefix": "LLVM-20.1.7-macOS-X64",
-              "sha256": "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
+              "sha256": "ccf82ffe7e136ee49659cb57157856a7963d0950fac3d05aabba0db75bfba26f"
             }
           },
           "aarch64-linux-llvm20": {
@@ -382,7 +382,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "vKmZaobfmKXrhcil/B4pM+tFvyf88Fu1ZHXJaChSHUg=",
+        "usagesDigest": "c1pdCjr4m4AYUD9I8UZRn8wzSwJ6pN6KLN5r0+2dZ/E=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
