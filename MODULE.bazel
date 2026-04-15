@@ -27,7 +27,9 @@ bazel_dep(name = "rules_shell", version = "0.6.1")
 swift_cc_toolchain_ext = use_extension("@rules_swiftnav//cc:extensions.bzl", "swift_cc_toolchain_extension")
 use_repo(
     swift_cc_toolchain_ext,
+    "aarch64-darwin-llvm",
     "aarch64-darwin-llvm20",
+    "aarch64-linux-llvm",
     "aarch64-linux-llvm20",
     "aarch64-linux-musl",
     "aarch64-sysroot",
@@ -35,7 +37,9 @@ use_repo(
     "darwin_gcc_arm_embedded_toolchain",
     "gcc_arm_gnu_8_3_toolchain",
     "llvm_mingw_toolchain",
+    "x86_64-darwin-llvm",
     "x86_64-darwin-llvm20",
+    "x86_64-linux-llvm",
     "x86_64-linux-llvm20",
     "x86_64-linux-musl",
     "x86_64-sysroot",
