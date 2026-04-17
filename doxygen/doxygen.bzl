@@ -21,8 +21,12 @@ def _swift_doxygen_impl(ctx):
     # this performs a CMake-like replacement of @VAR@ based on the vars dict
     config = configure_file_impl(ctx, vars, ctx.attr.name + "_Doxyfile")[0].files.to_list()[0]
 
+    # ctx.info_file is bazel-out/stable-status.txt, populated by --workspace_status_command
+    # when --stamp is enabled. Contains STABLE_GIT_TAG and other workspace status values.
+    info_file = ctx.info_file
+
     ctx.actions.run_shell(
-        inputs = [config] + ctx.files.deps,
+        inputs = [config, info_file] + ctx.files.deps,
         outputs = [doxygen_out],
         env = vars,
         command = """
@@ -36,6 +40,9 @@ def _swift_doxygen_impl(ctx):
 
         EXEC_ROOT=$(pwd)
 
+        # Use the GIT TAG 
+        STABLE_GIT_TAG=$(grep -m1 '^STABLE_GIT_TAG ' {info_file} | cut -d' ' -f2-)
+
         # Apply backward compatibility sed replacements into a temp file within
         # this sandbox so all $EXEC_ROOT-expanded paths point to the correct location.
         sed "s|@DOXYGEN_DOT_FOUND@|$DOXYGEN_DOT_FOUND|g" {original_config} | \
@@ -48,7 +55,7 @@ def _swift_doxygen_impl(ctx):
         sed "s|@PROJECT_SOURCE_DIR@|$EXEC_ROOT|g" > _processed_Doxyfile
 
         PATH=$PATH doxygen _processed_Doxyfile
-        """.format(original_config = config.path),
+        """.format(original_config = config.path, info_file = info_file.path),
     )
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
