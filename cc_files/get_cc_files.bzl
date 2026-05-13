@@ -1,3 +1,4 @@
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//cc:defs.bzl", "BINARY", "LIBRARY", "TEST_LIBRARY", "TEST_SRCS")
 
 FilesInfo = provider(

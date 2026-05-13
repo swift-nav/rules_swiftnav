@@ -1,5 +1,6 @@
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//cc:defs.bzl", "BINARY", "LIBRARY")
 load("//cc_files:get_cc_files.bzl", "get_cc_srcs")
 
