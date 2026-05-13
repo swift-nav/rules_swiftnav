@@ -1,3 +1,4 @@
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//cc_files:get_cc_files.bzl", "get_cc_files")
 
 def _check_format(ctx, exe, config, infile, clang_format_bin):
