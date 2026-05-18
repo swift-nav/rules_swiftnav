@@ -559,7 +559,7 @@
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "rarf5Jc5pJlZfj9/KuPWyPGcZq+MhgrG/UaIxpi3XLo=",
-        "usagesDigest": "fqvk7jDYYzvivUpBqfxgxBWRBXFIw5fgWgFMMVpPDDY=",
+        "usagesDigest": "l1u4WK5qiCl3K1So4ni9gwrOFYuqHwgZc3lET8gZqD0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
