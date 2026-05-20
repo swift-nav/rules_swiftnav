@@ -25,8 +25,11 @@ def _swift_doxygen_impl(ctx):
     # when --stamp is enabled. Contains STABLE_GIT_TAG and other workspace status values.
     info_file = ctx.info_file
 
+    doxygen_bin = ctx.file._doxygen
+
     ctx.actions.run_shell(
         inputs = [config, info_file] + ctx.files.deps,
+        tools = [doxygen_bin],
         outputs = [doxygen_out],
         env = vars,
         command = """
@@ -40,7 +43,7 @@ def _swift_doxygen_impl(ctx):
 
         EXEC_ROOT=$(pwd)
 
-        # Use the GIT TAG 
+        # Use the GIT TAG
         STABLE_GIT_TAG=$(grep -m1 '^STABLE_GIT_TAG ' {info_file} | cut -d' ' -f2-)
 
         # Apply backward compatibility sed replacements into a temp file within
@@ -54,8 +57,12 @@ def _swift_doxygen_impl(ctx):
         sed "s|@DOXYGEN_EXCLUDE@|$DOXYGEN_EXCLUDE|g" | \
         sed "s|@PROJECT_SOURCE_DIR@|$EXEC_ROOT|g" > _processed_Doxyfile
 
-        PATH=$PATH doxygen _processed_Doxyfile
-        """.format(original_config = config.path, info_file = info_file.path),
+        "$EXEC_ROOT/{doxygen_bin}" _processed_Doxyfile
+        """.format(
+            original_config = config.path,
+            info_file = info_file.path,
+            doxygen_bin = doxygen_bin.path,
+        ),
     )
 
     return [DefaultInfo(files = depset([doxygen_out, config]))]
@@ -70,6 +77,11 @@ _swift_doxygen = rule(
         ),
         "deps": attr.label_list(),
         "doxygen_source_directories": attr.string_list(),
+        "_doxygen": attr.label(
+            default = "@rules_swiftnav//doxygen:doxygen",
+            allow_single_file = True,
+            cfg = "exec",
+        ),
     },
 )
 
