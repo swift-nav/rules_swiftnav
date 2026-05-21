@@ -4,8 +4,3 @@ filegroup(
     name = "doxygen_bin",
     srcs = ["bin/doxygen"],
 )
-
-filegroup(
-    name = "runtime_files",
-    srcs = glob(["**"]),
-)

@@ -8,14 +8,6 @@ alias(
     }),
 )
 
-alias(
-    name = "doxygen_runtime_files",
-    actual = select({
-        "@bazel_tools//src/conditions:linux_x86_64": "@doxygen_linux_x86_64//:runtime_files",
-        "@bazel_tools//src/conditions:darwin_arm64": "@doxygen_macos_arm64//:runtime_files",
-    }),
-)
-
 exports_files(
     [
         "doxygen_linux.BUILD",
