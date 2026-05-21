@@ -1,0 +1,20 @@
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "doxygen",
+    actual = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@doxygen_linux_x86_64//:doxygen_bin",
+            "@bazel_tools//src/conditions:darwin_arm64": "@doxygen_macos_arm64//:doxygen_bin",
+        },
+        no_match_error = "Hermetic Doxygen is only available on linux_x86_64 and darwin_arm64. " +
+                         "darwin_x86_64 (Intel macOS) and other hosts are not supported.",
+    ),
+)
+
+exports_files(
+    [
+        "doxygen_linux.BUILD",
+        "doxygen_macos.BUILD",
+    ],
+)

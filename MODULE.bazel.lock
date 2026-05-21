@@ -382,7 +382,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "c1pdCjr4m4AYUD9I8UZRn8wzSwJ6pN6KLN5r0+2dZ/E=",
+        "usagesDigest": "kq8xM81FZzxLe7/KhyWMH6TbWKr+YoPvTeG+zjTqXhE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -393,6 +393,46 @@
           }
         },
         "recordedRepoMappingEntries": []
+      }
+    },
+    "//doxygen:extensions.bzl%doxygen_extension": {
+      "general": {
+        "bzlTransitiveDigest": "8rXZSW6xn9yZRmIS3aOLg3oOm71ghtrkPoU8tme9a0A=",
+        "usagesDigest": "qfqAVlrrWkDLEdM8ZBxhcmuwJmaSbrF5D1plABuXSgE=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "doxygen_linux_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/doxygen/doxygen/releases/download/Release_1_17_0/doxygen-1.17.0.linux.bin.tar.gz"
+              ],
+              "sha256": "75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2",
+              "strip_prefix": "doxygen-1.17.0",
+              "build_file": "@@//doxygen:doxygen_linux.BUILD"
+            }
+          },
+          "doxygen_macos_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/doxygen/doxygen/releases/download/Release_1_17_0/doxygen-1.17.0-mac-arm.zip"
+              ],
+              "sha256": "e05a7f647f894d2d82ef26a1d231cda079d2d1d85cf1e1c6fd8072430d80d614",
+              "strip_prefix": "doxygen-1.17.0",
+              "build_file": "@@//doxygen:doxygen_macos.BUILD"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
       }
     },
     "@@pybind11_bazel+//:python_configure.bzl%extension": {

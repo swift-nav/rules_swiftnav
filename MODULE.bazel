@@ -66,6 +66,9 @@ use_repo(
 yocto_generic_ext = use_extension("@rules_swiftnav//cc/toolchains/yocto_generic:yocto_generic_extension.bzl", "yocto_generic_extension")
 use_repo(yocto_generic_ext, "yocto_generic")
 
+doxygen_ext = use_extension("@rules_swiftnav//doxygen:extensions.bzl", "doxygen_extension")
+use_repo(doxygen_ext, "doxygen_linux_x86_64", "doxygen_macos_arm64")
+
 # Register the buildifier toolchain
 bazel_dep(
     name = "buildifier_prebuilt",
