@@ -34,6 +34,17 @@ constraint_value(
     constraint_setting = ":toolchain",
 )
 
+# musl is modeled as a `toolchain` value (not a pure `libc` tag) because the musl
+# cross toolchains are a self-contained compiler family that bundles its own libc,
+# mutually exclusive with llvm20/gcc above. Crucially this lets a musl platform
+# OVERRIDE the `toolchain` default (`llvm20_toolchain`); otherwise the platform
+# would inherit that default and the host-runnable llvm20 x86_64 toolchain would
+# match it, silently producing glibc binaries.
+constraint_value(
+    name = "musl",
+    constraint_setting = ":toolchain",
+)
+
 constraint_setting(name = "compiler")
 
 constraint_value(
@@ -44,11 +55,6 @@ constraint_value(
 constraint_value(
     name = "gcc-6",
     constraint_setting = ":compiler",
-)
-
-constraint_value(
-    name = "musl",
-    constraint_setting = ":libc",
 )
 
 constraint_value(
