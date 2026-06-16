@@ -1,0 +1,22 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+load("@rules_swiftnav//cc:strip.bzl", "strip")
+
+cc_binary(
+    name = "hello",
+    srcs = ["hello.cc"],
+)
+
+# Regression test for the strip rule resolving its tool via the toolchain action
+# config: modern rules_cc toolchains (e.g. the swift llvm toolchains) leave the
+# legacy cc_toolchain.strip_executable unpopulated, which used to fail at exec time.
+strip(
+    name = "hello_stripped",
+    binary = ":hello",
+    stripopts = ["--strip-unneeded"],
+)
+
+build_test(
+    name = "strip_build_test",
+    targets = [":hello_stripped"],
+)
