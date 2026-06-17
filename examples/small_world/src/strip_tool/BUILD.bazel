@@ -7,9 +7,13 @@ cc_binary(
     srcs = ["hello.cc"],
 )
 
-# Regression test for the strip rule resolving its tool via the toolchain action
-# config: modern rules_cc toolchains (e.g. the swift llvm toolchains) leave the
-# legacy cc_toolchain.strip_executable unpopulated, which used to fail at exec time.
+# Regression test for the strip rule, mirroring bird-sweater's usage. Guards two
+# things, on both Linux (ELF) and macOS (Mach-O) via CI:
+#   1. Tool resolution: modern rules_cc toolchains (e.g. the swift llvm toolchains)
+#      leave the legacy cc_toolchain.strip_executable unpopulated, which used to
+#      fail at exec time.
+#   2. Mach-O flags: llvm-strip rejects ELF-only options like --strip-unneeded for
+#      Mach-O, so the rule must drop them on macOS.
 strip(
     name = "hello_stripped",
     binary = ":hello",

@@ -38,3 +38,24 @@ jobs:
           cd examples/small_world
           bazel run //tools/buildifier:buildifier
           git diff --exit-code
+
+  strip-macos:
+    # Guards the strip rule against Mach-O regressions: llvm-strip rejects
+    # several ELF-only options on macOS, so this exercises the same strip()
+    # target that bird-sweater relies on. The Linux job above cannot catch a
+    # Mach-O-only flag regression.
+    runs-on: macos-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+
+      - uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+
+      - name: Build and test strip example
+        run: |
+          cd examples/small_world
+          bazel test //src/strip_tool/...
