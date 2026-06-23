@@ -17,6 +17,7 @@ import argparse
 import datetime
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -157,6 +158,20 @@ def _git_out(cmd):
                           capture_output=True).stdout.strip()
 
 
+def require_gh():
+    """Fail early if the GitHub CLI (used to open the release PR) is missing.
+
+    Like `git` and `bazel`, `gh` is expected on the maintainer's PATH; this
+    just turns a late, cryptic "command not found" into an actionable message
+    before any of the release mutations below run.
+    """
+    if shutil.which("gh") is None:
+        raise SystemExit(
+            "gh CLI is required to open the release PR; install it from "
+            "https://cli.github.com and authenticate with `gh auth login`"
+        )
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description="Bump version and open a release PR.")
     p.add_argument("part", nargs="?", choices=_PARTS, help="semver part to bump")
@@ -199,6 +214,9 @@ def main(argv=None):
         print(f"[dry-run] {old} -> {new} (branch {branch}, tag {tag})")
         print(f"[dry-run] would bump copyright year to {year} in {len(stale)} file(s)")
         return 0
+
+    # Fail before mutating anything if the tool that opens the PR is absent.
+    require_gh()
 
     # The example lockfile is regenerated below; ensure we'll do so with the
     # same Bazel version CI uses, i.e. that bazelisk honored .bazeliskrc.
