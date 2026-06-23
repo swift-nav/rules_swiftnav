@@ -15,6 +15,11 @@ the copyright headers across the repo to the current year (e.g. `2022-2025` ->
 preview the next version and how many headers would change without making any
 changes.
 
+Run it through `bazelisk` (the repo's `bazel` wrapper) so the example lockfile is
+regenerated with the Bazel version pinned in `.bazeliskrc` — the same version CI
+uses to validate it. The tool refuses to run if the active Bazel version differs
+from that pin, since a mismatch would desync the lockfile digest from CI.
+
 Review and merge the PR as normal.
 
 ## 2. (automatic) Tag + GitHub release

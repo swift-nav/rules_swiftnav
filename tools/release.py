@@ -32,6 +32,10 @@ _COPYRIGHT_RE = re.compile(
 REPO = "swift-nav/rules_swiftnav"
 EXAMPLE_LOCK_DIR = "examples/small_world"
 
+_BAZELISK_PIN_RE = re.compile(r'(?m)^\s*USE_BAZEL_VERSION\s*=\s*(\S+)')
+_BAZEL_VERSION_RE = re.compile(r'\bbazel\s+(\d+\.\d+\.\d+)')
+_CONCRETE_VERSION_RE = re.compile(r'\d+\.\d+\.\d+')
+
 
 def parse_version(module_text):
     """Return the X.Y.Z version string from a MODULE.bazel module() block."""
@@ -104,6 +108,40 @@ def bump_copyrights(year, dry_run=False):
     return changed
 
 
+def parse_bazelisk_pin(text):
+    """Return the USE_BAZEL_VERSION pinned in a .bazeliskrc, or None."""
+    m = _BAZELISK_PIN_RE.search(text)
+    return m.group(1) if m else None
+
+
+def parse_bazel_version(output):
+    """Return the X.Y.Z version from `bazel --version` output, or None."""
+    m = _BAZEL_VERSION_RE.search(output)
+    return m.group(1) if m else None
+
+
+def check_pinned_bazel(pin, version_output):
+    """Fail unless the running Bazel matches the .bazeliskrc `pin`.
+
+    The example lockfile's bzlTransitiveDigest is Bazel-version-specific, and CI
+    builds the example with the version bazelisk resolves from .bazeliskrc. A
+    release cut with a `bazel` that bypassed bazelisk (or overrode
+    USE_BAZEL_VERSION) would regenerate the lockfile with a different version,
+    desyncing the digest from CI. No-op when `pin` is not a concrete X.Y.Z
+    version (nothing to enforce against).
+    """
+    if not pin or not _CONCRETE_VERSION_RE.fullmatch(pin):
+        return
+    actual = parse_bazel_version(version_output)
+    if actual != pin:
+        raise SystemExit(
+            f"release must use the pinned Bazel {pin} (from .bazeliskrc), but "
+            f"`bazel --version` reports {actual or version_output.strip()!r}. "
+            f"Cut the release through bazelisk (and without a USE_BAZEL_VERSION "
+            f"override) so the example lockfile digest matches CI."
+        )
+
+
 def read_current_version(path="MODULE.bazel", use_stdin=False):
     """Read MODULE.bazel (from path or stdin) and return its version."""
     text = sys.stdin.read() if use_stdin else open(path, encoding="utf-8").read()
@@ -161,6 +199,15 @@ def main(argv=None):
         print(f"[dry-run] {old} -> {new} (branch {branch}, tag {tag})")
         print(f"[dry-run] would bump copyright year to {year} in {len(stale)} file(s)")
         return 0
+
+    # The example lockfile is regenerated below; ensure we'll do so with the
+    # same Bazel version CI uses, i.e. that bazelisk honored .bazeliskrc.
+    rc_path = os.path.join(EXAMPLE_LOCK_DIR, ".bazeliskrc")
+    pin = parse_bazelisk_pin(open(rc_path, encoding="utf-8").read()) \
+        if os.path.exists(rc_path) else None
+    bazel_version = subprocess.run(["bazel", "--version"], cwd=EXAMPLE_LOCK_DIR,
+                                   text=True, capture_output=True).stdout
+    check_pinned_bazel(pin, bazel_version)
 
     try:
         with open(args.file, "w", encoding="utf-8") as f:

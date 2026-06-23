@@ -19,6 +19,9 @@ from unittest import mock
 from tools.release import (
     bump_copyrights,
     bump_version,
+    check_pinned_bazel,
+    parse_bazel_version,
+    parse_bazelisk_pin,
     parse_version,
     read_current_version,
     set_copyright_years,
@@ -145,6 +148,50 @@ class BumpCopyrightsTest(unittest.TestCase):
                 f.write(b"\xff\xfe\x00\x01")
             with mock.patch("tools.release.list_tracked_files", return_value=[binary]):
                 self.assertEqual(bump_copyrights(2026), [])
+
+
+class ParseBazeliskPinTest(unittest.TestCase):
+    def test_reads_pinned_version(self):
+        self.assertEqual(parse_bazelisk_pin("USE_BAZEL_VERSION=9.1.1\n"), "9.1.1")
+
+    def test_tolerates_whitespace_and_other_lines(self):
+        text = "# comment\nBAZELISK_BASE_URL=x\n USE_BAZEL_VERSION = 9.1.1 \n"
+        self.assertEqual(parse_bazelisk_pin(text), "9.1.1")
+
+    def test_returns_none_when_absent(self):
+        self.assertIsNone(parse_bazelisk_pin("BAZELISK_BASE_URL=x\n"))
+
+
+class ParseBazelVersionTest(unittest.TestCase):
+    def test_extracts_semver(self):
+        self.assertEqual(parse_bazel_version("bazel 9.1.1\n"), "9.1.1")
+
+    def test_ignores_trailing_noise(self):
+        self.assertEqual(parse_bazel_version("bazel 9.1.1-homebrew\nextra\n"), "9.1.1")
+
+    def test_returns_none_when_unparseable(self):
+        self.assertIsNone(parse_bazel_version("no version here\n"))
+
+
+class CheckPinnedBazelTest(unittest.TestCase):
+    def test_passes_when_versions_match(self):
+        check_pinned_bazel("9.1.1", "bazel 9.1.1\n")  # no raise
+
+    def test_raises_when_versions_differ(self):
+        with self.assertRaises(SystemExit) as cm:
+            check_pinned_bazel("9.1.1", "bazel 9.0.0\n")
+        self.assertIn("9.1.1", str(cm.exception))
+        self.assertIn("bazelisk", str(cm.exception))
+
+    def test_raises_when_bazel_version_unparseable(self):
+        with self.assertRaises(SystemExit):
+            check_pinned_bazel("9.1.1", "weird output\n")
+
+    def test_noop_when_pin_is_not_concrete(self):
+        check_pinned_bazel("latest", "bazel 9.0.0\n")  # nothing to enforce
+
+    def test_noop_when_pin_is_missing(self):
+        check_pinned_bazel(None, "bazel 9.0.0\n")  # nothing to enforce
 
 
 class ReadCurrentVersionTest(unittest.TestCase):
