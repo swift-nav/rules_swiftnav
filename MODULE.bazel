@@ -11,7 +11,6 @@
 module(
     name = "rules_swiftnav",
     version = "0.20.0",
-    compatibility_level = 1,
 )
 
 # Core Bazel dependencies
@@ -72,6 +71,6 @@ use_repo(doxygen_ext, "doxygen_linux_x86_64", "doxygen_macos_arm64")
 # Register the buildifier toolchain
 bazel_dep(
     name = "buildifier_prebuilt",
-    version = "8.5.1",
+    version = "8.5.1.2",
     dev_dependency = True,
 )
