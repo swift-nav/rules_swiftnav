@@ -247,6 +247,60 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "@@hedron_compile_commands+//:workspace_setup.bzl%hedron_compile_commands_extension": {
+      "general": {
+        "bzlTransitiveDigest": "xfHREXIOWIcGVzoG9cUsecfHYTs1FeQNomBubjpqjW0=",
+        "usagesDigest": "CbJ2MjubH36j9xaONhhASfhodhpi5fzvuyg/IW2f7Ds=",
+        "recordedInputs": [
+          "REPO_MAPPING:hedron_compile_commands+,bazel_tools bazel_tools"
+        ],
+        "generatedRepoSpecs": {}
+      }
+    },
+    "@@hedron_compile_commands+//:workspace_setup_transitive.bzl%hedron_compile_commands_extension": {
+      "general": {
+        "bzlTransitiveDigest": "IfDf0vEa2jjQ11RNpUM0u4xftPXIs+pyM8IMVkRqVMk=",
+        "usagesDigest": "yxZQbFglJyjpn7JZ9mhIc3EhLzZivlbs6wiHWOKJ/UA=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {}
+      }
+    },
+    "@@hedron_compile_commands+//:workspace_setup_transitive_transitive.bzl%hedron_compile_commands_extension": {
+      "general": {
+        "bzlTransitiveDigest": "1p58k3o2Jgjt/pBE7cb8WmmkplrSguIKma/h32x7X10=",
+        "usagesDigest": "GkOuy/k8wz0dbKMeEJFKEJB3CWkMZt3DYcPgj4lALkI=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {}
+      }
+    },
+    "@@hedron_compile_commands+//:workspace_setup_transitive_transitive_transitive.bzl%hedron_compile_commands_extension": {
+      "general": {
+        "bzlTransitiveDigest": "arNWX4EleUjJxqkM5nCRTj+ce05Zz1gSdGH1DCKOoLs=",
+        "usagesDigest": "WZExKK/BI4lqpUZfPpv4YARDE1Y7igQB+wYGKvNoCKs=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {}
+      }
+    },
+    "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
+      "general": {
+        "bzlTransitiveDigest": "Ilz4hu4VWEbx3OM4ZIpgYmYXuPq6ewOVgzv5F0ziWS8=",
+        "usagesDigest": "tVQNvLoXMWAbiK39am3yovKGpwINdftfn7RpDyN+JZc=",
+        "recordedInputs": [
+          "REPO_MAPPING:pybind11_bazel+,bazel_tools bazel_tools"
+        ],
+        "generatedRepoSpecs": {
+          "pybind11": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@pybind11_bazel+//:pybind11-BUILD.bazel",
+              "strip_prefix": "pybind11-2.13.6",
+              "url": "https://github.com/pybind/pybind11/archive/refs/tags/v2.13.6.tar.gz",
+              "integrity": "sha256-4Iy4f0dz2pf6e18DXeh2OrxlbYfVdz5i9toFh9Hw7CA="
+            }
+          }
+        }
+      }
+    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
         "bzlTransitiveDigest": "Ga4z8lQy1YQ5rAMy+dOl0dqcCEBnYNCXku8x3YQmDZI=",
@@ -505,7 +559,7 @@
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "LS0VF7klVv3uKgNzF7w5juh0eLqMf5RfufyCxD5bY3g=",
-        "usagesDigest": "l1u4WK5qiCl3K1So4ni9gwrOFYuqHwgZc3lET8gZqD0=",
+        "usagesDigest": "cfbVRjYB9KEP/HK47KBI90/Mw32r/8nBQ14JZj3hLPA=",
         "recordedInputs": [
           "REPO_MAPPING:rules_swiftnav+,bazel_tools bazel_tools",
           "REPO_MAPPING:rules_swiftnav+,rules_swiftnav rules_swiftnav+"
@@ -684,6 +738,52 @@
               "sha256": "fb613dacb25149f140f73fe9ff6c380bb43328e6bf813473986e9127e2bc283b",
               "strip_prefix": "gcc-arm-none-eabi-10.3-2021.10",
               "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2"
+            }
+          }
+        }
+      }
+    },
+    "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
+      "general": {
+        "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
+        "usagesDigest": "QcC3ycY8CPhyxMP6ZzIIJiNVjVF5FPQXB6ExocWPqH0=",
+        "recordedInputs": [],
+        "generatedRepoSpecs": {
+          "yocto_generic": {
+            "repoRuleId": "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic.bzl%yocto_generic",
+            "attributes": {}
+          }
+        }
+      }
+    },
+    "@@rules_swiftnav+//doxygen:extensions.bzl%doxygen_extension": {
+      "general": {
+        "bzlTransitiveDigest": "FpPcFCi/TMdMIYzhkBJQDLoL6L4vfaGhOA4TTyqW2zA=",
+        "usagesDigest": "mT61Q0RKiXj/TRY1Qc9AwavVMIZPHKED5lr64353LLs=",
+        "recordedInputs": [
+          "REPO_MAPPING:rules_swiftnav+,bazel_tools bazel_tools"
+        ],
+        "generatedRepoSpecs": {
+          "doxygen_linux_x86_64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/doxygen/doxygen/releases/download/Release_1_17_0/doxygen-1.17.0.linux.bin.tar.gz"
+              ],
+              "sha256": "75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2",
+              "strip_prefix": "doxygen-1.17.0",
+              "build_file": "@@rules_swiftnav+//doxygen:doxygen_linux.BUILD"
+            }
+          },
+          "doxygen_macos_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/doxygen/doxygen/releases/download/Release_1_17_0/doxygen-1.17.0-mac-arm.zip"
+              ],
+              "sha256": "e05a7f647f894d2d82ef26a1d231cda079d2d1d85cf1e1c6fd8072430d80d614",
+              "strip_prefix": "doxygen-1.17.0",
+              "build_file": "@@rules_swiftnav+//doxygen:doxygen_macos.BUILD"
             }
           }
         }
