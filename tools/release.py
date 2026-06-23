@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Copyright (C) 2022 Swift Navigation Inc.
+# Copyright (C) 2022-2026 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
 #
 # This source is subject to the license found in the file 'LICENSE' which must
-# be be distributed together with this source. All other rights reserved.
+# be distributed together with this source. All other rights reserved.
 #
 # THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
@@ -14,6 +14,7 @@ Stdlib-only so CI can run it with plain `python3` (no Bazel/deps required).
 """
 
 import argparse
+import datetime
 import os
 import re
 import subprocess
@@ -21,6 +22,12 @@ import sys
 
 _VERSION_RE = re.compile(r'(?m)^(\s*version\s*=\s*")(\d+\.\d+\.\d+)(")')
 _PARTS = ("major", "minor", "patch")
+
+# Matches "Copyright (C) 2022" or "Copyright (C) 2022-2025" in a Swift
+# Navigation header, capturing the start year and (optional) end year.
+_COPYRIGHT_RE = re.compile(
+    r"(Copyright \(C\) )(\d{4})(?:-(\d{4}))?( Swift Navigation)"
+)
 
 REPO = "swift-nav/rules_swiftnav"
 EXAMPLE_LOCK_DIR = "examples/small_world"
@@ -52,6 +59,49 @@ def set_version(module_text, new_version):
     if n != 1:
         raise ValueError("could not substitute version in MODULE.bazel")
     return new_text
+
+
+def set_copyright_years(text, year):
+    """Return text with Swift Navigation copyright headers extended to year.
+
+    The first-publication year is preserved and the end of the range is set to
+    `year`, producing "(C) <start>-<year>". A header already ending at `year`
+    (single year or range) is left unchanged, so the transform is idempotent.
+    """
+    def repl(m):
+        start = int(m.group(2))
+        if start >= year:
+            return m.group(0)
+        return f"{m.group(1)}{start}-{year}{m.group(4)}"
+
+    return _COPYRIGHT_RE.sub(repl, text)
+
+
+def list_tracked_files():
+    """Return the repo's git-tracked file paths (relative to the workspace)."""
+    return _git_out(["ls-files"]).splitlines()
+
+
+def bump_copyrights(year, dry_run=False):
+    """Extend Swift Navigation copyright headers in tracked files to `year`.
+
+    Returns the list of files that changed (or would change, when dry_run).
+    Binary or non-UTF-8 files are skipped.
+    """
+    changed = []
+    for path in list_tracked_files():
+        try:
+            with open(path, encoding="utf-8") as f:
+                text = f.read()
+        except (OSError, UnicodeDecodeError):
+            continue
+        new_text = set_copyright_years(text, year)
+        if new_text != text:
+            changed.append(path)
+            if not dry_run:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(new_text)
+    return changed
 
 
 def read_current_version(path="MODULE.bazel", use_stdin=False):
@@ -104,13 +154,20 @@ def main(argv=None):
     if existing_tags:
         raise SystemExit(f"tag {tag} already exists")
 
+    year = datetime.date.today().year
+
     if args.dry_run:
+        stale = bump_copyrights(year, dry_run=True)
         print(f"[dry-run] {old} -> {new} (branch {branch}, tag {tag})")
+        print(f"[dry-run] would bump copyright year to {year} in {len(stale)} file(s)")
         return 0
 
     try:
         with open(args.file, "w", encoding="utf-8") as f:
             f.write(set_version(text, new))
+
+        # Refresh copyright headers to the current year across the repo.
+        bumped = bump_copyrights(year)
 
         # Keep the committed example lockfile in sync with the bumped version.
         _run(["bazel", "mod", "deps", "--lockfile_mode=update"], cwd=EXAMPLE_LOCK_DIR)
@@ -118,7 +175,8 @@ def main(argv=None):
         _run(["bazel", "run", "//tools/buildifier:buildifier"])
 
         _run(["git", "checkout", "-b", branch])
-        _run(["git", "add", "MODULE.bazel", f"{EXAMPLE_LOCK_DIR}/MODULE.bazel.lock"])
+        _run(["git", "add", "MODULE.bazel", f"{EXAMPLE_LOCK_DIR}/MODULE.bazel.lock",
+              *bumped])
         _run(["git", "commit", "-m", f"Bump version to {new}"])
         _run(["git", "push", "-u", "origin", branch])
         _run(["gh", "pr", "create", "--repo", REPO, "--fill",
@@ -129,7 +187,7 @@ def main(argv=None):
         print(
             f"release failed mid-way. To reset:\n"
             f"  git checkout main && git branch -D {branch} 2>/dev/null; "
-            f"git checkout -- {args.file} {EXAMPLE_LOCK_DIR}/MODULE.bazel.lock",
+            f"git checkout -- .",
             file=sys.stderr,
         )
         raise

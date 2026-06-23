@@ -9,9 +9,11 @@ created automatically.
 bazel run //tools:release -- minor   # or: major / patch
 ```
 
-This bumps `version` in `MODULE.bazel`, refreshes the example lockfile, and opens
-a PR titled `Bump version to X.Y.Z`. Use `--dry-run` to preview the next version
-without making changes.
+This bumps `version` in `MODULE.bazel`, refreshes the example lockfile, extends
+the copyright headers across the repo to the current year (e.g. `2022-2025` ->
+`2022-2026`), and opens a PR titled `Bump version to X.Y.Z`. Use `--dry-run` to
+preview the next version and how many headers would change without making any
+changes.
 
 Review and merge the PR as normal.
 
