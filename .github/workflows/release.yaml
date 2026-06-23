@@ -1,0 +1,64 @@
+name: release
+
+# Cuts a release when MODULE.bazel's version changes on a push to main.
+#
+# NOTE: this job creates the tag + GitHub release using the built-in
+# GITHUB_TOKEN. Events created with GITHUB_TOKEN do NOT trigger other
+# workflow runs (GitHub's recursion guard). That is fine today: nothing
+# in this repo listens for the tag/release event, and downstream
+# publishing is handled out-of-band by a separate manual process. If a
+# future workflow is added `on: release` or `on: push: tags` (e.g. to
+# build/upload release assets), it will NOT be triggered by this job —
+# switch the release creation below to a GitHub App token at that point.
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    # Don't cut releases from forks of this public repo.
+    if: github.repository == 'swift-nav/rules_swiftnav'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          # Full history so we can read MODULE.bazel at the previous main tip
+          # (github.event.before), which is robust to multi-commit pushes.
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Detect version change and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          NEW=$(python3 tools/release.py --current)
+          if [ -z "$NEW" ]; then
+            echo "could not read current version from MODULE.bazel" >&2
+            exit 1
+          fi
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "no previous main tip to compare against; nothing to release"
+            exit 0
+          fi
+          OLD=$(git show "$BEFORE:MODULE.bazel" | python3 tools/release.py --current --stdin)
+          if [ "$NEW" = "$OLD" ]; then
+            echo "version unchanged ($NEW); nothing to release"
+            exit 0
+          fi
+          TAG="v$NEW"
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "tag $TAG already exists; nothing to do"
+            exit 0
+          fi
+          echo "releasing $OLD -> $NEW as $TAG"
+          gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --generate-notes
