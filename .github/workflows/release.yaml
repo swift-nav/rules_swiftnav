@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           # Full history so we can read MODULE.bazel at the previous main tip
           # (github.event.before), which is robust to multi-commit pushes.
@@ -38,6 +38,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           BEFORE: ${{ github.event.before }}
         run: |
+          set -euo pipefail
           NEW=$(python3 tools/release.py --current)
           if [ -z "$NEW" ]; then
             echo "could not read current version from MODULE.bazel" >&2
@@ -47,7 +48,13 @@ jobs:
             echo "no previous main tip to compare against; nothing to release"
             exit 0
           fi
-          OLD=$(git show "$BEFORE:MODULE.bazel" | python3 tools/release.py --current --stdin)
+          # Tolerate MODULE.bazel not existing at $BEFORE (e.g. history rewrite):
+          # an unreadable previous version must not be mistaken for a change.
+          OLD=$(git show "$BEFORE:MODULE.bazel" 2>/dev/null | python3 tools/release.py --current --stdin) || true
+          if [ -z "$OLD" ]; then
+            echo "could not read previous version (MODULE.bazel missing at $BEFORE?); nothing to release"
+            exit 0
+          fi
           if [ "$NEW" = "$OLD" ]; then
             echo "version unchanged ($NEW); nothing to release"
             exit 0
