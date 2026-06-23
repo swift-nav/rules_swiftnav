@@ -1,8 +1,8 @@
-# Copyright (C) 2026 Swift Navigation Inc.
+# Copyright (C) 2022-2026 Swift Navigation Inc.
 # Contact: Swift Navigation <dev@swift-nav.com>
 #
 # This source is subject to the license found in the file 'LICENSE' which must
-# be be distributed together with this source. All other rights reserved.
+# be distributed together with this source. All other rights reserved.
 
 """Module extension that fetches hermetic Doxygen binaries from upstream GitHub releases."""
 
