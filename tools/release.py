@@ -244,8 +244,17 @@ def main(argv=None):
               *bumped])
         _run(["git", "commit", "-m", f"Bump version to {new}"])
         _run(["git", "push", "-u", "origin", branch])
-        _run(["gh", "pr", "create", "--repo", REPO, "--fill",
-              "--title", f"Bump version to {new}"])
+        body = (
+            f"Automated release PR opened by `bazel run //tools:release`.\n\n"
+            f"- Bumps the module version: `{old}` -> `{new}`\n"
+            f"- Refreshes the example lockfile "
+            f"(`{EXAMPLE_LOCK_DIR}/MODULE.bazel.lock`)\n"
+            f"- Extends Swift Navigation copyright headers to {year}\n\n"
+            f"Merging to `main` triggers `.github/workflows/release.yaml`, "
+            f"which tags `{tag}` and creates the GitHub release."
+        )
+        _run(["gh", "pr", "create", "--repo", REPO,
+              "--title", f"Bump version to {new}", "--body", body])
         print(f"Opened release PR for {new}.")
         return 0
     except Exception:
