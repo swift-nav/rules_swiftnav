@@ -24,6 +24,7 @@ from tools.release import (
     parse_bazelisk_pin,
     parse_version,
     read_current_version,
+    require_gh,
     set_copyright_years,
     set_version,
 )
@@ -192,6 +193,18 @@ class CheckPinnedBazelTest(unittest.TestCase):
 
     def test_noop_when_pin_is_missing(self):
         check_pinned_bazel(None, "bazel 9.0.0\n")  # nothing to enforce
+
+
+class RequireGhTest(unittest.TestCase):
+    def test_passes_when_gh_on_path(self):
+        with mock.patch("tools.release.shutil.which", return_value="/usr/bin/gh"):
+            require_gh()  # no raise
+
+    def test_raises_when_gh_missing(self):
+        with mock.patch("tools.release.shutil.which", return_value=None):
+            with self.assertRaises(SystemExit) as cm:
+                require_gh()
+        self.assertIn("gh", str(cm.exception))
 
 
 class ReadCurrentVersionTest(unittest.TestCase):

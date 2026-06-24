@@ -3,6 +3,22 @@
 Cutting a release is two steps for a maintainer; the tag and GitHub release are
 created automatically.
 
+## Prerequisites
+
+The release tool shells out to a few command-line tools, which must be on your
+`PATH`:
+
+- **`bazelisk`** (the repo's `bazel` wrapper) — runs the tool and regenerates
+  the example lockfile with the Bazel version pinned in `.bazeliskrc` (see
+  step 1 for why this matters).
+- **`git`** — commits the version bump and pushes the release branch.
+- **`gh`** ([GitHub CLI](https://cli.github.com)), authenticated via
+  `gh auth login` — opens the release PR. The tool checks for it up front and
+  exits with an actionable message if it is missing.
+
+You also need push access to `swift-nav/rules_swiftnav` and a clean working
+tree (the tool refuses to run if there are uncommitted changes).
+
 ## 1. Open the release PR
 
 ```bash
