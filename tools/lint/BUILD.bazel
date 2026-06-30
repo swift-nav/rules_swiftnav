@@ -1,7 +1,7 @@
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_swiftnav//cc:defs.bzl", "UNIT")
-load("@rules_shell//sh:sh_binary.bzl", "sh_binary")
 
 py_binary(
     name = "extract_lint_results",

@@ -6,6 +6,11 @@ CREATE_PATCHES=false
 APPLY_PATCHES=false
 TARGETS=()
 
+if [[ -z "${BUILD_WORKSPACE_DIRECTORY:-}" ]]; then
+    echo "Environment variable BUILD_WORKSPACE_DIRECTORY is not set. Assuming ${PWD} is the workspace root."
+    export BUILD_WORKSPACE_DIRECTORY="${PWD}"
+fi
+
 while [[ $# -gt 0 ]]; do
     case $1 in
         --create-patches)
@@ -37,11 +42,12 @@ if [[ ${#TARGETS[@]} -eq 0 ]]; then
 fi
 
 buildevents=$(mktemp)
+trap 'rm -f "$buildevents"' EXIT
 echo "Build events in $buildevents"
 
 args=(
     "--build_event_json_file=$buildevents"
-    "--remote_download_regex='.*AspectRulesLint.*'"
+    "--remote_download_regex=.*AspectRulesLint.*"
     "--config=lint"
     "--output_groups=rules_lint_machine"
     "--keep_going"
@@ -55,23 +61,23 @@ if [[ "$CREATE_PATCHES" == true ]]; then
 fi
 
 # Run linters
-bazel build ${args[@]} "${TARGETS[@]}"
+(cd "$BUILD_WORKSPACE_DIRECTORY" && bazel build "${args[@]}" "${TARGETS[@]}")
 
-OUTPUT_DIR="$(pwd)/clang-tidy-output"
+OUTPUT_DIR="$BUILD_WORKSPACE_DIRECTORY/clang-tidy-output"
 OUTPUT_DIR_MERGED_SARIF="$OUTPUT_DIR/merged-report.sarif"
 OUTPUT_DIR_PATCHES="$OUTPUT_DIR/patches"
 
 EXIT_CODE=0
-bazel run @rules_swiftnav//tools/lint:extract_lint_results -- \
-  --build-event-json-file=$buildevents --bazel-output-path="$(pwd)" \
+(cd "$BUILD_WORKSPACE_DIRECTORY" && bazel run @rules_swiftnav//tools/lint:extract_lint_results -- \
+  --build-event-json-file=$buildevents --bazel-output-path="$BUILD_WORKSPACE_DIRECTORY" \
   --output-merged-sarif-file="$OUTPUT_DIR_MERGED_SARIF" \
   --output-patch-folder="$OUTPUT_DIR_PATCHES" \
-  --exit-code=1 || EXIT_CODE=$?
+  --exit-code=1) || EXIT_CODE=$?
 
 if [[ "$APPLY_PATCHES" == true ]]; then
     for patch in "$OUTPUT_DIR_PATCHES"/*.patch; do
         if [[ -f "$patch" ]]; then
-            patch -p1 <"$patch"
+            (cd "$BUILD_WORKSPACE_DIRECTORY" && patch -p1 <"$patch")
         fi
     done
 fi
