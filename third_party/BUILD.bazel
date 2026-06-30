@@ -29,8 +29,3 @@ config_setting(
     flag_values = {":enable_mkl": "true"},
     visibility = ["//visibility:public"],
 )
-
-exports_files(
-    glob(["*.BUILD"]),
-    visibility = ["//visibility:public"],
-)
