@@ -54,6 +54,13 @@ def cc_toolchain_config(
         "-ffp-contract=off",
         # Diagnostics
         "-fcolor-diagnostics",
+        # Clang's builtin resource include (stdarg.h, stddef.h, ...). The real
+        # clang auto-detects this relative to its own binary, so this is a
+        # no-op there (lowest priority, real dir found first). It's required by
+        # consumers that drive a separate libclang with include-path detection
+        # disabled, e.g. rules_rs hermetic bindgen. Clang major = llvm20.
+        "-idirafter",
+        "{}/lib/clang/20/include".format(toolchain_path_prefix),
     ] + extra_copts
 
     # -fstandalone-debug disables options that optimize
