@@ -29,3 +29,22 @@ config_setting(
     flag_values = {":enable_mkl": "true"},
     visibility = ["//visibility:public"],
 )
+
+# Link MKL against the hermetic LLVM OpenMP runtime instead of the system
+# libgomp.a. Defined here (a repo that is always loaded and cheap) rather than in
+# the heavy @mkl archive repo, so a global --...=True in .bazelrc does not force
+# fetching/extracting the MKL tarball on builds that never use MKL.
+#
+# NOTE: transitional. Remove this flag (and make hermetic LLVM the only path)
+# once every MKL-using build has migrated to the hermetic LLVM toolchain.
+bool_flag(
+    name = "use_hermetic_llvm",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_use_hermetic_llvm",
+    flag_values = {":use_hermetic_llvm": "true"},
+    visibility = ["//visibility:public"],
+)
