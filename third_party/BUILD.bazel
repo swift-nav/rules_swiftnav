@@ -29,3 +29,19 @@ config_setting(
     flag_values = {":enable_mkl": "true"},
     visibility = ["//visibility:public"],
 )
+
+# Flag to control whether to use the hermetic LLVM toolchain.
+#
+# NOTE: transitional. Remove this flag (and make hermetic LLVM the only path)
+# once every MKL-using build has migrated to the hermetic LLVM toolchain.
+bool_flag(
+    name = "use_hermetic_llvm",
+    build_setting_default = False,
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
+    name = "_use_hermetic_llvm",
+    flag_values = {":use_hermetic_llvm": "true"},
+    visibility = ["//visibility:public"],
+)
