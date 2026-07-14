@@ -558,73 +558,13 @@
     },
     "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
-        "bzlTransitiveDigest": "LS0VF7klVv3uKgNzF7w5juh0eLqMf5RfufyCxD5bY3g=",
-        "usagesDigest": "SVuUXmKtGjW61IFF3CuuXCUn9YtoaV7LAfvSCL79/A4=",
+        "bzlTransitiveDigest": "PfHBW3b77D/I6D3fVyfQxbocDafeQhCpaMQ6foZ9NwM=",
+        "usagesDigest": "Kpgt0yq41j5imqi2fBHjhdk4YmjbbPRYcqXIJmXSdQE=",
         "recordedInputs": [
           "REPO_MAPPING:rules_swiftnav+,bazel_tools bazel_tools",
           "REPO_MAPPING:rules_swiftnav+,rules_swiftnav rules_swiftnav+"
         ],
         "generatedRepoSpecs": {
-          "aarch64-darwin-llvm": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm:llvm.BUILD.bzl",
-              "patch_args": [
-                "-p1"
-              ],
-              "patches": [
-                "@@rules_swiftnav+//cc/toolchains/llvm:llvm.patch"
-              ],
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/llvm-14.0.0/clang%2Bllvm-14.0.0-arm64-apple-darwin.tar.gz",
-              "strip_prefix": "clang+llvm-14.0.0-arm64-apple-darwin",
-              "sha256": "f826ee92c3fedb92bad2f9f834d96f6b9db3192871bfe434124bca848ba9a2a3"
-            }
-          },
-          "x86_64-darwin-llvm": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "patch_args": [
-                "-p1"
-              ],
-              "patches": [
-                "@@rules_swiftnav+//cc/toolchains/llvm:llvm.patch"
-              ],
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm:llvm.BUILD.bzl",
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-apple-darwin.tar.xz",
-              "strip_prefix": "clang+llvm-14.0.0-x86_64-apple-darwin",
-              "sha256": "cf5af0f32d78dcf4413ef6966abbfd5b1445fe80bba57f2ff8a08f77e672b9b3"
-            }
-          },
-          "aarch64-linux-llvm": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "patch_args": [
-                "-p1"
-              ],
-              "patches": [
-                "@@rules_swiftnav+//cc/toolchains/llvm:llvm.patch"
-              ],
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm:llvm.BUILD.bzl",
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-aarch64-linux-gnu.tar.xz",
-              "strip_prefix": "clang+llvm-14.0.0-aarch64-linux-gnu",
-              "sha256": "1792badcd44066c79148ffeb1746058422cc9d838462be07e3cb19a4b724a1ee"
-            }
-          },
-          "x86_64-linux-llvm": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm:llvm.BUILD.bzl",
-              "patch_args": [
-                "-p1"
-              ],
-              "patches": [
-                "@@rules_swiftnav+//cc/toolchains/llvm:llvm.patch"
-              ],
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-14.0.0/clang%2Bllvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz",
-              "strip_prefix": "clang+llvm-14.0.0-x86_64-linux-gnu-ubuntu-18.04",
-              "sha256": "61582215dafafb7b576ea30cc136be92c877ba1f1c31ddbbd372d6d65622fef5"
-            }
-          },
           "aarch64-darwin-llvm20": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
             "attributes": {
