@@ -1272,6 +1272,20 @@ def _impl(ctx):
         ],
     )
 
+    hidden_visibility_feature = feature(
+        name = "hidden_visibility",
+        flag_sets = [
+            flag_set(
+                actions = [ACTION_NAMES.c_compile, ACTION_NAMES.cpp_compile],
+                flag_groups = [flag_group(flags = ["-fvisibility=hidden"])],
+            ),
+            flag_set(
+                actions = all_cpp_compile_actions,
+                flag_groups = [flag_group(flags = ["-fvisibility-inlines-hidden"])],
+            ),
+        ],
+    )
+
     treat_warnings_as_errors_feature = feature(
         name = "treat_warnings_as_errors",
         flag_sets = [
@@ -1442,6 +1456,7 @@ def _impl(ctx):
             unfiltered_compile_flags_feature,
             treat_warnings_as_errors_feature,
             archive_param_file_feature,
+            hidden_visibility_feature,
         ] + layering_check_features(ctx.attr.compiler) + [
             # append swiftnavs custom features here.
             gnu_extensions_feature,
@@ -1478,6 +1493,7 @@ def _impl(ctx):
             tsan_feature,
             ubsan_feature,
             macos_minimum_os_feature,
+            thinlto_feature,
         ] + (
             [
                 supports_start_end_lib_feature,
@@ -1498,6 +1514,7 @@ def _impl(ctx):
             unfiltered_compile_flags_feature,
             treat_warnings_as_errors_feature,
             archive_param_file_feature,
+            hidden_visibility_feature,
         ] + layering_check_features(ctx.attr.compiler) + [
             # append swiftnavs custom features here
             gnu_extensions_feature,
