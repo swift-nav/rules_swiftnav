@@ -33,6 +33,7 @@ def swift_add_valgrind_callgrind(
         name = None,
         child_silent_after_fork = False,
         trace_children = False,
+        valgrind_args = [],
         program_args = [],
         tags = [],
         data = [],
@@ -51,6 +52,8 @@ def swift_add_valgrind_callgrind(
             "<binary_target>.valgrind.callgrind" if omitted.
         child_silent_after_fork: Enable --child-silent-after-fork=yes.
         trace_children: Enable --trace-children=yes for spawned processes.
+        valgrind_args: Extra flags passed to valgrind before the binary, e.g.
+            ["--max-stackframe=16000000"] for binaries with large stack frames.
         program_args: Arguments forwarded to the binary. Supports $(location)
             expansion and the {OUTPUT_DIR} / {TMPDIR} runtime tokens.
         tags: Additional Bazel tags.
@@ -65,6 +68,7 @@ def swift_add_valgrind_callgrind(
         valgrind_flags.append("--child-silent-after-fork=yes")
     if trace_children:
         valgrind_flags.append("--trace-children=yes")
+    valgrind_flags += valgrind_args
 
     sh_test(
         name = name,
