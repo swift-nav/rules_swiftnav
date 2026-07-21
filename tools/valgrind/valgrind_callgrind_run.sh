@@ -8,14 +8,19 @@
 # caller route a binary's output/working directory to a writable location.
 #
 # Outputs written to TEST_UNDECLARED_OUTPUTS_DIR:
-#   callgrind.out         — raw callgrind output (inspect with KCacheGrind)
-#   cpu_instructions.txt  — total instruction count (single line)
+#   valgrind-callgrind.<pid>          — raw callgrind output per process
+#                                       (inspect with KCacheGrind)
+#   valgrind-callgrind.instructions   — total instruction count summed over all
+#                                       processes (single line)
+# The %p (pid) suffix keeps output from separate processes distinct when
+# --trace-children=yes is used.
 
 set -euo pipefail
 
 OUTPUT_DIR="${TEST_UNDECLARED_OUTPUTS_DIR:-$(mktemp -d)}"
 SCRATCH_DIR="${TEST_TMPDIR:-$(mktemp -d)}"
-CALLGRIND_OUT="${OUTPUT_DIR}/callgrind.out"
+CALLGRIND_OUT_PATTERN="${OUTPUT_DIR}/valgrind-callgrind.%p"
+INSTRUCTIONS_FILE="${OUTPUT_DIR}/valgrind-callgrind.instructions"
 
 if ! command -v valgrind &>/dev/null; then
     echo "Error: valgrind not found" >&2
@@ -37,18 +42,29 @@ done
 
 echo "Running callgrind profiling..."
 valgrind -q --tool=callgrind \
-    "--callgrind-out-file=${CALLGRIND_OUT}" \
+    "--callgrind-out-file=${CALLGRIND_OUT_PATTERN}" \
     "${ARGS[@]}"
 
-if [ ! -f "$CALLGRIND_OUT" ]; then
-    echo "Error: callgrind output file not found: $CALLGRIND_OUT" >&2
+# Sum the instruction count across every process's output file. callgrind
+# reports the total on a "summary:" line (or "totals:" in older formats); the
+# first field is the instruction count (Ir).
+TOTAL_INSTRUCTIONS=0
+FOUND=0
+for f in "${OUTPUT_DIR}"/valgrind-callgrind.*; do
+    [ -e "$f" ] || continue
+    n=$(awk '/^summary:/{print $2; exit}' "$f")
+    if [ -z "$n" ]; then
+        n=$(awk -F: '/^totals:/{gsub(/ /, "", $2); print $2; exit}' "$f")
+    fi
+    [ -n "$n" ] || continue
+    TOTAL_INSTRUCTIONS=$((TOTAL_INSTRUCTIONS + n))
+    FOUND=1
+done
+
+if [ "$FOUND" -eq 0 ]; then
+    echo "Error: no callgrind output files found in $OUTPUT_DIR" >&2
     exit 1
 fi
 
-CPU_INSTRUCTIONS=$(awk '/^summary:/{print $2; exit}' "$CALLGRIND_OUT")
-if [ -z "$CPU_INSTRUCTIONS" ]; then
-    CPU_INSTRUCTIONS=$(awk -F: '/^totals:/{gsub(/ /, "", $2); print $2; exit}' "$CALLGRIND_OUT")
-fi
-
-echo "$CPU_INSTRUCTIONS" > "${OUTPUT_DIR}/cpu_instructions.txt"
-echo "CPU instructions: $CPU_INSTRUCTIONS"
+echo "$TOTAL_INSTRUCTIONS" > "$INSTRUCTIONS_FILE"
+echo "CPU instructions: $TOTAL_INSTRUCTIONS"

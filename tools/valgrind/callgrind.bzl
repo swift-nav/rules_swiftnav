@@ -40,8 +40,10 @@ def swift_add_valgrind_callgrind(
     """Creates a test target that runs a binary under valgrind callgrind.
 
     Outputs written to TEST_UNDECLARED_OUTPUTS_DIR:
-        callgrind.out          — raw callgrind output (inspect with KCacheGrind)
-        cpu_instructions.txt   — single line: total instruction count
+        valgrind-callgrind.<pid>        — raw callgrind output per process
+                                          (inspect with KCacheGrind)
+        valgrind-callgrind.instructions — single line: total instruction count
+                                          summed over all processes
 
     Args:
         binary: Label of the cc_binary (or swift_cc_test) to run under callgrind.
