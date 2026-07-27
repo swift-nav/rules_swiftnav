@@ -14,7 +14,6 @@ from tools.valgrind.report.metrics import (
     Metric,
     build_metric,
     build_report,
-    find_metric,
     format_baseline,
     format_delta,
     format_number,
@@ -65,12 +64,6 @@ class BuildReportTest(unittest.TestCase):
         self.assertEqual(report["label"], "target")
         self.assertEqual(report["baseline_file"], "pkg/baseline.txt")
         self.assertEqual(len(report["metrics"]), 2)
-
-    def test_find_metric_by_key(self) -> None:
-        report = build_report("target", "pkg/baseline.txt", [_metric(100, 100)])
-
-        self.assertEqual(find_metric(report, "cpu_instructions")["value"], 100)
-        self.assertIsNone(find_metric(report, "peak_heap_mb"))
 
 
 class FormatNumberTest(unittest.TestCase):

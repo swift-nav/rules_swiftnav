@@ -96,11 +96,6 @@ def build_report(label: str, baseline_file: str, metrics: list[Metric]) -> Repor
     )
 
 
-def find_metric(report: Report, key: str) -> Metric | None:
-    """Return the metric with the given key, or None."""
-    return next((metric for metric in report["metrics"] if metric["key"] == key), None)
-
-
 def format_number(value: float, unit: str, signed: bool = False) -> str:
     """Render a metric number: counts as integers, everything else to 3 decimals."""
     sign = "+" if signed else ""

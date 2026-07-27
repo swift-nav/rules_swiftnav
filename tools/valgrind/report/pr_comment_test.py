@@ -45,19 +45,33 @@ class FormatCommentTest(unittest.TestCase):
         self.assertTrue(comment.startswith(DEFAULT_MARKER))
         self.assertIn("## Title", comment)
         self.assertIn(SUMMARY_HEADER, comment)
-        self.assertIn('| `run_replay` | <abbr title="within tolerance">✅</abbr> | +5.00% |', comment)
+        self.assertIn("| `run_replay` | ✅ | within tolerance |", comment)
         self.assertIn("<summary>✅ run_replay</summary>", comment)
         self.assertIn(METRIC_HEADER, comment)
         self.assertIn("| CPU instructions | 1,050 | 1,000 | +50 (+5.00%) |", comment)
         self.assertIn("Baseline: `run_replay/baseline.txt` · tolerance ±5.00%", comment)
         self.assertIn("Commit: `abc1234`", comment)
 
-    def test_status_symbol_carries_a_tooltip_instead_of_a_legend(self) -> None:
+    def test_reason_names_the_metric_at_fault(self) -> None:
         comment = format_comment([_report("run_replay", 2000, 1000)], DEFAULT_MARKER, "Title", None)
 
-        self.assertIn('<abbr title="regression: grew past the tolerance">❌</abbr>', comment)
-        self.assertNotIn("within tolerance ·", comment)
+        self.assertIn("| `run_replay` | ❌ | CPU instructions regression |", comment)
+        # GitHub strips title attributes, so the wording must not hide in one.
+        self.assertNotIn("<abbr", comment)
         self.assertNotIn("Commit:", comment)
+
+    def test_reason_names_only_the_metrics_matching_the_verdict(self) -> None:
+        stale = build_metric("peak_heap_mb", "Peak memory (heap)", "MB", 1.0, 10.0, 5.0)
+        passing = build_metric("peak_stack_mb", "Peak memory (stacks)", "MB", 1.0, 1.0, 5.0)
+
+        comment = format_comment([_report("run_replay", 2000, 1000, [stale, passing])], DEFAULT_MARKER, "Title", None)
+
+        self.assertIn("| `run_replay` | ❌ | CPU instructions regression |", comment)
+
+    def test_stale_baseline_reason(self) -> None:
+        comment = format_comment([_report("run_replay", 100, 1000)], DEFAULT_MARKER, "Title", None)
+
+        self.assertIn("| `run_replay` | ⚠️ | CPU instructions baseline stale |", comment)
 
     def test_several_metrics_become_several_rows(self) -> None:
         heap = build_metric("peak_heap_mb", "Peak memory (heap)", "MB", 15.405, 15.400, 5.0)
@@ -65,8 +79,6 @@ class FormatCommentTest(unittest.TestCase):
 
         self.assertIn("| CPU instructions | 1,000 | 1,000 | +0 (+0.00%) |", comment)
         self.assertIn("| Peak memory (heap) | 15.405 MB | 15.400 MB | +0.005 MB (+0.03%) |", comment)
-        # The summary column still tracks CPU only.
-        self.assertIn("| +0.00% |", comment)
 
     def test_several_targets_share_one_summary_but_get_their_own_block(self) -> None:
         reports = [_report("zeta", 900, 1000), _report("alpha", 2000, 1000)]
@@ -75,15 +87,15 @@ class FormatCommentTest(unittest.TestCase):
 
         self.assertEqual(comment.count(SUMMARY_HEADER), 1)
         self.assertEqual(comment.count("<details>"), 2)
-        self.assertLess(comment.index("| `alpha` |"), comment.index("| `zeta` |"))
+        self.assertLess(comment.index("<summary>❌ alpha"), comment.index("<summary>⚠️ zeta"))
 
-    def test_target_without_the_summary_metric_renders_a_dash(self) -> None:
-        heap = build_metric("peak_heap_mb", "Peak memory (heap)", "MB", 15.405, 15.400, 5.0)
+    def test_a_target_without_cpu_metrics_still_gets_a_reason(self) -> None:
+        heap = build_metric("peak_heap_mb", "Peak memory (heap)", "MB", 20.0, 10.0, 5.0)
         memory_only = build_report("massif_target", "pkg/baseline.txt", [heap])
 
         comment = format_comment([memory_only], DEFAULT_MARKER, "Title", None)
 
-        self.assertIn("| — |", comment)
+        self.assertIn("| `massif_target` | ❌ | Peak memory (heap) regression |", comment)
 
     def test_differing_tolerances_are_not_claimed_to_be_one(self) -> None:
         loose = build_metric("peak_heap_mb", "Peak memory (heap)", "MB", 15.4, 15.4, 20.0)
@@ -106,8 +118,8 @@ class MainTest(unittest.TestCase):
 
             self.assertEqual(exit_code, 0)
             comment = out.getvalue()
-            self.assertIn("| `first` |", comment)
-            self.assertIn("| `second` |", comment)
+            self.assertIn("<summary>✅ first</summary>", comment)
+            self.assertIn("<summary>✅ second</summary>", comment)
             self.assertEqual(comment.count(SUMMARY_HEADER), 1)
 
     def test_fails_on_an_unreadable_report(self) -> None:

@@ -11,8 +11,10 @@ Requirements:
   - Any number of targets, any number of metrics each — callgrind today, massif
     and DRD stack usage later.
   - The summary stays narrow. GitHub hides a wider table behind a scrollbar.
-  - Status is a symbol carrying its wording as a tooltip, so there is no legend.
-  - Detail sits in a collapsed block. The summary alone answers "did it regress".
+  - The verdict is a symbol plus the reason in words. GitHub strips title
+    attributes, so hover tooltips are not an option.
+  - Detail sits in a collapsed block, headed by the target it belongs to. The
+    summary alone answers "did it regress".
   - Rows are sorted by label, so rewriting the comment never reshuffles them.
 
 Run with Bazel:
@@ -30,7 +32,6 @@ from tools.valgrind.report.metrics import (
     STATUS_STALE_BASELINE,
     Metric,
     Report,
-    find_metric,
     format_baseline,
     format_delta,
     format_value,
@@ -38,15 +39,12 @@ from tools.valgrind.report.metrics import (
 )
 
 DEFAULT_MARKER = "<!-- valgrind-callgrind-regression -->"
-DEFAULT_TITLE = "Valgrind callgrind: runtime regression"
-
-# The metric whose delta earns a column in the summary table.
-SUMMARY_METRIC_KEY = "cpu_instructions"
+DEFAULT_TITLE = "Valgrind analysis"
 
 SUMMARY_HEADER = "\n".join(
     [
-        "| Target | Verdict | CPU regression |",
-        "|---|:-:|--:|",
+        "| Target | Verdict | Reason |",
+        "|---|:-:|---|",
     ]
 )
 
@@ -63,10 +61,9 @@ _STATUS_EMOJI = {
     STATUS_STALE_BASELINE: "⚠️",
 }
 
-_STATUS_HINT = {
-    STATUS_PASS: "within tolerance",
-    STATUS_REGRESSION: "regression: grew past the tolerance",
-    STATUS_STALE_BASELINE: "baseline stale: improved past the tolerance",
+_STATUS_WORDING = {
+    STATUS_REGRESSION: "regression",
+    STATUS_STALE_BASELINE: "baseline stale",
 }
 
 
@@ -75,18 +72,22 @@ def format_percent(pct: float) -> str:
     return f"{pct:+,.0f}%" if abs(pct) >= 1000 else f"{pct:+.2f}%"
 
 
-def format_status(status: str) -> str:
-    """Render a status as its symbol, with the wording as a hover tooltip."""
-    emoji = _STATUS_EMOJI.get(status, status)
-    hint = _STATUS_HINT.get(status)
-    return f'<abbr title="{hint}">{emoji}</abbr>' if hint else emoji
+def format_verdict(status: str) -> str:
+    """Render a status as its symbol."""
+    return _STATUS_EMOJI.get(status, status)
+
+
+def format_reason(report: Report) -> str:
+    """Say in words why a target got its verdict, naming the metrics at fault."""
+    if report["status"] == STATUS_PASS:
+        return "within tolerance"
+    at_fault = [metric["name"] for metric in report["metrics"] if metric["status"] == report["status"]]
+    return f"{', '.join(at_fault)} {_STATUS_WORDING[report['status']]}"
 
 
 def format_summary_row(report: Report) -> str:
     """Render one target as a row of a SUMMARY_HEADER table."""
-    summary_metric = find_metric(report, SUMMARY_METRIC_KEY)
-    regression = format_percent(summary_metric["delta_pct"]) if summary_metric else "—"
-    return f"| `{report['label']}` | {format_status(report['status'])} | {regression} |"
+    return f"| `{report['label']}` | {format_verdict(report['status'])} | {format_reason(report)} |"
 
 
 def format_metric_row(metric: Metric) -> str:
@@ -107,7 +108,7 @@ def format_details(report: Report) -> str:
     return "\n".join(
         [
             "<details>",
-            f"<summary>{_STATUS_EMOJI.get(report['status'], report['status'])} {report['label']}</summary>",
+            f"<summary>{format_verdict(report['status'])} {report['label']}</summary>",
             "",
             METRIC_HEADER,
             *[format_metric_row(metric) for metric in report["metrics"]],
