@@ -8,15 +8,13 @@ writes the total to ``valgrind-callgrind.instructions``.
 When an instructions baseline is supplied the total is compared against it and
 the tool exits non-zero once the measured count exceeds the baseline by more
 than the tolerance, which turns a plain ``bazel test`` into a runtime
-regression gate. Two extra report files are written so CI can surface the
-numbers without re-parsing anything:
+regression gate. The comparison is also written to
+``valgrind-callgrind.report.json`` so CI can surface the numbers without
+re-parsing anything.
 
-    valgrind-callgrind.report.json   machine readable result
-    valgrind-callgrind.report.md     markdown table for a PR comment
-
-The json report is self-contained: it carries the label and the baseline path
-alongside the numbers, so the reports of several callgrind targets can be
-merged into a single comment by rendering one ``format_row`` per report.
+That json report is self-contained — it carries the label and the baseline path
+alongside the numbers — so callgrind_comment can merge the reports of any
+number of callgrind targets into a single markdown comment.
 
 The baseline file holds nothing but the expected count as a single positive
 integer, which is the exact format of the generated ``.instructions`` file.
@@ -36,24 +34,10 @@ from typing import TypedDict
 
 INSTRUCTIONS_FILENAME = "valgrind-callgrind.instructions"
 REPORT_JSON_FILENAME = "valgrind-callgrind.report.json"
-REPORT_MD_FILENAME = "valgrind-callgrind.report.md"
 
 STATUS_PASS = "pass"
 STATUS_REGRESSION = "regression"
 STATUS_STALE_BASELINE = "stale-baseline"
-
-_STATUS_TEXT = {
-    STATUS_PASS: "✅ pass",
-    STATUS_REGRESSION: "❌ regression",
-    STATUS_STALE_BASELINE: "⚠️ baseline stale",
-}
-
-TABLE_HEADER = "\n".join(
-    [
-        "| Target | CPU instructions | Baseline | Delta | Tolerance | Status |",
-        "|--------|------------------|----------|-------|-----------|--------|",
-    ]
-)
 
 # Only the per-process dumps, so the report files this tool writes into the
 # same directory are never mistaken for callgrind output on a re-run.
@@ -152,31 +136,6 @@ def build_report(label: str, measured: int, baseline: int, baseline_file: str, t
     )
 
 
-def format_row(report: Report) -> str:
-    """Render a report as one row of a TABLE_HEADER table."""
-    return (
-        f"| `{report['label']}` "
-        f"| {report['cpu_instructions']:,} "
-        f"| {report['baseline']:,} "
-        f"| {report['delta']:+,} ({report['delta_pct']:+.2f}%) "
-        f"| ±{report['tolerance_pct']:.2f}% "
-        f"| {_STATUS_TEXT[report['status']]} |"
-    )
-
-
-def format_markdown(report: Report) -> str:
-    """Render a report as a standalone markdown table."""
-    return "\n".join(
-        [
-            TABLE_HEADER,
-            format_row(report),
-            "",
-            f"Baseline file: `{report['baseline_file']}`",
-            "",
-        ]
-    )
-
-
 def _refresh_hint(measured: int, baseline_file: str) -> str:
     return f"  echo {measured} > {baseline_file}"
 
@@ -239,8 +198,6 @@ def main(argv: list[str] | None = None) -> int:
     with open(os.path.join(args.output_dir, REPORT_JSON_FILENAME), "w") as f:
         json.dump(report, f, indent=2)
         f.write("\n")
-    with open(os.path.join(args.output_dir, REPORT_MD_FILENAME), "w") as f:
-        f.write(format_markdown(report))
 
     print(f"Baseline:         {baseline:,}  ({baseline_file})")
     print(f"Delta:            {report['delta']:+,} ({report['delta_pct']:+.2f}%), tolerance ±{args.tolerance_pct:.2f}%")

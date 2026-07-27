@@ -39,3 +39,26 @@ py_test(
     main = "callgrind_report_test.py",
     tags = [UNIT],
 )
+
+# Merges the json reports of any number of callgrind targets into one markdown
+# comment. Public so CI can `bazel run` it over the collected test outputs.
+py_binary(
+    name = "callgrind_comment",
+    srcs = [
+        "callgrind_comment.py",
+        "callgrind_report.py",
+    ],
+    main = "callgrind_comment.py",
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "callgrind_comment_test",
+    srcs = [
+        "callgrind_comment.py",
+        "callgrind_comment_test.py",
+        "callgrind_report.py",
+    ],
+    main = "callgrind_comment_test.py",
+    tags = [UNIT],
+)

@@ -13,15 +13,11 @@ from pathlib import Path
 from tools.valgrind.callgrind_report import (
     INSTRUCTIONS_FILENAME,
     REPORT_JSON_FILENAME,
-    REPORT_MD_FILENAME,
     STATUS_PASS,
     STATUS_REGRESSION,
     STATUS_STALE_BASELINE,
-    TABLE_HEADER,
-    Report,
     build_report,
     find_output_files,
-    format_row,
     main,
     read_baseline,
     sum_instructions,
@@ -63,10 +59,10 @@ class ReadCallgrindOutputTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             _write(root / "valgrind-callgrind.1", _SUMMARY_DUMP)
-            # The report files this tool writes into the same directory must
-            # never be picked up as callgrind output on a re-run.
+            # The files this tool writes into the same directory must never be
+            # picked up as callgrind output on a re-run.
             _write(root / INSTRUCTIONS_FILENAME, "1000000\n")
-            _write(root / REPORT_MD_FILENAME, "| table |\n")
+            _write(root / REPORT_JSON_FILENAME, "{}\n")
 
             self.assertEqual([Path(p).name for p in find_output_files(tmp)], ["valgrind-callgrind.1"])
 
@@ -106,15 +102,6 @@ class BuildReportTest(unittest.TestCase):
 
     def test_large_improvement_flags_a_stale_baseline(self) -> None:
         self.assertEqual(self._status(measured=80, baseline=100), STATUS_STALE_BASELINE)
-
-
-class FormatRowTest(unittest.TestCase):
-    def test_renders_every_column(self) -> None:
-        report: Report = build_report("my_target", 1050, 1000, "pkg/baseline.txt", 5.0)
-        self.assertEqual(
-            format_row(report),
-            "| `my_target` | 1,050 | 1,000 | +50 (+5.00%) | ±5.00% | ✅ pass |",
-        )
 
 
 class MainTest(unittest.TestCase):
@@ -166,7 +153,6 @@ class MainTest(unittest.TestCase):
             self.assertEqual(report["cpu_instructions"], 1000000)
             self.assertEqual(report["baseline"], 980000)
             self.assertEqual(report["baseline_file"], "pkg/baseline.txt")
-            self.assertTrue((Path(tmp) / REPORT_MD_FILENAME).read_text().startswith(TABLE_HEADER))
 
     def test_fails_on_regression_beyond_tolerance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
