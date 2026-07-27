@@ -82,9 +82,15 @@ class ReadBaselineTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(read_baseline(_write(Path(tmp) / "baseline.txt", "  1230982304\n")), 1230982304)
 
-    def test_rejects_non_integer(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(ValueError):
-            read_baseline(_write(Path(tmp) / "baseline.txt", "1.2e9\n"))
+    def test_rejects_anything_but_a_positive_integer(self) -> None:
+        # 0 is an unfilled placeholder, not something to compare against.
+        for content in ("1.2e9\n", "0\n", "-5\n", "\n"):
+            with (
+                self.subTest(content=content),
+                tempfile.TemporaryDirectory() as tmp,
+                self.assertRaises(ValueError),
+            ):
+                read_baseline(_write(Path(tmp) / "baseline.txt", content))
 
 
 class BuildReportTest(unittest.TestCase):
@@ -184,6 +190,12 @@ class MainTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
             self.assertEqual(self._run(tmp, "not a number\n"), 1)
+
+    def test_fails_on_placeholder_baseline_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            self._output_dir(tmp)
+            self.assertEqual(self._run(tmp, "0\n"), 1)
+            self.assertFalse((Path(tmp) / REPORT_JSON_FILENAME).exists())
 
 
 if __name__ == "__main__":

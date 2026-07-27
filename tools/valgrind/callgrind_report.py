@@ -18,9 +18,9 @@ The json report is self-contained: it carries the label and the baseline path
 alongside the numbers, so the reports of several callgrind targets can be
 merged into a single comment by rendering one ``format_row`` per report.
 
-The baseline file holds nothing but the expected count as a single integer,
-which is the exact format of the generated ``.instructions`` file. Refreshing a
-baseline is therefore a copy of the one over the other.
+The baseline file holds nothing but the expected count as a single positive
+integer, which is the exact format of the generated ``.instructions`` file.
+Refreshing a baseline is therefore a copy of the one over the other.
 
 Run with Bazel:
     bazel run //tools/valgrind:callgrind_report -- --output-dir <dir>
@@ -117,19 +117,21 @@ def read_baseline(path: str | os.PathLike) -> int:
     """Read the expected instruction count from a baseline file.
 
     Raises:
-        ValueError: if the file does not hold a single integer.
+        ValueError: if the file does not hold a single positive integer. Zero is
+            rejected too: a placeholder nobody has filled in is not something a
+            measurement can be compared against.
     """
     with open(path) as f:
         content = f.read().strip()
-    if not re.fullmatch(r"\d+", content):
-        raise ValueError(f"expected a single integer, got {content!r}")
+    if not re.fullmatch(r"\d+", content) or int(content) == 0:
+        raise ValueError(f"expected a single positive integer, got {content!r}")
     return int(content)
 
 
 def build_report(label: str, measured: int, baseline: int, baseline_file: str, tolerance_pct: float) -> Report:
     """Compare a measured count against a baseline within a percent tolerance."""
     delta = measured - baseline
-    delta_pct = (delta / baseline) * 100 if baseline else 0.0
+    delta_pct = (delta / baseline) * 100
 
     if delta_pct > tolerance_pct:
         status = STATUS_REGRESSION
