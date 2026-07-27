@@ -8,9 +8,8 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@rules_python//python:py_binary.bzl", "py_binary")
-load("@rules_python//python:py_test.bzl", "py_test")
-load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+# Valgrind macros and their runner scripts. The reporting tools they invoke
+# live in //tools/valgrind/report.
 
 exports_files(
     glob([
@@ -18,47 +17,4 @@ exports_files(
         "*.sh",
     ]),
     visibility = ["//visibility:public"],
-)
-
-# Summarises callgrind output and gates it against an instructions baseline.
-# Public because swift_add_valgrind_callgrind puts it in the data of the
-# sh_test it generates in the consuming repository.
-py_binary(
-    name = "callgrind_report",
-    srcs = ["callgrind_report.py"],
-    main = "callgrind_report.py",
-    visibility = ["//visibility:public"],
-)
-
-py_test(
-    name = "callgrind_report_test",
-    srcs = [
-        "callgrind_report.py",
-        "callgrind_report_test.py",
-    ],
-    main = "callgrind_report_test.py",
-    tags = [UNIT],
-)
-
-# Merges the json reports of any number of callgrind targets into one markdown
-# comment. Public so CI can `bazel run` it over the collected test outputs.
-py_binary(
-    name = "callgrind_comment",
-    srcs = [
-        "callgrind_comment.py",
-        "callgrind_report.py",
-    ],
-    main = "callgrind_comment.py",
-    visibility = ["//visibility:public"],
-)
-
-py_test(
-    name = "callgrind_comment_test",
-    srcs = [
-        "callgrind_comment.py",
-        "callgrind_comment_test.py",
-        "callgrind_report.py",
-    ],
-    main = "callgrind_comment_test.py",
-    tags = [UNIT],
 )

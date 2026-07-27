@@ -1,0 +1,75 @@
+# Copyright (C) 2022-2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+# Reporting side of the valgrind tooling: turning a profiling run into a
+# baseline comparison, and those comparisons into a PR comment. The valgrind
+# macros and runner scripts live one level up in //tools/valgrind.
+
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_library.bzl", "py_library")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+
+# Report types shared by the measuring tools and the comment renderer.
+py_library(
+    name = "metrics",
+    srcs = ["metrics.py"],
+)
+
+py_test(
+    name = "metrics_test",
+    srcs = ["metrics_test.py"],
+    main = "metrics_test.py",
+    tags = [UNIT],
+    deps = [":metrics"],
+)
+
+# Summarises callgrind output and gates it against an instructions baseline.
+# Public because swift_add_valgrind_callgrind puts it in the data of the
+# sh_test it generates in the consuming repository.
+py_binary(
+    name = "callgrind_report",
+    srcs = ["callgrind_report.py"],
+    main = "callgrind_report.py",
+    visibility = ["//visibility:public"],
+    deps = [":metrics"],
+)
+
+py_test(
+    name = "callgrind_report_test",
+    srcs = ["callgrind_report_test.py"],
+    main = "callgrind_report_test.py",
+    tags = [UNIT],
+    deps = [
+        ":callgrind_report",
+        ":metrics",
+    ],
+)
+
+# Merges the reports of any number of profiled targets into one markdown
+# comment. Public so CI can `bazel run` it over the collected test outputs.
+py_binary(
+    name = "pr_comment",
+    srcs = ["pr_comment.py"],
+    main = "pr_comment.py",
+    visibility = ["//visibility:public"],
+    deps = [":metrics"],
+)
+
+py_test(
+    name = "pr_comment_test",
+    srcs = ["pr_comment_test.py"],
+    main = "pr_comment_test.py",
+    tags = [UNIT],
+    deps = [
+        ":metrics",
+        ":pr_comment",
+    ],
+)

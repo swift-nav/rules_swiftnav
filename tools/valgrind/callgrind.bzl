@@ -32,7 +32,7 @@ Usage:
 
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 
-_REPORT_TOOL = "@rules_swiftnav//tools/valgrind:callgrind_report"
+_REPORT_TOOL = "@rules_swiftnav//tools/valgrind/report:callgrind_report"
 
 def swift_add_valgrind_callgrind(
         binary,

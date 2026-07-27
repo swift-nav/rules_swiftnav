@@ -9,35 +9,36 @@ When an instructions baseline is supplied the total is compared against it and
 the tool exits non-zero once the measured count exceeds the baseline by more
 than the tolerance, which turns a plain ``bazel test`` into a runtime
 regression gate. The comparison is also written to
-``valgrind-callgrind.report.json`` so CI can surface the numbers without
-re-parsing anything.
-
-That json report is self-contained — it carries the label and the baseline path
-alongside the numbers — so callgrind_comment can merge the reports of any
-number of callgrind targets into a single markdown comment.
+``valgrind-callgrind.report.json`` in the shared report format, so pr_comment
+can merge it with the reports of other targets.
 
 The baseline file holds nothing but the expected count as a single positive
 integer, which is the exact format of the generated ``.instructions`` file.
 Refreshing a baseline is therefore a copy of the one over the other.
 
 Run with Bazel:
-    bazel run //tools/valgrind:callgrind_report -- --output-dir <dir>
+    bazel run //tools/valgrind/report:callgrind_report -- --output-dir <dir>
 """
 
 import argparse
-import json
 import os
 import re
 import sys
 from collections.abc import Iterable
-from typing import TypedDict
+
+from tools.valgrind.report.metrics import (
+    STATUS_REGRESSION,
+    STATUS_STALE_BASELINE,
+    build_metric,
+    build_report,
+    write_report,
+)
 
 INSTRUCTIONS_FILENAME = "valgrind-callgrind.instructions"
 REPORT_JSON_FILENAME = "valgrind-callgrind.report.json"
 
-STATUS_PASS = "pass"
-STATUS_REGRESSION = "regression"
-STATUS_STALE_BASELINE = "stale-baseline"
+METRIC_KEY = "cpu_instructions"
+METRIC_NAME = "CPU instructions"
 
 # Only the per-process dumps, so the report files this tool writes into the
 # same directory are never mistaken for callgrind output on a re-run.
@@ -48,19 +49,6 @@ _OUTPUT_FILE_RE = re.compile(r"^valgrind-callgrind\.\d+$")
 # are the other collected events.
 _SUMMARY_RE = re.compile(r"^summary:\s*(\d+)")
 _TOTALS_RE = re.compile(r"^totals:\s*(\d+)")
-
-
-class Report(TypedDict):
-    """A callgrind measurement compared against its baseline."""
-
-    label: str
-    cpu_instructions: int
-    baseline: int
-    baseline_file: str
-    delta: int
-    delta_pct: float
-    tolerance_pct: float
-    status: str
 
 
 def find_output_files(output_dir: str) -> list[str]:
@@ -110,30 +98,6 @@ def read_baseline(path: str | os.PathLike) -> int:
     if not re.fullmatch(r"\d+", content) or int(content) == 0:
         raise ValueError(f"expected a single positive integer, got {content!r}")
     return int(content)
-
-
-def build_report(label: str, measured: int, baseline: int, baseline_file: str, tolerance_pct: float) -> Report:
-    """Compare a measured count against a baseline within a percent tolerance."""
-    delta = measured - baseline
-    delta_pct = (delta / baseline) * 100
-
-    if delta_pct > tolerance_pct:
-        status = STATUS_REGRESSION
-    elif delta_pct < -tolerance_pct:
-        status = STATUS_STALE_BASELINE
-    else:
-        status = STATUS_PASS
-
-    return Report(
-        label=label,
-        cpu_instructions=measured,
-        baseline=baseline,
-        baseline_file=baseline_file,
-        delta=delta,
-        delta_pct=delta_pct,
-        tolerance_pct=tolerance_pct,
-        status=status,
-    )
 
 
 def _refresh_hint(measured: int, baseline_file: str) -> str:
@@ -193,18 +157,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: instructions baseline '{baseline_file}' is malformed: {err}", file=sys.stderr)
         return 1
 
-    report = build_report(args.label, measured, baseline, baseline_file, args.tolerance_pct)
-
-    with open(os.path.join(args.output_dir, REPORT_JSON_FILENAME), "w") as f:
-        json.dump(report, f, indent=2)
-        f.write("\n")
+    metric = build_metric(METRIC_KEY, METRIC_NAME, "", measured, baseline, args.tolerance_pct)
+    report = build_report(args.label, baseline_file, [metric])
+    write_report(report, os.path.join(args.output_dir, REPORT_JSON_FILENAME))
 
     print(f"Baseline:         {baseline:,}  ({baseline_file})")
-    print(f"Delta:            {report['delta']:+,} ({report['delta_pct']:+.2f}%), tolerance ±{args.tolerance_pct:.2f}%")
+    print(
+        f"Delta:            {metric['delta']:+,.0f} ({metric['delta_pct']:+.2f}%), tolerance ±{args.tolerance_pct:.2f}%"
+    )
 
     if report["status"] == STATUS_REGRESSION:
         print(
-            f"\nError: runtime regression. CPU instructions grew {report['delta_pct']:+.2f}%, more than the "
+            f"\nError: runtime regression. CPU instructions grew {metric['delta_pct']:+.2f}%, more than the "
             f"allowed {args.tolerance_pct:.2f}%.\nIf the increase is expected, refresh the baseline with:\n"
             f"{_refresh_hint(measured, baseline_file)}",
             file=sys.stderr,
@@ -215,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
         # An improvement this large means the baseline no longer guards this
         # target, so say so loudly without failing the test.
         print(
-            f"\nWarning: measured count is {-report['delta_pct']:.2f}% below the baseline, which no longer "
+            f"\nWarning: measured count is {-metric['delta_pct']:.2f}% below the baseline, which no longer "
             f"guards this target.\nConsider refreshing it with:\n{_refresh_hint(measured, baseline_file)}"
         )
 

@@ -2,26 +2,22 @@
 """Tests for callgrind_report.py
 
 Run with Bazel:
-    bazel test //tools/valgrind/...
+    bazel test //tools/valgrind/report/...
 """
 
-import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from tools.valgrind.callgrind_report import (
+from tools.valgrind.report.callgrind_report import (
     INSTRUCTIONS_FILENAME,
     REPORT_JSON_FILENAME,
-    STATUS_PASS,
-    STATUS_REGRESSION,
-    STATUS_STALE_BASELINE,
-    build_report,
     find_output_files,
     main,
     read_baseline,
     sum_instructions,
 )
+from tools.valgrind.report.metrics import STATUS_PASS, STATUS_REGRESSION, STATUS_STALE_BASELINE, read_report
 
 # Multi-event summary line: the first field is Ir, the rest are other events.
 _SUMMARY_DUMP = """\
@@ -89,21 +85,6 @@ class ReadBaselineTest(unittest.TestCase):
                 read_baseline(_write(Path(tmp) / "baseline.txt", content))
 
 
-class BuildReportTest(unittest.TestCase):
-    @staticmethod
-    def _status(measured: int, baseline: int) -> str:
-        return build_report("target", measured, baseline, "pkg/baseline.txt", 5.0)["status"]
-
-    def test_tolerance_boundary_passes(self) -> None:
-        self.assertEqual(self._status(measured=105, baseline=100), STATUS_PASS)
-
-    def test_increase_beyond_tolerance_is_a_regression(self) -> None:
-        self.assertEqual(self._status(measured=106, baseline=100), STATUS_REGRESSION)
-
-    def test_large_improvement_flags_a_stale_baseline(self) -> None:
-        self.assertEqual(self._status(measured=80, baseline=100), STATUS_STALE_BASELINE)
-
-
 class MainTest(unittest.TestCase):
     @staticmethod
     def _output_dir(tmp: str) -> str:
@@ -141,18 +122,24 @@ class MainTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(main(["--output-dir", tmp]), 1)
 
-    def test_passes_within_tolerance_and_writes_reports(self) -> None:
+    def test_passes_within_tolerance_and_writes_one_cpu_metric(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
 
             self.assertEqual(self._run(tmp, "980000\n"), 0)
 
-            report = json.loads((Path(tmp) / REPORT_JSON_FILENAME).read_text())
+            report = read_report(Path(tmp) / REPORT_JSON_FILENAME)
             self.assertEqual(report["status"], STATUS_PASS)
             self.assertEqual(report["label"], "my_target")
-            self.assertEqual(report["cpu_instructions"], 1000000)
-            self.assertEqual(report["baseline"], 980000)
             self.assertEqual(report["baseline_file"], "pkg/baseline.txt")
+            self.assertEqual(len(report["metrics"]), 1)
+            metric = report["metrics"][0]
+            self.assertEqual(metric["key"], "cpu_instructions")
+            self.assertEqual(metric["name"], "CPU instructions")
+            self.assertEqual(metric["unit"], "")
+            self.assertEqual(metric["value"], 1000000)
+            self.assertEqual(metric["baseline"], 980000)
+            self.assertEqual(metric["tolerance_pct"], 5.0)
 
     def test_fails_on_regression_beyond_tolerance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -160,8 +147,7 @@ class MainTest(unittest.TestCase):
 
             self.assertEqual(self._run(tmp, "900000\n"), 1)
 
-            report = json.loads((Path(tmp) / REPORT_JSON_FILENAME).read_text())
-            self.assertEqual(report["status"], STATUS_REGRESSION)
+            self.assertEqual(read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"], STATUS_REGRESSION)
 
     def test_stale_baseline_warns_but_succeeds(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -169,19 +155,12 @@ class MainTest(unittest.TestCase):
 
             self.assertEqual(self._run(tmp, "2000000\n"), 0)
 
-            report = json.loads((Path(tmp) / REPORT_JSON_FILENAME).read_text())
-            self.assertEqual(report["status"], STATUS_STALE_BASELINE)
+            self.assertEqual(read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"], STATUS_STALE_BASELINE)
 
     def test_fails_on_malformed_baseline_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
             self.assertEqual(self._run(tmp, "not a number\n"), 1)
-
-    def test_fails_on_placeholder_baseline_file(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
-            self.assertEqual(self._run(tmp, "0\n"), 1)
-            self.assertFalse((Path(tmp) / REPORT_JSON_FILENAME).exists())
 
 
 if __name__ == "__main__":
