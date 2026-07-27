@@ -17,6 +17,7 @@ from tools.valgrind.callgrind_report import (
     STATUS_PASS,
     STATUS_REGRESSION,
     STATUS_STALE_BASELINE,
+    STATUS_UNRECORDED,
     TABLE_HEADER,
     Report,
     build_report,
@@ -151,10 +152,13 @@ class BuildReportTest(unittest.TestCase):
         self.assertEqual(report["status"], STATUS_STALE_BASELINE)
         self.assertEqual(report["delta"], -20)
 
-    def test_zero_baseline_does_not_divide(self) -> None:
-        report = self._report(measured=10, baseline=0)
+    def test_unrecorded_baseline_does_not_pass_silently(self) -> None:
+        # A freshly added baseline file holds 0 until a real run fills it in.
+        report = self._report(measured=1000, baseline=0)
+        self.assertEqual(report["status"], STATUS_UNRECORDED)
+        self.assertEqual(report["cpu_instructions"], 1000)
+        self.assertEqual(report["delta"], 0)
         self.assertEqual(report["delta_pct"], 0.0)
-        self.assertEqual(report["status"], STATUS_PASS)
 
     def test_carries_label_and_baseline_file(self) -> None:
         report = self._report(measured=100, baseline=100)
@@ -274,6 +278,17 @@ class MainTest(unittest.TestCase):
             missing = str(Path(tmp) / "does-not-exist.txt")
 
             self.assertEqual(main(["--output-dir", tmp, "--instructions-baseline", missing]), 1)
+
+    def test_fails_on_an_unrecorded_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            self._output_dir(tmp, (1, _SUMMARY_DUMP))
+            baseline = _write(Path(tmp) / "baseline.txt", "0\n")
+
+            self.assertEqual(main(["--output-dir", tmp, "--instructions-baseline", str(baseline)]), 1)
+
+            report = json.loads((Path(tmp) / REPORT_JSON_FILENAME).read_text())
+            self.assertEqual(report["status"], STATUS_UNRECORDED)
+            self.assertEqual(report["cpu_instructions"], 1000000)
 
     def test_fails_on_malformed_baseline_file(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

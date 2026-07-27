@@ -41,11 +41,13 @@ REPORT_MD_FILENAME = "valgrind-callgrind.report.md"
 STATUS_PASS = "pass"
 STATUS_REGRESSION = "regression"
 STATUS_STALE_BASELINE = "stale-baseline"
+STATUS_UNRECORDED = "unrecorded"
 
 _STATUS_TEXT = {
     STATUS_PASS: "✅ pass",
     STATUS_REGRESSION: "❌ regression",
     STATUS_STALE_BASELINE: "⚠️ baseline stale",
+    STATUS_UNRECORDED: "🆕 baseline unrecorded",
 }
 
 TABLE_HEADER = "\n".join(
@@ -127,9 +129,27 @@ def read_baseline(path: str | os.PathLike) -> int:
 
 
 def build_report(label: str, measured: int, baseline: int, baseline_file: str, tolerance_pct: float) -> Report:
-    """Compare a measured count against a baseline within a percent tolerance."""
+    """Compare a measured count against a baseline within a percent tolerance.
+
+    A baseline of 0 means nobody has recorded a real count yet, which cannot be
+    compared against and must not pass silently.
+    """
+    if baseline <= 0:
+        # Reporting measured-minus-nothing as the delta would read like a huge
+        # regression, so leave it at zero and let the status carry the meaning.
+        return Report(
+            label=label,
+            cpu_instructions=measured,
+            baseline=baseline,
+            baseline_file=baseline_file,
+            delta=0,
+            delta_pct=0.0,
+            tolerance_pct=tolerance_pct,
+            status=STATUS_UNRECORDED,
+        )
+
     delta = measured - baseline
-    delta_pct = (delta / baseline) * 100 if baseline else 0.0
+    delta_pct = (delta / baseline) * 100
 
     if delta_pct > tolerance_pct:
         status = STATUS_REGRESSION
@@ -239,6 +259,14 @@ def main(argv: list[str] | None = None) -> int:
         f.write("\n")
     with open(os.path.join(args.output_dir, REPORT_MD_FILENAME), "w") as f:
         f.write(format_markdown(report))
+
+    if report["status"] == STATUS_UNRECORDED:
+        print(
+            f"\nError: no instruction count recorded in '{baseline_file}' yet, so there is nothing to "
+            f"compare against.\nRecord this run's count with:\n{_refresh_hint(measured, baseline_file)}",
+            file=sys.stderr,
+        )
+        return 1
 
     print(f"Baseline:         {baseline:,}  ({baseline_file})")
     print(f"Delta:            {report['delta']:+,} ({report['delta_pct']:+.2f}%), tolerance ±{args.tolerance_pct:.2f}%")
