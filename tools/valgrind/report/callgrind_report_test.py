@@ -14,7 +14,6 @@ from tools.valgrind.report.callgrind_report import (
     REPORT_JSON_FILENAME,
     find_output_files,
     main,
-    read_baseline,
     sum_instructions,
 )
 from tools.valgrind.report.metrics import STATUS_PASS, STATUS_REGRESSION, STATUS_STALE_BASELINE, read_report
@@ -69,22 +68,6 @@ class ReadCallgrindOutputTest(unittest.TestCase):
                 sum_instructions(find_output_files(tmp))
 
 
-class ReadBaselineTest(unittest.TestCase):
-    def test_reads_integer(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(read_baseline(_write(Path(tmp) / "baseline.txt", "  1230982304\n")), 1230982304)
-
-    def test_rejects_anything_but_a_positive_integer(self) -> None:
-        # 0 is an unfilled placeholder, not something to compare against.
-        for content in ("1.2e9\n", "0\n", "-5\n", "\n"):
-            with (
-                self.subTest(content=content),
-                tempfile.TemporaryDirectory() as tmp,
-                self.assertRaises(ValueError),
-            ):
-                read_baseline(_write(Path(tmp) / "baseline.txt", content))
-
-
 class MainTest(unittest.TestCase):
     @staticmethod
     def _output_dir(tmp: str) -> str:
@@ -92,18 +75,18 @@ class MainTest(unittest.TestCase):
         return tmp
 
     @staticmethod
-    def _run(tmp: str, baseline_value: str, tolerance_pct: str = "5") -> int:
-        baseline = _write(Path(tmp) / "baseline.txt", baseline_value)
+    def _run(tmp: str, baseline_json: str, tolerance_pct: str = "5") -> int:
+        baseline = _write(Path(tmp) / "baseline.json", baseline_json)
         return main(
             [
                 "--output-dir",
                 tmp,
                 "--label",
                 "my_target",
-                "--instructions-baseline",
+                "--baseline",
                 str(baseline),
                 "--baseline-label",
-                "pkg/baseline.txt",
+                "pkg/baseline.json",
                 "--tolerance-pct",
                 tolerance_pct,
             ]
@@ -126,12 +109,12 @@ class MainTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
 
-            self.assertEqual(self._run(tmp, "980000\n"), 0)
+            self.assertEqual(self._run(tmp, '{"cpu_instructions": 980000}'), 0)
 
             report = read_report(Path(tmp) / REPORT_JSON_FILENAME)
             self.assertEqual(report["status"], STATUS_PASS)
             self.assertEqual(report["label"], "my_target")
-            self.assertEqual(report["baseline_file"], "pkg/baseline.txt")
+            self.assertEqual(report["baseline_file"], "pkg/baseline.json")
             self.assertEqual(len(report["metrics"]), 1)
             metric = report["metrics"][0]
             self.assertEqual(metric["key"], "cpu_instructions")
@@ -145,7 +128,7 @@ class MainTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
 
-            self.assertEqual(self._run(tmp, "900000\n"), 1)
+            self.assertEqual(self._run(tmp, '{"cpu_instructions": 900000}'), 1)
 
             self.assertEqual(read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"], STATUS_REGRESSION)
 
@@ -153,14 +136,14 @@ class MainTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
 
-            self.assertEqual(self._run(tmp, "2000000\n"), 0)
+            self.assertEqual(self._run(tmp, '{"cpu_instructions": 2000000}'), 0)
 
             self.assertEqual(read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"], STATUS_STALE_BASELINE)
 
-    def test_fails_on_malformed_baseline_file(self) -> None:
+    def test_fails_on_an_unusable_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             self._output_dir(tmp)
-            self.assertEqual(self._run(tmp, "not a number\n"), 1)
+            self.assertEqual(self._run(tmp, '{"cpu_instructions": "not a number"}'), 1)
 
 
 if __name__ == "__main__":

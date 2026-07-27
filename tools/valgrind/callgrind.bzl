@@ -8,9 +8,9 @@ any binary's CLI works. The runner substitutes two tokens in them:
     {OUTPUT_DIR}  -> TEST_UNDECLARED_OUTPUTS_DIR (collected by Bazel)
     {TMPDIR}      -> TEST_TMPDIR (scratch, discarded)
 
-Passing instructions_baseline turns the target into a runtime regression gate:
-`bazel test` fails once the count exceeds the checked-in baseline by more than
-tolerance_pct, so CI needs no logic of its own.
+Passing baseline turns the target into a runtime regression gate: `bazel test`
+fails once the count exceeds the checked-in baseline by more than tolerance_pct,
+so CI needs no logic of its own.
 
 Usage:
     load("@rules_swiftnav//tools/valgrind:callgrind.bzl",
@@ -24,7 +24,7 @@ Usage:
             "--directory", "{TMPDIR}/output",
         ],
         data = [":input.file", "config.yaml"],
-        instructions_baseline = "callgrind_baseline.txt",
+        baseline = "callgrind_baseline.json",
         tolerance_pct = 5,
         timeout = "eternal",
     )
@@ -41,7 +41,7 @@ def swift_add_valgrind_callgrind(
         trace_children = False,
         valgrind_args = [],
         program_args = [],
-        instructions_baseline = None,
+        baseline = None,
         tolerance_pct = 5,
         tags = [],
         data = [],
@@ -68,16 +68,15 @@ def swift_add_valgrind_callgrind(
             ["--max-stackframe=16000000"] for binaries with large stack frames.
         program_args: Arguments forwarded to the binary. Supports $(location)
             expansion and the {OUTPUT_DIR} / {TMPDIR} runtime tokens.
-        instructions_baseline: Label of a text file holding the expected
-            instruction count as a single integer — the same format as the
-            generated valgrind-callgrind.instructions file, so refreshing a
-            baseline is a copy of the one over the other. When set, the test
-            fails on a regression larger than tolerance_pct. When omitted the
-            target only profiles and never fails on the count.
+        baseline: Label of a json file mapping metric keys to their expected
+            values, e.g. {"cpu_instructions": 28032185999}. One file per target,
+            so the memory baselines can join it later. When set, the test fails
+            on a regression larger than tolerance_pct. When omitted the target
+            only profiles and never fails on the count.
         tolerance_pct: Percentage the measured instruction count may exceed the
             baseline before the test fails. Also the threshold below which an
             improvement is reported as a stale baseline (a warning, not a
-            failure). Ignored without instructions_baseline.
+            failure). Ignored without baseline.
         tags: Additional Bazel tags.
         data: Additional data dependencies (e.g. inputs referenced by args).
         **kwargs: Forwarded to sh_test (e.g. timeout, size, env).
@@ -96,15 +95,15 @@ def swift_add_valgrind_callgrind(
     # callgrind targets are merged into one CI comment.
     report_args = ["--label", name]
     baseline_data = []
-    if instructions_baseline:
-        baseline_data = [instructions_baseline]
+    if baseline:
+        baseline_data = [baseline]
         report_args += [
-            "--instructions-baseline",
-            "$(location {})".format(instructions_baseline),
+            "--baseline",
+            "$(location {})".format(baseline),
             # The workspace-relative path is what a developer needs to see when
             # told how to refresh the baseline.
             "--baseline-label",
-            "$(rootpath {})".format(instructions_baseline),
+            "$(rootpath {})".format(baseline),
             "--tolerance-pct",
             str(tolerance_pct),
         ]

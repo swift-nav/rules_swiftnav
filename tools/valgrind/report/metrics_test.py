@@ -5,7 +5,9 @@ Run with Bazel:
     bazel test //tools/valgrind/report/...
 """
 
+import tempfile
 import unittest
+from pathlib import Path
 
 from tools.valgrind.report.metrics import (
     STATUS_PASS,
@@ -18,6 +20,7 @@ from tools.valgrind.report.metrics import (
     format_delta,
     format_number,
     format_value,
+    read_baseline,
     worst_status,
 )
 
@@ -64,6 +67,41 @@ class BuildReportTest(unittest.TestCase):
         self.assertEqual(report["label"], "target")
         self.assertEqual(report["baseline_file"], "pkg/baseline.txt")
         self.assertEqual(len(report["metrics"]), 2)
+
+
+class ReadBaselineTest(unittest.TestCase):
+    @staticmethod
+    def _file(tmp: str, content: str) -> Path:
+        path = Path(tmp) / "baseline.json"
+        path.write_text(content)
+        return path
+
+    def test_reads_the_requested_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"cpu_instructions": 28032185999, "memory_heap_mb": 15.405}')
+
+            self.assertEqual(read_baseline(path, "cpu_instructions"), 28032185999)
+            self.assertEqual(read_baseline(path, "memory_heap_mb"), 15.405)
+
+    def test_rejects_a_missing_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"memory_heap_mb": 15.405}')
+            with self.assertRaises(ValueError):
+                read_baseline(path, "cpu_instructions")
+
+    def test_rejects_anything_but_a_positive_number(self) -> None:
+        # 0 is an unfilled placeholder, not something to compare against.
+        for content in ('{"cpu_instructions": 0}', '{"cpu_instructions": -5}', '{"cpu_instructions": "42"}'):
+            with (
+                self.subTest(content=content),
+                tempfile.TemporaryDirectory() as tmp,
+                self.assertRaises(ValueError),
+            ):
+                read_baseline(self._file(tmp, content), "cpu_instructions")
+
+    def test_rejects_malformed_json(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(ValueError):
+            read_baseline(self._file(tmp, "not json"), "cpu_instructions")
 
 
 class FormatNumberTest(unittest.TestCase):

@@ -12,9 +12,10 @@ regression gate. The comparison is also written to
 ``valgrind-callgrind.report.json`` in the shared report format, so pr_comment
 can merge it with the reports of other targets.
 
-The baseline file holds nothing but the expected count as a single positive
-integer, which is the exact format of the generated ``.instructions`` file.
-Refreshing a baseline is therefore a copy of the one over the other.
+The baseline is a json file mapping metric keys to their expected values, so a
+target that later also measures memory keeps every baseline in one file::
+
+    {"cpu_instructions": 28032185999}
 
 Run with Bazel:
     bazel run //tools/valgrind/report:callgrind_report -- --output-dir <dir>
@@ -31,6 +32,7 @@ from tools.valgrind.report.metrics import (
     STATUS_STALE_BASELINE,
     build_metric,
     build_report,
+    read_baseline,
     write_report,
 )
 
@@ -85,23 +87,8 @@ def sum_instructions(paths: Iterable[str | os.PathLike]) -> int:
     return total
 
 
-def read_baseline(path: str | os.PathLike) -> int:
-    """Read the expected instruction count from a baseline file.
-
-    Raises:
-        ValueError: if the file does not hold a single positive integer. Zero is
-            rejected too: a placeholder nobody has filled in is not something a
-            measurement can be compared against.
-    """
-    with open(path) as f:
-        content = f.read().strip()
-    if not re.fullmatch(r"\d+", content) or int(content) == 0:
-        raise ValueError(f"expected a single positive integer, got {content!r}")
-    return int(content)
-
-
 def _refresh_hint(measured: int, baseline_file: str) -> str:
-    return f"  echo {measured} > {baseline_file}"
+    return f'  set "{METRIC_KEY}": {measured} in {baseline_file}'
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -117,9 +104,9 @@ def main(argv: list[str] | None = None) -> int:
         help="Name of the profiled target, shown in the reports",
     )
     parser.add_argument(
-        "--instructions-baseline",
+        "--baseline",
         default=None,
-        help="File holding the expected instruction count as a single integer",
+        help=f"Json file whose {METRIC_KEY!r} entry is the expected instruction count",
     )
     parser.add_argument(
         "--baseline-label",
@@ -144,24 +131,24 @@ def main(argv: list[str] | None = None) -> int:
         f.write(f"{measured}\n")
     print(f"CPU instructions: {measured:,}")
 
-    if not args.instructions_baseline:
+    if not args.baseline:
         return 0
 
-    baseline_file = args.baseline_label or args.instructions_baseline
+    baseline_file = args.baseline_label or args.baseline
     try:
-        baseline = read_baseline(args.instructions_baseline)
+        baseline = read_baseline(args.baseline, METRIC_KEY)
     except OSError:
-        print(f"Error: instructions baseline '{baseline_file}' not found", file=sys.stderr)
+        print(f"Error: baseline '{baseline_file}' not found", file=sys.stderr)
         return 1
     except ValueError as err:
-        print(f"Error: instructions baseline '{baseline_file}' is malformed: {err}", file=sys.stderr)
+        print(f"Error: baseline '{baseline_file}' is unusable: {err}", file=sys.stderr)
         return 1
 
     metric = build_metric(METRIC_KEY, METRIC_NAME, "", measured, baseline, args.tolerance_pct)
     report = build_report(args.label, baseline_file, [metric])
     write_report(report, os.path.join(args.output_dir, REPORT_JSON_FILENAME))
 
-    print(f"Baseline:         {baseline:,}  ({baseline_file})")
+    print(f"Baseline:         {baseline:,.0f}  ({baseline_file})")
     print(
         f"Delta:            {metric['delta']:+,.0f} ({metric['delta_pct']:+.2f}%), tolerance ±{args.tolerance_pct:.2f}%"
     )

@@ -96,6 +96,32 @@ def build_report(label: str, baseline_file: str, metrics: list[Metric]) -> Repor
     )
 
 
+def read_baseline(path: str | os.PathLike, key: str) -> float:
+    """Read one metric's expected value from a json baseline file.
+
+    The file maps metric keys to numbers, so a target that measures several
+    quantities keeps them all in one place::
+
+        {"cpu_instructions": 28032185999, "memory_heap_mb": 15.405}
+
+    Raises:
+        ValueError: if the file is not valid json, has no entry for the key, or
+            the entry is not a positive number. Zero is rejected too: a
+            placeholder nobody has filled in is not something to compare
+            against.
+    """
+    with open(path) as f:
+        baselines = json.load(f)
+
+    if not isinstance(baselines, dict) or key not in baselines:
+        raise ValueError(f"no {key!r} entry")
+
+    value = baselines[key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value <= 0:
+        raise ValueError(f"{key!r} must be a positive number, got {value!r}")
+    return value
+
+
 def format_number(value: float, unit: str, signed: bool = False) -> str:
     """Render a metric number: counts as integers, everything else to 3 decimals."""
     sign = "+" if signed else ""
