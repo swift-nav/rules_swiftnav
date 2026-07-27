@@ -16,6 +16,7 @@ from tools.valgrind.callgrind_comment import (
     DEFAULT_MARKER,
     TABLE_HEADER,
     format_comment,
+    format_percent,
     main,
 )
 from tools.valgrind.callgrind_report import build_report
@@ -36,8 +37,11 @@ class FormatCommentTest(unittest.TestCase):
         self.assertTrue(comment.startswith(DEFAULT_MARKER))
         self.assertIn("## Title", comment)
         self.assertIn(TABLE_HEADER, comment)
-        self.assertIn("| `only_target` | 1,050 | 1,000 | +50 (+5.00%) | ±5.00% | ✅ pass |", comment)
-        self.assertIn("Baseline for `only_target`: `pkg/baseline.txt`", comment)
+        self.assertIn("| ✅ | `only_target` | 1,050 | 1,000 | +5.00% |", comment)
+        self.assertIn(
+            "- `only_target` — baseline `pkg/baseline.txt`, tolerance ±5.00%, absolute delta +50",
+            comment,
+        )
         self.assertIn("Commit: `abc1234`", comment)
 
     def test_several_reports_share_one_table_sorted_by_label(self) -> None:
@@ -50,9 +54,19 @@ class FormatCommentTest(unittest.TestCase):
 
         self.assertEqual(comment.count(TABLE_HEADER), 1)
         self.assertLess(comment.index("| `alpha` |"), comment.index("| `zeta` |"))
-        self.assertIn("❌ regression", comment)
-        self.assertIn("⚠️ baseline stale", comment)
+        self.assertIn("| ❌ | `alpha` |", comment)
+        self.assertIn("| ⚠️ | `zeta` |", comment)
         self.assertNotIn("Commit:", comment)
+
+
+class FormatPercentTest(unittest.TestCase):
+    def test_keeps_decimals_for_ordinary_deltas(self) -> None:
+        self.assertEqual(format_percent(42.0), "+42.00%")
+        self.assertEqual(format_percent(-42.0), "-42.00%")
+
+    def test_drops_decimals_once_the_delta_is_huge(self) -> None:
+        # An unfilled placeholder baseline yields percentages this large.
+        self.assertEqual(format_percent(4200.0), "+4,200%")
 
 
 class MainTest(unittest.TestCase):
