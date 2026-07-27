@@ -8,10 +8,34 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+
 exports_files(
     glob([
         "*.bzl",
         "*.sh",
     ]),
     visibility = ["//visibility:public"],
+)
+
+# Summarises callgrind output and gates it against an instructions baseline.
+# Public because swift_add_valgrind_callgrind puts it in the data of the
+# sh_test it generates in the consuming repository.
+py_binary(
+    name = "callgrind_report",
+    srcs = ["callgrind_report.py"],
+    main = "callgrind_report.py",
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "callgrind_report_test",
+    srcs = [
+        "callgrind_report.py",
+        "callgrind_report_test.py",
+    ],
+    main = "callgrind_report_test.py",
+    tags = [UNIT],
 )

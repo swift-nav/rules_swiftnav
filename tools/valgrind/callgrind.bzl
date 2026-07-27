@@ -1,14 +1,16 @@
 """Valgrind callgrind profiling macro for Bazel.
 
 Runs a binary under valgrind's callgrind tool, capturing the raw callgrind
-output (for KCacheGrind) and a single extracted CPU instruction count.
+output (for KCacheGrind) and the extracted CPU instruction count.
 
-Unlike a binary-specific profiling macro, the invocation is not hardcoded — the
-caller supplies program_args verbatim, so any binary's CLI works. Two runtime
-tokens are substituted in program_args by the runner:
+The invocation is not hardcoded — the caller supplies program_args verbatim, so
+any binary's CLI works. The runner substitutes two tokens in them:
     {OUTPUT_DIR}  -> TEST_UNDECLARED_OUTPUTS_DIR (collected by Bazel)
     {TMPDIR}      -> TEST_TMPDIR (scratch, discarded)
-Use these to point a binary's output/working directory at a writable location.
+
+Passing instructions_baseline turns the target into a runtime regression gate:
+`bazel test` fails once the count exceeds the checked-in baseline by more than
+tolerance_pct, so CI needs no logic of its own.
 
 Usage:
     load("@rules_swiftnav//tools/valgrind:callgrind.bzl",
@@ -22,11 +24,15 @@ Usage:
             "--directory", "{TMPDIR}/output",
         ],
         data = [":input.file", "config.yaml"],
+        instructions_baseline = "callgrind_baseline.txt",
+        tolerance_pct = 5,
         timeout = "eternal",
     )
 """
 
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+_REPORT_TOOL = "@rules_swiftnav//tools/valgrind:callgrind_report"
 
 def swift_add_valgrind_callgrind(
         binary,
@@ -35,6 +41,8 @@ def swift_add_valgrind_callgrind(
         trace_children = False,
         valgrind_args = [],
         program_args = [],
+        instructions_baseline = None,
+        tolerance_pct = 5,
         tags = [],
         data = [],
         **kwargs):
@@ -45,6 +53,10 @@ def swift_add_valgrind_callgrind(
                                           (inspect with KCacheGrind)
         valgrind-callgrind.instructions — single line: total instruction count
                                           summed over all processes
+        valgrind-callgrind.report.json  — baseline comparison, machine readable
+        valgrind-callgrind.report.md    — baseline comparison as a markdown
+                                          table, ready to post as a PR comment
+    The last two are only produced when instructions_baseline is set.
 
     Args:
         binary: Label of the cc_binary (or swift_cc_test) to run under callgrind.
@@ -56,6 +68,16 @@ def swift_add_valgrind_callgrind(
             ["--max-stackframe=16000000"] for binaries with large stack frames.
         program_args: Arguments forwarded to the binary. Supports $(location)
             expansion and the {OUTPUT_DIR} / {TMPDIR} runtime tokens.
+        instructions_baseline: Label of a text file holding the expected
+            instruction count as a single integer — the same format as the
+            generated valgrind-callgrind.instructions file, so refreshing a
+            baseline is a copy of the one over the other. When set, the test
+            fails on a regression larger than tolerance_pct. When omitted the
+            target only profiles and never fails on the count.
+        tolerance_pct: Percentage the measured instruction count may exceed the
+            baseline before the test fails. Also the threshold below which an
+            improvement is reported as a stale baseline (a warning, not a
+            failure). Ignored without instructions_baseline.
         tags: Additional Bazel tags.
         data: Additional data dependencies (e.g. inputs referenced by args).
         **kwargs: Forwarded to sh_test (e.g. timeout, size, env).
@@ -70,11 +92,35 @@ def swift_add_valgrind_callgrind(
         valgrind_flags.append("--trace-children=yes")
     valgrind_flags += valgrind_args
 
+    # The label identifies this target's row when the reports of several
+    # callgrind targets are merged into one CI comment.
+    report_args = ["--label", name]
+    baseline_data = []
+    if instructions_baseline:
+        baseline_data = [instructions_baseline]
+        report_args += [
+            "--instructions-baseline",
+            "$(location {})".format(instructions_baseline),
+            # The workspace-relative path is what a developer needs to see when
+            # told how to refresh the baseline.
+            "--baseline-label",
+            "$(rootpath {})".format(instructions_baseline),
+            "--tolerance-pct",
+            str(tolerance_pct),
+        ]
+
     sh_test(
         name = name,
         srcs = ["@rules_swiftnav//tools/valgrind:valgrind_callgrind_run.sh"],
-        args = valgrind_flags + ["$(location {})".format(binary)] + program_args,
-        data = data + [binary],
+        args = (
+            ["$(location {})".format(_REPORT_TOOL)] +
+            report_args +
+            ["--"] +
+            valgrind_flags +
+            ["$(location {})".format(binary)] +
+            program_args
+        ),
+        data = data + baseline_data + [binary, _REPORT_TOOL],
         tags = tags + ["valgrind-callgrind", "manual"],
         **kwargs
     )

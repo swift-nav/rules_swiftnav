@@ -1,26 +1,46 @@
 #!/bin/bash
-# Generic valgrind callgrind runner used by swift_add_valgrind_callgrind targets.
-# Arguments are forwarded to valgrind:
-#   [valgrind_flags...] binary [binary_args...]
+# Runs valgrind callgrind for swift_add_valgrind_callgrind targets. Reporting
+# and the baseline check live in the callgrind_report tool, whose runfiles path
+# is the first argument; everything up to -- is forwarded to it.
 #
-# The tokens {OUTPUT_DIR} and {TMPDIR} in the forwarded arguments are replaced
-# with TEST_UNDECLARED_OUTPUTS_DIR and TEST_TMPDIR respectively, letting the
-# caller route a binary's output/working directory to a writable location.
+# Usage:
+#   valgrind_callgrind_run.sh <callgrind_report> [report_args...] -- \
+#       [valgrind_flags...] binary [binary_args...]
 #
-# Outputs written to TEST_UNDECLARED_OUTPUTS_DIR:
-#   valgrind-callgrind.<pid>          — raw callgrind output per process
-#                                       (inspect with KCacheGrind)
-#   valgrind-callgrind.instructions   — total instruction count summed over all
-#                                       processes (single line)
-# The %p (pid) suffix keeps output from separate processes distinct when
-# --trace-children=yes is used.
+# {OUTPUT_DIR} and {TMPDIR} in the valgrind arguments expand to
+# TEST_UNDECLARED_OUTPUTS_DIR and TEST_TMPDIR. The %p (pid) suffix on the dumps
+# keeps processes distinct under --trace-children=yes.
 
 set -euo pipefail
+
+if [ $# -eq 0 ]; then
+    echo "Error: missing callgrind_report tool argument" >&2
+    exit 1
+fi
+
+REPORT_TOOL="$(realpath "$1")"
+shift
+
+REPORT_ARGS=()
+while [ $# -gt 0 ] && [ "$1" != "--" ]; do
+    REPORT_ARGS+=("$1")
+    shift
+done
+
+if [ $# -eq 0 ]; then
+    echo "Error: missing -- separator before the valgrind arguments" >&2
+    exit 1
+fi
+shift
+
+if [ $# -eq 0 ]; then
+    echo "Error: no binary to run under callgrind" >&2
+    exit 1
+fi
 
 OUTPUT_DIR="${TEST_UNDECLARED_OUTPUTS_DIR:-$(mktemp -d)}"
 SCRATCH_DIR="${TEST_TMPDIR:-$(mktemp -d)}"
 CALLGRIND_OUT_PATTERN="${OUTPUT_DIR}/valgrind-callgrind.%p"
-INSTRUCTIONS_FILE="${OUTPUT_DIR}/valgrind-callgrind.instructions"
 
 if ! command -v valgrind &>/dev/null; then
     echo "Error: valgrind not found" >&2
@@ -45,26 +65,4 @@ valgrind -q --tool=callgrind \
     "--callgrind-out-file=${CALLGRIND_OUT_PATTERN}" \
     "${ARGS[@]}"
 
-# Sum the instruction count across every process's output file. callgrind
-# reports the total on a "summary:" line (or "totals:" in older formats); the
-# first field is the instruction count (Ir).
-TOTAL_INSTRUCTIONS=0
-FOUND=0
-for f in "${OUTPUT_DIR}"/valgrind-callgrind.*; do
-    [ -e "$f" ] || continue
-    n=$(awk '/^summary:/{print $2; exit}' "$f")
-    if [ -z "$n" ]; then
-        n=$(awk -F: '/^totals:/{gsub(/ /, "", $2); print $2; exit}' "$f")
-    fi
-    [ -n "$n" ] || continue
-    TOTAL_INSTRUCTIONS=$((TOTAL_INSTRUCTIONS + n))
-    FOUND=1
-done
-
-if [ "$FOUND" -eq 0 ]; then
-    echo "Error: no callgrind output files found in $OUTPUT_DIR" >&2
-    exit 1
-fi
-
-echo "$TOTAL_INSTRUCTIONS" > "$INSTRUCTIONS_FILE"
-echo "CPU instructions: $TOTAL_INSTRUCTIONS"
+"$REPORT_TOOL" --output-dir "$OUTPUT_DIR" "${REPORT_ARGS[@]+"${REPORT_ARGS[@]}"}"
