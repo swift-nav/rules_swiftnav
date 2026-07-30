@@ -64,9 +64,10 @@ use_repo(yocto_generic_ext, "yocto_generic")
 doxygen_ext = use_extension("@rules_swiftnav//doxygen:extensions.bzl", "doxygen_extension")
 use_repo(doxygen_ext, "doxygen_linux_x86_64", "doxygen_macos_arm64")
 
-# Register the buildifier toolchain
 bazel_dep(
     name = "buildifier_prebuilt",
     version = "8.5.1.2",
     dev_dependency = True,
 )
+bazel_dep(name = "rules_go", version = "0.60.0", dev_dependency = True, repo_name = "")
+bazel_dep(name = "aspect_rules_lint", version = "2.7.2", dev_dependency = True)

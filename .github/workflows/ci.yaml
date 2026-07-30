@@ -21,8 +21,7 @@ jobs:
 
       - name: Run format
         run: |
-          bazel run //tools/buildifier:buildifier
-          git diff --exit-code
+          bazel run //tools/format:format.check 
 
       - name: Run tools tests
         run: |
