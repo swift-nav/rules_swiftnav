@@ -28,6 +28,8 @@ Because this is silencing a warning for a nonexistent line, we
 only support the very specific NOLINT(build/header_guard) syntax,
 and not the general NOLINT or NOLINT(*) syntax.
 """
+
+
 def can_ignore_file(lines):
     if any("NOLINT(build/header_guard)" in line for line in lines) or any(
         "#pragma once" in line for line in lines
@@ -144,11 +146,12 @@ def main():
     os.chdir(os.environ["BUILD_WORKSPACE_DIRECTORY"])
     files = []
     if len(sys.argv) == 1:
-        git = subprocess.run(['git', 'ls-files', '*.h'],
-                             capture_output=True,
-                             encoding=locale.getpreferredencoding(),
-                             check=True,
-                             )
+        git = subprocess.run(
+            ["git", "ls-files", "*.h"],
+            capture_output=True,
+            encoding=locale.getpreferredencoding(),
+            check=True,
+        )
         files = git.stdout.splitlines()
     else:
         files = sys.argv[1:]

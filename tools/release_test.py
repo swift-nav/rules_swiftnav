@@ -29,7 +29,7 @@ from tools.release import (
     set_version,
 )
 
-MODULE = '''module(
+MODULE = """module(
     name = "rules_swiftnav",
     version = "0.20.0",
     compatibility_level = 1,
@@ -37,7 +37,7 @@ MODULE = '''module(
 
 bazel_dep(name = "bazel_skylib", version = "1.8.2")
 bazel_dep(name = "platforms", version = "1.0.0")
-'''
+"""
 
 
 class ParseVersionTest(unittest.TestCase):
@@ -68,7 +68,7 @@ class SetVersionTest(unittest.TestCase):
     def test_replaces_only_module_version(self):
         out = set_version(MODULE, "0.21.0")
         self.assertEqual(parse_version(out), "0.21.0")
-        self.assertIn('compatibility_level = 1', out)
+        self.assertIn("compatibility_level = 1", out)
 
     def test_leaves_bazel_dep_versions_untouched(self):
         out = set_version(MODULE, "0.21.0")
@@ -125,8 +125,10 @@ class BumpCopyrightsTest(unittest.TestCase):
             stale = self._write(d, "a.py", self.HEADER.format("2022"))
             current = self._write(d, "b.py", self.HEADER.format("2022-2026"))
             no_header = self._write(d, "c.txt", "nothing here\n")
-            with mock.patch("tools.release.list_tracked_files",
-                            return_value=[stale, current, no_header]):
+            with mock.patch(
+                "tools.release.list_tracked_files",
+                return_value=[stale, current, no_header],
+            ):
                 changed = bump_copyrights(2026)
             self.assertEqual(changed, [stale])
             with open(stale, encoding="utf-8") as f:

@@ -26,23 +26,21 @@ _PARTS = ("major", "minor", "patch")
 
 # Matches "Copyright (C) 2022" or "Copyright (C) 2022-2025" in a Swift
 # Navigation header, capturing the start year and (optional) end year.
-_COPYRIGHT_RE = re.compile(
-    r"(Copyright \(C\) )(\d{4})(?:-(\d{4}))?( Swift Navigation)"
-)
+_COPYRIGHT_RE = re.compile(r"(Copyright \(C\) )(\d{4})(?:-(\d{4}))?( Swift Navigation)")
 
 REPO = "swift-nav/rules_swiftnav"
 EXAMPLE_LOCK_DIR = "examples/small_world"
 
-_BAZELISK_PIN_RE = re.compile(r'(?m)^\s*USE_BAZEL_VERSION\s*=\s*(\S+)')
-_BAZEL_VERSION_RE = re.compile(r'\bbazel\s+(\d+\.\d+\.\d+)')
-_CONCRETE_VERSION_RE = re.compile(r'\d+\.\d+\.\d+')
+_BAZELISK_PIN_RE = re.compile(r"(?m)^\s*USE_BAZEL_VERSION\s*=\s*(\S+)")
+_BAZEL_VERSION_RE = re.compile(r"\bbazel\s+(\d+\.\d+\.\d+)")
+_CONCRETE_VERSION_RE = re.compile(r"\d+\.\d+\.\d+")
 
 
 def parse_version(module_text):
     """Return the X.Y.Z version string from a MODULE.bazel module() block."""
     m = _VERSION_RE.search(module_text)
     if not m:
-        raise ValueError("no `version = \"X.Y.Z\"` found in MODULE.bazel")
+        raise ValueError('no `version = "X.Y.Z"` found in MODULE.bazel')
     return m.group(2)
 
 
@@ -73,6 +71,7 @@ def set_copyright_years(text, year):
     `year`, producing "(C) <start>-<year>". A header already ending at `year`
     (single year or range) is left unchanged, so the transform is idempotent.
     """
+
     def repl(m):
         start = int(m.group(2))
         if start >= year:
@@ -154,8 +153,9 @@ def _run(cmd, **kw):
 
 
 def _git_out(cmd):
-    return subprocess.run(["git", *cmd], check=True, text=True,
-                          capture_output=True).stdout.strip()
+    return subprocess.run(
+        ["git", *cmd], check=True, text=True, capture_output=True
+    ).stdout.strip()
 
 
 def require_gh():
@@ -175,8 +175,11 @@ def require_gh():
 def main(argv=None):
     p = argparse.ArgumentParser(description="Bump version and open a release PR.")
     p.add_argument("part", nargs="?", choices=_PARTS, help="semver part to bump")
-    p.add_argument("--current", action="store_true",
-                   help="print the current version and exit (used by CI)")
+    p.add_argument(
+        "--current",
+        action="store_true",
+        help="print the current version and exit (used by CI)",
+    )
     p.add_argument("--file", default="MODULE.bazel")
     p.add_argument("--stdin", action="store_true")
     p.add_argument("--dry-run", action="store_true")
@@ -221,10 +224,14 @@ def main(argv=None):
     # The example lockfile is regenerated below; ensure we'll do so with the
     # same Bazel version CI uses, i.e. that bazelisk honored .bazeliskrc.
     rc_path = os.path.join(EXAMPLE_LOCK_DIR, ".bazeliskrc")
-    pin = parse_bazelisk_pin(open(rc_path, encoding="utf-8").read()) \
-        if os.path.exists(rc_path) else None
-    bazel_version = subprocess.run(["bazel", "--version"], cwd=EXAMPLE_LOCK_DIR,
-                                   text=True, capture_output=True).stdout
+    pin = (
+        parse_bazelisk_pin(open(rc_path, encoding="utf-8").read())
+        if os.path.exists(rc_path)
+        else None
+    )
+    bazel_version = subprocess.run(
+        ["bazel", "--version"], cwd=EXAMPLE_LOCK_DIR, text=True, capture_output=True
+    ).stdout
     check_pinned_bazel(pin, bazel_version)
 
     try:
@@ -240,8 +247,15 @@ def main(argv=None):
         _run(["bazel", "run", "//tools/buildifier:buildifier"])
 
         _run(["git", "checkout", "-b", branch])
-        _run(["git", "add", "MODULE.bazel", f"{EXAMPLE_LOCK_DIR}/MODULE.bazel.lock",
-              *bumped])
+        _run(
+            [
+                "git",
+                "add",
+                "MODULE.bazel",
+                f"{EXAMPLE_LOCK_DIR}/MODULE.bazel.lock",
+                *bumped,
+            ]
+        )
         _run(["git", "commit", "-m", f"Bump version to {new}"])
         _run(["git", "push", "-u", "origin", branch])
         body = (
@@ -253,8 +267,19 @@ def main(argv=None):
             f"Merging to `main` triggers `.github/workflows/release.yaml`, "
             f"which tags `{tag}` and creates the GitHub release."
         )
-        _run(["gh", "pr", "create", "--repo", REPO,
-              "--title", f"Bump version to {new}", "--body", body])
+        _run(
+            [
+                "gh",
+                "pr",
+                "create",
+                "--repo",
+                REPO,
+                "--title",
+                f"Bump version to {new}",
+                "--body",
+                body,
+            ]
+        )
         print(f"Opened release PR for {new}.")
         return 0
     except Exception:
