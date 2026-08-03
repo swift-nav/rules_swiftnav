@@ -19,7 +19,7 @@ def main():
         "filename",
         nargs="?",
         default="src/base_math/sign.cc",
-        help="Source file to analyze (default: src/base_math/sign.cc)"
+        help="Source file to analyze (default: src/base_math/sign.cc)",
     )
     args = parser.parse_args()
 
@@ -32,7 +32,7 @@ def main():
             ["bazel", "run", "@hedron_compile_commands//:refresh_all"],
             capture_output=True,
             text=True,
-            check=True
+            check=True,
         )
         print(result.stdout)
         if result.stderr:
@@ -91,11 +91,14 @@ def main():
         if arguments:
             compile_options = [arg for arg in arguments if arg.startswith("-")]
         else:
-            print("Error: No command or arguments found in target entry", file=sys.stderr)
+            print(
+                "Error: No command or arguments found in target entry", file=sys.stderr
+            )
             sys.exit(1)
     else:
         # Split command string and extract options starting with '-'
         import shlex
+
         parts = shlex.split(command)
         compile_options = [part for part in parts if part.startswith("-")]
 
@@ -115,7 +118,9 @@ def main():
 
     if duplicates:
         print(f"Found {len(duplicates)} duplicate compile option(s):\n")
-        for option, count in sorted(duplicates.items(), key=lambda x: x[1], reverse=True):
+        for option, count in sorted(
+            duplicates.items(), key=lambda x: x[1], reverse=True
+        ):
             print(f"  '{option}' appears {count} times")
     else:
         print("No duplicate compile options found.")
@@ -137,7 +142,11 @@ def main():
         print()
 
     # Check for multiple optimization levels
-    opt_flags = [opt for opt in compile_options if opt in ["-O0", "-O1", "-O2", "-O3", "-Os", "-Oz", "-Og", "-Ofast"]]
+    opt_flags = [
+        opt
+        for opt in compile_options
+        if opt in ["-O0", "-O1", "-O2", "-O3", "-Os", "-Oz", "-Og", "-Ofast"]
+    ]
     if len(opt_flags) > 1:
         contradictions_found = True
         print(f"Found {len(opt_flags)} conflicting optimization level flags:")

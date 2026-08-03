@@ -25,9 +25,11 @@ def main() -> None:
     args = init()
     defaults = json.loads(args.defaults)
 
-    with open(args.status) as status, open(args.template) as tpl, open(
-        args.output, "w"
-    ) as out:
+    with (
+        open(args.status) as status,
+        open(args.template) as tpl,
+        open(args.output, "w") as out,
+    ):
         template = tpl.read()
         for key, val in merge(status, defaults).items():
             template = template.replace("@" + key + "@", val)

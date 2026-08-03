@@ -100,7 +100,13 @@ class TestExtractFilesFromBep(unittest.TestCase):
     def test_relative_path_resolved_with_bazel_output_path(self):
         """A relative path from the BEP is joined with bazel_output_path."""
         bep = self.p / "bep.json"
-        bep.write_text(_named_set_event(_file(name="foo.report", path_prefix=["bazel-out", "k8-fastbuild", "bin"])))
+        bep.write_text(
+            _named_set_event(
+                _file(
+                    name="foo.report", path_prefix=["bazel-out", "k8-fastbuild", "bin"]
+                )
+            )
+        )
 
         result = extract_files_from_bep(
             bep, bazel_output_path=Path("/workspace"), ext=".report"
@@ -112,7 +118,11 @@ class TestExtractFilesFromBep(unittest.TestCase):
     def test_absolute_path_not_modified_by_bazel_output_path(self):
         """An absolute path in the BEP is used as-is regardless of bazel_output_path."""
         bep = self.p / "bep.json"
-        bep.write_text(_named_set_event(_file(name="foo.report", path_prefix=["/absolute", "path"])))
+        bep.write_text(
+            _named_set_event(
+                _file(name="foo.report", path_prefix=["/absolute", "path"])
+            )
+        )
 
         result = extract_files_from_bep(
             bep, bazel_output_path=Path("/workspace"), ext=".report"
@@ -319,22 +329,28 @@ class TestFilterExternalDependencies(unittest.TestCase):
 
     def test_external_results_removed(self):
         """Results whose primary URI starts with 'external/' are dropped."""
-        run = {"results": [
-            self._result("external/dep+/include/dep/file.h"),
-            self._result("lib/src/file.cc"),
-        ]}
+        run = {
+            "results": [
+                self._result("external/dep+/include/dep/file.h"),
+                self._result("lib/src/file.cc"),
+            ]
+        }
         result = filter_external_dependencies(run)
         self.assertEqual(len(result["results"]), 1)
         self.assertEqual(
-            result["results"][0]["locations"][0]["physicalLocation"]["artifactLocation"]["uri"],
+            result["results"][0]["locations"][0]["physicalLocation"][
+                "artifactLocation"
+            ]["uri"],
             "lib/src/file.cc",
         )
 
     def test_all_external_results_emptied(self):
         """A run whose only results are external dependencies is emptied."""
-        run = {"results": [
-            self._result("external/dep2+/include/dep2/file.hpp"),
-        ]}
+        run = {
+            "results": [
+                self._result("external/dep2+/include/dep2/file.hpp"),
+            ]
+        }
         result = filter_external_dependencies(run)
         self.assertEqual(result["results"], [])
 
@@ -353,45 +369,72 @@ class TestFilterExternalDependencies(unittest.TestCase):
 
 class TestExtractRuleIds(unittest.TestCase):
     def _run(self, results):
-        return {"tool": {"driver": {"name": "ClangTidy", "rules": []}}, "results": results}
+        return {
+            "tool": {"driver": {"name": "ClangTidy", "rules": []}},
+            "results": results,
+        }
 
     def test_rule_id_extracted_from_message_bracket_suffix(self):
         """ruleId is parsed from the trailing [check-name] in the message text."""
-        run = self._run([{"level": "warning", "message": {"text": "some issue [misc-include-cleaner]"}}])
+        run = self._run(
+            [
+                {
+                    "level": "warning",
+                    "message": {"text": "some issue [misc-include-cleaner]"},
+                }
+            ]
+        )
         result = extract_rule_ids(run)
         self.assertEqual(result["results"][0]["ruleId"], "misc-include-cleaner")
 
     def test_existing_rule_id_not_overwritten(self):
         """Results that already have ruleId are left unchanged."""
-        run = self._run([{"ruleId": "existing-rule", "message": {"text": "msg [other-rule]"}}])
+        run = self._run(
+            [{"ruleId": "existing-rule", "message": {"text": "msg [other-rule]"}}]
+        )
         result = extract_rule_ids(run)
         self.assertEqual(result["results"][0]["ruleId"], "existing-rule")
 
     def test_message_without_bracket_suffix_skipped(self):
         """Results whose message has no [check-name] suffix get no ruleId added."""
-        run = self._run([{"level": "warning", "message": {"text": "no check name here"}}])
+        run = self._run(
+            [{"level": "warning", "message": {"text": "no check name here"}}]
+        )
         result = extract_rule_ids(run)
         self.assertNotIn("ruleId", result["results"][0])
 
     def test_rules_array_populated_in_driver(self):
         """Extracted check names are added to tool.driver.rules with defaultConfiguration.level."""
-        run = self._run([
-            {"level": "warning", "message": {"text": "issue [modernize-use-nullptr]"}},
-            {"level": "error", "message": {"text": "issue [misc-include-cleaner]"}},
-        ])
+        run = self._run(
+            [
+                {
+                    "level": "warning",
+                    "message": {"text": "issue [modernize-use-nullptr]"},
+                },
+                {"level": "error", "message": {"text": "issue [misc-include-cleaner]"}},
+            ]
+        )
         result = extract_rule_ids(run)
         rules_by_id = {r["id"]: r for r in result["tool"]["driver"]["rules"]}
         self.assertIn("modernize-use-nullptr", rules_by_id)
         self.assertIn("misc-include-cleaner", rules_by_id)
-        self.assertEqual(rules_by_id["modernize-use-nullptr"]["defaultConfiguration"]["level"], "warning")
-        self.assertEqual(rules_by_id["misc-include-cleaner"]["defaultConfiguration"]["level"], "error")
+        self.assertEqual(
+            rules_by_id["modernize-use-nullptr"]["defaultConfiguration"]["level"],
+            "warning",
+        )
+        self.assertEqual(
+            rules_by_id["misc-include-cleaner"]["defaultConfiguration"]["level"],
+            "error",
+        )
 
     def test_duplicate_check_names_appear_once_in_rules(self):
         """The same check name appearing in multiple results is deduplicated in rules."""
-        run = self._run([
-            {"message": {"text": "a [misc-include-cleaner]"}},
-            {"message": {"text": "b [misc-include-cleaner]"}},
-        ])
+        run = self._run(
+            [
+                {"message": {"text": "a [misc-include-cleaner]"}},
+                {"message": {"text": "b [misc-include-cleaner]"}},
+            ]
+        )
         result = extract_rule_ids(run)
         ids = [r["id"] for r in result["tool"]["driver"]["rules"]]
         self.assertEqual(ids.count("misc-include-cleaner"), 1)
@@ -402,19 +445,40 @@ class TestExtractRuleIds(unittest.TestCase):
             inp = Path(tmp) / "a.sarif"
             data = {
                 "version": "2.1.0",
-                "runs": [{"tool": {"driver": {"name": "ClangTidy"}}, "results": [
-                    {"level": "warning",
-                     "message": {"text": "nested namespaces can be concatenated [modernize-concat-nested-namespaces]"},
-                     "locations": [{"physicalLocation": {"artifactLocation": {"uri": "src/file.cc"},
-                                                         "region": {"startLine": 5, "startColumn": 1}}}]},
-                ]}],
+                "runs": [
+                    {
+                        "tool": {"driver": {"name": "ClangTidy"}},
+                        "results": [
+                            {
+                                "level": "warning",
+                                "message": {
+                                    "text": "nested namespaces can be concatenated [modernize-concat-nested-namespaces]"
+                                },
+                                "locations": [
+                                    {
+                                        "physicalLocation": {
+                                            "artifactLocation": {"uri": "src/file.cc"},
+                                            "region": {
+                                                "startLine": 5,
+                                                "startColumn": 1,
+                                            },
+                                        }
+                                    }
+                                ],
+                            },
+                        ],
+                    }
+                ],
             }
             with open(inp, "w") as f:
                 json.dump(data, f)
             out = Path(tmp) / "out.sarif"
             merge_sarif_reports([inp], out)
             result = json.loads(out.read_text())
-            self.assertEqual(result["runs"][0]["results"][0]["ruleId"], "modernize-concat-nested-namespaces")
+            self.assertEqual(
+                result["runs"][0]["results"][0]["ruleId"],
+                "modernize-concat-nested-namespaces",
+            )
 
 
 class TestFilterErrorsOnly(unittest.TestCase):
@@ -753,7 +817,9 @@ class TestMergeSarifReports(unittest.TestCase):
         virtual_dir.parent.mkdir(parents=True)
         virtual_dir.symlink_to(real_include_dir)
 
-        virtual_uri = "bazel-out/k8-fastbuild/bin/mylib/_virtual_includes/mylib/mylib/header.h"
+        virtual_uri = (
+            "bazel-out/k8-fastbuild/bin/mylib/_virtual_includes/mylib/mylib/header.h"
+        )
         inp = self.p / "a.sarif"
         data = {
             "version": "2.1.0",
