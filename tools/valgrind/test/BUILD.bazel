@@ -1,0 +1,68 @@
+# Copyright (C) 2022-2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+# End-to-end targets for the valgrind macros. Everything here is manual and
+# linux-only, so nothing runs in a wildcard build; the point is that the rules
+# analyse and, on a machine with valgrind, actually gate.
+
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("//tools/valgrind:callgrind.bzl", "swift_add_valgrind_callgrind")
+load("//tools/valgrind:massif_drd.bzl", "swift_add_valgrind_massif")
+load("//tools/valgrind:memcheck.bzl", "swift_add_valgrind_memcheck")
+load("//tools/valgrind:profile.bzl", "valgrind_profile")
+
+cc_binary(
+    name = "allocate",
+    srcs = ["allocate.cc"],
+    tags = ["manual"],
+)
+
+swift_add_valgrind_massif(
+    name = "massif_gate",
+    baseline = "baseline.json",
+    binary = ":allocate",
+    data = ["input.txt"],
+    program_args = ["$(location :input.txt)"],
+    stack_usage = True,
+    tolerance_pct = 50,
+)
+
+swift_add_valgrind_callgrind(
+    name = "callgrind_gate",
+    baseline = "baseline.json",
+    binary = ":allocate",
+    data = ["input.txt"],
+    program_args = ["$(location :input.txt)"],
+    tolerance_pct = 90,
+)
+
+# No baseline, so it only profiles.
+swift_add_valgrind_massif(
+    name = "massif_profile_only",
+    binary = ":allocate",
+)
+
+swift_add_valgrind_memcheck(
+    name = "memcheck",
+    binary = ":allocate",
+)
+
+# The profiling rule on its own, without the linux constraint the macros add, so
+# that the action it declares can be inspected on any host with `bazel aquery`.
+valgrind_profile(
+    name = "analysis_only",
+    binary = ":allocate",
+    data = ["input.txt"],
+    label = "//tools/valgrind/test:analysis_only",
+    measure_tool = "//tools/valgrind/report:massif_drd_measure",
+    program_args = ["$(location :input.txt)"],
+    tags = ["manual"],
+    tool = "massif",
+)

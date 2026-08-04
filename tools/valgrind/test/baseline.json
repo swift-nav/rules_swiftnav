@@ -1,0 +1,7 @@
+{
+  "cpu_instructions": 20000000,
+  "memory_heap_mb": 4.1,
+  "memory_heap_extra_mb": 0.1,
+  "memory_stack_mb": 0.1,
+  "memory_total_mb": 4.3
+}
