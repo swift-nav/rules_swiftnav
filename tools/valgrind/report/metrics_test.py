@@ -16,6 +16,8 @@ from tools.valgrind.report.metrics import (
     STATUS_PASS,
     STATUS_REGRESSION,
     STATUS_STALE_BASELINE,
+    Measured,
+    Measurement,
     Metric,
     build_metric,
     build_report,
@@ -24,10 +26,13 @@ from tools.valgrind.report.metrics import (
     format_limit,
     format_number,
     format_value,
+    print_measurement,
     print_summary,
     read_baseline,
     read_limit,
+    read_measurement,
     worst_status,
+    write_measurement,
 )
 
 
@@ -242,6 +247,40 @@ class PrintSummaryTest(unittest.TestCase):
 
         self.assertIn('set "memory_heap_mb"', err)
         self.assertNotIn('set "cpu_instructions"', err)
+
+
+class MeasurementTest(unittest.TestCase):
+    _MEASUREMENT = Measurement(
+        label="//pkg:target",
+        metrics=[
+            Measured(key="memory_heap_mb", name="Peak heap", unit="MB", value=10.5),
+            Measured(key="cpu_instructions", name="CPU", unit="", value=1000),
+        ],
+    )
+
+    def test_round_trips(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "measurement.json"
+            write_measurement(self._MEASUREMENT, path)
+
+            self.assertEqual(read_measurement(path), self._MEASUREMENT)
+
+    def test_rejects_a_file_that_is_not_a_measurement(self) -> None:
+        # A truncated or hand-edited measurement must not compare as if it were
+        # empty, which would pass every baseline vacuously.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "measurement.json"
+            for content in ('{"label": "x"}', "[]", '{"label": "x", "metrics": []}'):
+                path.write_text(content)
+                with self.assertRaises(ValueError):
+                    read_measurement(path)
+
+    def test_prints_each_metric_in_its_own_unit(self) -> None:
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            print_measurement(self._MEASUREMENT)
+
+        self.assertEqual(out.getvalue(), "Peak heap: 10.500 MB\nCPU: 1,000\n")
 
 
 if __name__ == "__main__":

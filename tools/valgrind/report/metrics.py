@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-"""Shared report types for the valgrind profiling tools.
+"""Shared measurement and report types for the valgrind profiling tools.
 
-A report is what one profiled Bazel target produces: a label, the baseline file
-it was compared against, and one metric per measured quantity. Every valgrind
-metric is a single scalar compared against a single scalar baseline — callgrind
-yields an instruction count, massif peak heap sizes, DRD a stack high-water —
-so one Metric type covers them all.
+Profiling a target happens in two steps, so that refreshing a baseline does not
+re-run valgrind. A measurement is the first step's output: a label and one
+scalar per measured quantity, carrying its own display name and unit so the
+comparison step needs no knowledge of which profiler produced it. A report is
+the second step's: the same metrics, each set against its baseline and given a
+status. Every valgrind metric is a single scalar compared against a single
+scalar — callgrind yields an instruction count, massif peak heap sizes, DRD a
+stack high-water — so one Metric type covers them all.
 
-The measuring tools (callgrind_report and friends) write these as json;
-pr_comment reads them back and renders the PR comment. print_summary is the
-console half of the same job: it is what makes a failing `bazel test` explain
-itself, and it lives here so every profiler reports a regression identically.
+The measuring tools (callgrind_measure and friends) write a Measurement,
+compare turns it into a Report, and pr_comment renders those into a PR comment.
+print_summary is the console half of compare's job: it is what makes a failing
+`bazel test` explain itself, and it lives here so every profiler reports a
+regression identically.
 """
 
 import json
@@ -34,6 +38,22 @@ _STATUS_PRECEDENCE = [
 ]
 
 LIMIT_SUFFIX = "_max"
+
+
+class Measured(TypedDict):
+    """One measured quantity, before any baseline is involved."""
+
+    key: str
+    name: str
+    unit: str
+    value: float
+
+
+class Measurement(TypedDict):
+    """Everything one profiling run measured, in the order it reports them."""
+
+    label: str
+    metrics: list[Measured]
 
 
 class Metric(TypedDict):
@@ -224,6 +244,14 @@ def _refresh_hint(lead: str, metrics: list[Metric], baseline_file: str) -> str:
     )
 
 
+def print_measurement(measurement: Measurement) -> None:
+    """Print what a run measured, for a target with no baseline to gate on."""
+    for measured in measurement["metrics"]:
+        print(
+            f"{measured['name']}: {format_number(measured['value'], measured['unit'])}"
+        )
+
+
 def print_summary(report: Report) -> int:
     """Print a report's measurements and verdict, returning the exit code.
 
@@ -291,6 +319,33 @@ def print_summary(report: Report) -> int:
         _refresh_hint("Consider refreshing it with:", at_fault, report["baseline_file"])
     )
     return 0
+
+
+def write_measurement(measurement: Measurement, path: Path) -> None:
+    """Write a measurement as json."""
+    with path.open("w") as f:
+        json.dump(measurement, f, indent=2)
+        f.write("\n")
+
+
+def read_measurement(path: Path) -> Measurement:
+    """Read a measurement written by write_measurement.
+
+    Raises:
+        ValueError: if the file is not a measurement, so that a truncated or
+            hand-edited one is rejected rather than compared as if it were
+            empty.
+    """
+    with path.open() as f:
+        measurement = json.load(f)
+
+    if not isinstance(measurement, dict) or not isinstance(
+        measurement.get("metrics"), list
+    ):
+        raise ValueError("not a measurement written by write_measurement")
+    if not measurement["metrics"]:
+        raise ValueError("no metrics")
+    return measurement
 
 
 def write_report(report: Report, path: Path) -> None:
