@@ -134,15 +134,15 @@ class WorkdirTest(unittest.TestCase):
 
 
 class DrdStackUsageTest(unittest.TestCase):
-    def _run(self, log: str | None, code: int = 0) -> tuple[int, str | None]:
-        """Run a DRD pass that logs the given text, returning its exit code and report."""
+    def _run(self, *logs: str, code: int = 0) -> tuple[int, str | None]:
+        """Run a DRD pass writing one log per child, returning its exit code and report."""
         with _Dirs() as dirs:
 
             def fake_valgrind(
                 label: str, flags: list[str], args: list[str], cwd: Path | None
             ) -> int:
-                if log is not None:
-                    (dirs.scratch / "drd.log").write_text(log)
+                for pid, text in enumerate(logs):
+                    (dirs.scratch / f"drd.log.{pid}").write_text(text)
                 return code
 
             with mock.patch.object(runner, "valgrind", fake_valgrind):
@@ -158,18 +158,23 @@ class DrdStackUsageTest(unittest.TestCase):
         self.assertEqual(len(report.splitlines()), 2)
         self.assertNotIn("Conflicting load", report)
 
+    def test_collects_the_stack_lines_of_every_child(self) -> None:
+        # Under --trace-children each process logs to its own %p file, and all
+        # of their threads count towards the total.
+        self.assertEqual(len(self._run(_STACK_LINES, _STACK_LINES)[1].splitlines()), 4)
+
     def test_writes_no_report_when_the_pass_found_nothing(self) -> None:
         # An empty report would stop massif_report falling back on massif's own
         # stack figure, and fail the target with a misleading error.
         self.assertIsNone(self._run("==42== no stack usage here\n")[1])
 
     def test_writes_no_report_when_the_pass_never_logged(self) -> None:
-        self.assertIsNone(self._run(None)[1])
+        self.assertIsNone(self._run()[1])
 
     def test_returns_the_drd_exit_code(self) -> None:
         # A DRD pass that failed must fail the target rather than leave the
         # stack figure quietly unmeasured.
-        self.assertEqual(self._run(None, code=3)[0], 3)
+        self.assertEqual(self._run(code=3)[0], 3)
 
 
 class ToolFlagsTest(unittest.TestCase):
@@ -292,11 +297,9 @@ class MainTest(unittest.TestCase):
         self.assertEqual(returned, 1)
         self.assertEqual(calls, [])
 
-    def test_fails_when_there_is_no_binary_to_run(self) -> None:
-        returned, calls = self._main(["--tool", "massif", "--", "--only-a-flag"])
-
-        self.assertEqual(returned, 1)
-        self.assertEqual(calls, [])
+    def test_raises_when_there_is_no_binary_to_run(self) -> None:
+        with self.assertRaises(ValueError):
+            self._main(["--tool", "massif", "--", "--only-a-flag"])
 
     def test_hands_the_report_tool_the_output_and_dump_directories(self) -> None:
         returned, calls = self._main(

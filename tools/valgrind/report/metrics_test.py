@@ -53,7 +53,7 @@ class BuildMetricTest(unittest.TestCase):
 
     def test_zero_baseline_does_not_divide(self) -> None:
         metric = _metric(10, 0)
-        self.assertEqual(metric["delta_pct"], 0.0)
+        self.assertAlmostEqual(metric["delta_pct"], 0.0)
         self.assertEqual(metric["status"], STATUS_PASS)
 
     def test_no_limit_by_default(self) -> None:
@@ -118,7 +118,7 @@ class ReadBaselineTest(unittest.TestCase):
             )
 
             self.assertEqual(read_baseline(path, "cpu_instructions"), 28032185999)
-            self.assertEqual(read_baseline(path, "memory_heap_mb"), 15.405)
+            self.assertAlmostEqual(read_baseline(path, "memory_heap_mb"), 15.405)
 
     def test_rejects_a_missing_key(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

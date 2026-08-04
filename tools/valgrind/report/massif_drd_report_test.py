@@ -83,7 +83,7 @@ class ParseMassifTest(unittest.TestCase):
             _write(root / "valgrind-massif.2", _snapshot(0, 30 * _MB, 0, 0))
 
             self.assertEqual(
-                parse_massif(find_dump_files(tmp)),
+                parse_massif(find_dump_files(root)),
                 {"mem_heap_B": 30 * _MB, "mem_heap_extra_B": 0, "mem_stacks_B": 0},
             )
 
@@ -98,7 +98,7 @@ class ParseMassifTest(unittest.TestCase):
             _write(root / STACK_USAGE_FILENAME, _STACK_USAGE)
 
             self.assertEqual(
-                [Path(p).name for p in find_dump_files(tmp)], ["valgrind-massif.1"]
+                [p.name for p in find_dump_files(root)], ["valgrind-massif.1"]
             )
 
     def test_raises_when_every_snapshot_is_empty(self) -> None:
@@ -131,21 +131,21 @@ class MeasureTest(unittest.TestCase):
             _write(Path(tmp) / "valgrind-massif.1", _MASSIF_OUT)
             _write(Path(tmp) / STACK_USAGE_FILENAME, _STACK_USAGE)
 
-            measured = measure(tmp, tmp)
+            measured = measure(Path(tmp), Path(tmp))
 
-            self.assertEqual(measured["memory_stack_mb"], 3.0)
-            self.assertEqual(measured["memory_total_mb"], 15.0)
+            self.assertAlmostEqual(measured["memory_stack_mb"], 3.0)
+            self.assertAlmostEqual(measured["memory_total_mb"], 15.0)
 
     def test_falls_back_to_massif_without_a_drd_pass(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             _write(Path(tmp) / "valgrind-massif.1", _MASSIF_OUT)
 
-            measured = measure(tmp, tmp)
+            measured = measure(Path(tmp), Path(tmp))
 
-            self.assertEqual(measured["memory_heap_mb"], 10.0)
-            self.assertEqual(measured["memory_heap_extra_mb"], 2.0)
-            self.assertEqual(measured["memory_stack_mb"], 1.0)
-            self.assertEqual(measured["memory_total_mb"], 13.0)
+            self.assertAlmostEqual(measured["memory_heap_mb"], 10.0)
+            self.assertAlmostEqual(measured["memory_heap_extra_mb"], 2.0)
+            self.assertAlmostEqual(measured["memory_stack_mb"], 1.0)
+            self.assertAlmostEqual(measured["memory_total_mb"], 13.0)
 
     def test_dumps_can_live_apart_from_the_reports(self) -> None:
         # dumps_to_tmpdir keeps large dumps out of the collected outputs.
@@ -156,7 +156,9 @@ class MeasureTest(unittest.TestCase):
             _write(Path(dumps) / "valgrind-massif.1", _MASSIF_OUT)
             _write(Path(out) / STACK_USAGE_FILENAME, _STACK_USAGE)
 
-            self.assertEqual(measure(out, dumps)["memory_total_mb"], 15.0)
+            self.assertAlmostEqual(
+                measure(Path(out), Path(dumps))["memory_total_mb"], 15.0
+            )
 
 
 class MainTest(unittest.TestCase):

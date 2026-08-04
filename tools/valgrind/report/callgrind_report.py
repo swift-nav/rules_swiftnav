@@ -22,10 +22,10 @@ Run with Bazel:
 """
 
 import argparse
-import os
 import re
 import sys
 from collections.abc import Iterable
+from pathlib import Path
 
 from tools.valgrind.report.metrics import (
     build_metric,
@@ -43,8 +43,9 @@ METRIC_KEY = "cpu_instructions"
 METRIC_NAME = "CPU instructions"
 
 # Only the per-process dumps, so the report files this tool writes into the
-# same directory are never mistaken for callgrind output on a re-run.
-_OUTPUT_FILE_RE = re.compile(r"^valgrind-callgrind\.\d+$")
+# same directory are never mistaken for callgrind output on a re-run. callgrind
+# appends .<part> for a multi-part dump and -<tid> under --separate-threads.
+_OUTPUT_FILE_RE = re.compile(r"^valgrind-callgrind\.\d+(\.\d+)?(-\d+)?$")
 
 # callgrind reports the run total on a "summary:" line, or "totals:" in older
 # output formats. The first field is the instruction count (Ir); later fields
@@ -53,18 +54,14 @@ _SUMMARY_RE = re.compile(r"^summary:\s*(\d+)")
 _TOTALS_RE = re.compile(r"^totals:\s*(\d+)")
 
 
-def find_output_files(output_dir: str) -> list[str]:
+def find_output_files(output_dir: Path) -> list[Path]:
     """Return the per-process callgrind dumps in output_dir, sorted by name."""
-    return sorted(
-        os.path.join(output_dir, name)
-        for name in os.listdir(output_dir)
-        if _OUTPUT_FILE_RE.match(name)
-    )
+    return sorted(p for p in output_dir.iterdir() if _OUTPUT_FILE_RE.match(p.name))
 
 
-def parse_instructions(path: str | os.PathLike) -> int | None:
+def parse_instructions(path: Path) -> int | None:
     """Return the instruction total of a single callgrind dump, or None."""
-    with open(path) as f:
+    with path.open() as f:
         for line in f:
             match = _SUMMARY_RE.match(line) or _TOTALS_RE.match(line)
             if match:
@@ -72,7 +69,7 @@ def parse_instructions(path: str | os.PathLike) -> int | None:
     return None
 
 
-def sum_instructions(paths: Iterable[str | os.PathLike]) -> int:
+def sum_instructions(paths: Iterable[Path]) -> int:
     """Sum the instruction totals of every callgrind dump.
 
     Raises:
@@ -96,6 +93,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--output-dir",
         required=True,
+        type=Path,
         help="Directory holding the valgrind-callgrind.<pid> dumps",
     )
     parser.add_argument(
@@ -106,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--baseline",
         default=None,
+        type=Path,
         help=f"Json file whose {METRIC_KEY!r} entry is the expected instruction count",
     )
     parser.add_argument(
@@ -130,14 +129,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    with open(os.path.join(args.output_dir, INSTRUCTIONS_FILENAME), "w") as f:
-        f.write(f"{measured}\n")
+    (args.output_dir / INSTRUCTIONS_FILENAME).write_text(f"{measured}\n")
 
     if not args.baseline:
         print(f"{METRIC_NAME}: {measured:,}")
         return 0
 
-    baseline_file = args.baseline_label or args.baseline
+    baseline_file = args.baseline_label or str(args.baseline)
     try:
         baseline = read_baseline(args.baseline, METRIC_KEY)
         limit = read_limit(args.baseline, METRIC_KEY)
@@ -155,7 +153,7 @@ def main(argv: list[str] | None = None) -> int:
         METRIC_KEY, METRIC_NAME, "", measured, baseline, args.tolerance_pct, limit
     )
     report = build_report(args.label, baseline_file, [metric])
-    write_report(report, os.path.join(args.output_dir, REPORT_JSON_FILENAME))
+    write_report(report, args.output_dir / REPORT_JSON_FILENAME)
 
     return print_summary(report)
 

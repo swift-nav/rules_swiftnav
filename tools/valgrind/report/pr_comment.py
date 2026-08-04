@@ -23,6 +23,7 @@ Run with Bazel:
 
 import argparse
 import sys
+from pathlib import Path
 
 from tools.valgrind.report.metrics import (
     STATUS_OVER_LIMIT,
@@ -170,7 +171,7 @@ def format_comment(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "reports", nargs="+", help="Paths to valgrind report json files"
+        "reports", nargs="+", type=Path, help="Paths to valgrind report json files"
     )
     parser.add_argument(
         "--marker",

@@ -14,8 +14,8 @@ itself, and it lives here so every profiler reports a regression identically.
 """
 
 import json
-import os
 import sys
+from pathlib import Path
 from typing import TypedDict
 
 STATUS_PASS = "pass"
@@ -120,9 +120,9 @@ def build_report(label: str, baseline_file: str, metrics: list[Metric]) -> Repor
     )
 
 
-def _load_baselines(path: str | os.PathLike) -> dict:
+def _load_baselines(path: Path) -> dict:
     """Read a baseline file as a flat metric key to number mapping."""
-    with open(path) as f:
+    with path.open() as f:
         baselines = json.load(f)
 
     if not isinstance(baselines, dict):
@@ -137,7 +137,7 @@ def _positive_number(key: str, value: object) -> float:
     return value
 
 
-def read_baseline(path: str | os.PathLike, key: str) -> float:
+def read_baseline(path: Path, key: str) -> float:
     """Read one metric's expected value from a json baseline file.
 
     The file maps metric keys to numbers, so a target that measures several
@@ -157,7 +157,7 @@ def read_baseline(path: str | os.PathLike, key: str) -> float:
     return _positive_number(key, baselines[key])
 
 
-def read_limit(path: str | os.PathLike, key: str) -> float | None:
+def read_limit(path: Path, key: str) -> float | None:
     """Read a metric's optional absolute ceiling, or None if it has none.
 
     The ceiling lives beside the baseline under the same key plus
@@ -293,14 +293,14 @@ def print_summary(report: Report) -> int:
     return 0
 
 
-def write_report(report: Report, path: str | os.PathLike) -> None:
+def write_report(report: Report, path: Path) -> None:
     """Write a report as json."""
-    with open(path, "w") as f:
+    with path.open("w") as f:
         json.dump(report, f, indent=2)
         f.write("\n")
 
 
-def read_report(path: str | os.PathLike) -> Report:
+def read_report(path: Path) -> Report:
     """Read a report written by write_report."""
-    with open(path) as f:
+    with path.open() as f:
         return json.load(f)

@@ -106,7 +106,8 @@ def drd_stack_usage(args: list[str], cwd: Path | None) -> int:
     something in it, so a pass that produced nothing leaves the reporting tool
     free to fall back on massif's own figure rather than reading an empty file.
     """
-    log = SCRATCH_DIR / "drd.log"
+    # The %p suffix stops --trace-children children truncating each other's log.
+    log = SCRATCH_DIR / "drd.log.%p"
     drd = [
         "--tool=drd",
         "--show-stack-usage=yes",
@@ -115,11 +116,12 @@ def drd_stack_usage(args: list[str], cwd: Path | None) -> int:
     ]
     code = valgrind("DRD (stack)", drd, args, cwd)
 
-    usage = (
-        [line for line in log.read_text().splitlines() if _STACK_USAGE.search(line)]
-        if log.exists()
-        else []
-    )
+    usage = [
+        line
+        for path in sorted(SCRATCH_DIR.glob("drd.log.*"))
+        for line in path.read_text().splitlines()
+        if _STACK_USAGE.search(line)
+    ]
     if usage:
         (OUTPUT_DIR / "valgrind-drd.stack_usage.txt").write_text(
             "".join(f"{line}\n" for line in usage)
@@ -212,11 +214,7 @@ def main(argv: list[str]) -> int:
 
     separator = argv.index("--")
     opts = parse(argv[:separator])
-    try:
-        args = expand(argv[separator + 1 :])
-    except ValueError as err:
-        print(f"Error: {err}", file=sys.stderr)
-        return 1
+    args = expand(argv[separator + 1 :])
 
     code, dump_dir = TOOLS[opts.tool](args, workdir(opts.workdir_data), opts)
     if code != 0 or not opts.report:

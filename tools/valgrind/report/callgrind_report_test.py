@@ -53,7 +53,16 @@ class ReadCallgrindOutputTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             _write(Path(tmp) / "valgrind-callgrind.1", _SUMMARY_DUMP)
             _write(Path(tmp) / "valgrind-callgrind.2", _TOTALS_DUMP)
-            self.assertEqual(sum_instructions(find_output_files(tmp)), 1250000)
+            self.assertEqual(sum_instructions(find_output_files(Path(tmp))), 1250000)
+
+    def test_counts_multi_part_and_per_thread_dumps(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _write(root / "valgrind-callgrind.1.2", _SUMMARY_DUMP)
+            _write(root / "valgrind-callgrind.2-01", _TOTALS_DUMP)
+            _write(root / "valgrind-callgrind.3.1-02", _TOTALS_DUMP)
+
+            self.assertEqual(sum_instructions(find_output_files(root)), 1500000)
 
     def test_ignores_everything_but_per_process_dumps(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -65,14 +74,14 @@ class ReadCallgrindOutputTest(unittest.TestCase):
             _write(root / REPORT_JSON_FILENAME, "{}\n")
 
             self.assertEqual(
-                [Path(p).name for p in find_output_files(tmp)], ["valgrind-callgrind.1"]
+                [p.name for p in find_output_files(root)], ["valgrind-callgrind.1"]
             )
 
     def test_raises_when_no_dump_carries_a_total(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             _write(Path(tmp) / "valgrind-callgrind.1", "version: 1\nfn=main\n0 12\n")
             with self.assertRaises(ValueError):
-                sum_instructions(find_output_files(tmp))
+                sum_instructions(find_output_files(Path(tmp)))
 
 
 class MainTest(unittest.TestCase):
@@ -131,7 +140,7 @@ class MainTest(unittest.TestCase):
             self.assertEqual(metric["unit"], "")
             self.assertEqual(metric["value"], 1000000)
             self.assertEqual(metric["baseline"], 980000)
-            self.assertEqual(metric["tolerance_pct"], 5.0)
+            self.assertAlmostEqual(metric["tolerance_pct"], 5.0)
 
     def test_fails_on_regression_beyond_tolerance(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

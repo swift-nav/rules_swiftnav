@@ -25,10 +25,10 @@ Run with Bazel:
 """
 
 import argparse
-import os
 import re
 import sys
 from collections.abc import Iterable
+from pathlib import Path
 
 from tools.valgrind.report.metrics import (
     build_metric,
@@ -69,21 +69,17 @@ _STACK_USAGE_RE = re.compile(
 )
 
 
-def find_dump_files(dump_dir: str | os.PathLike) -> list[str]:
+def find_dump_files(dump_dir: Path) -> list[Path]:
     """Return the per-process massif dumps in dump_dir, sorted by name."""
-    return sorted(
-        os.path.join(dump_dir, name)
-        for name in os.listdir(dump_dir)
-        if _DUMP_FILE_RE.match(name)
-    )
+    return sorted(p for p in dump_dir.iterdir() if _DUMP_FILE_RE.match(p.name))
 
 
-def _snapshots(path: str | os.PathLike) -> list[dict[str, int]]:
+def _snapshots(path: Path) -> list[dict[str, int]]:
     """Return every snapshot's byte totals from one massif dump."""
     snapshots = []
     current = dict(_ZERO_SNAPSHOT)
 
-    with open(path) as f:
+    with path.open() as f:
         for line in f:
             if line.startswith("snapshot="):
                 snapshots.append(current)
@@ -96,7 +92,7 @@ def _snapshots(path: str | os.PathLike) -> list[dict[str, int]]:
     return snapshots
 
 
-def parse_massif(paths: Iterable[str | os.PathLike]) -> dict[str, int]:
+def parse_massif(paths: Iterable[Path]) -> dict[str, int]:
     """Return the peak snapshot's byte totals across every massif dump.
 
     "Peak" is the snapshot with the largest heap + heap extra + stacks. massif
@@ -121,7 +117,7 @@ def parse_massif(paths: Iterable[str | os.PathLike]) -> dict[str, int]:
     return peak
 
 
-def parse_stack_usage(path: str | os.PathLike) -> int:
+def parse_stack_usage(path: Path) -> int:
     """Return the summed per-thread stack high-water, in bytes.
 
     Stack pages stay committed once touched, so the sum over threads is what
@@ -132,7 +128,7 @@ def parse_stack_usage(path: str | os.PathLike) -> int:
     """
     total = 0
     found = False
-    with open(path) as f:
+    with path.open() as f:
         for line in f:
             match = _STACK_USAGE_RE.search(line)
             if match:
@@ -143,9 +139,7 @@ def parse_stack_usage(path: str | os.PathLike) -> int:
     return total
 
 
-def measure(
-    output_dir: str | os.PathLike, dump_dir: str | os.PathLike
-) -> dict[str, float]:
+def measure(output_dir: Path, dump_dir: Path) -> dict[str, float]:
     """Measure every memory metric from a run's massif dumps and DRD report."""
     peak = parse_massif(find_dump_files(dump_dir))
 
@@ -155,11 +149,9 @@ def measure(
     # massif only accounts for stacks under --stacks=yes, which slows it down
     # considerably, so the runner can measure them with a DRD pass instead.
     # Fall back to massif's own figure when that pass was not made.
-    stack_path = os.path.join(output_dir, STACK_USAGE_FILENAME)
+    stack_path = output_dir / STACK_USAGE_FILENAME
     stack_b = (
-        parse_stack_usage(stack_path)
-        if os.path.exists(stack_path)
-        else peak["mem_stacks_B"]
+        parse_stack_usage(stack_path) if stack_path.exists() else peak["mem_stacks_B"]
     )
     stack_mb = stack_b / _BYTES_PER_MB
 
@@ -176,11 +168,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--output-dir",
         required=True,
+        type=Path,
         help=f"Directory the reports are written to, holding {STACK_USAGE_FILENAME} if a DRD pass was made",
     )
     parser.add_argument(
         "--dump-dir",
         default=None,
+        type=Path,
         help="Directory holding the valgrind-massif.<pid> dumps. Defaults to --output-dir",
     )
     parser.add_argument(
@@ -191,6 +185,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--baseline",
         default=None,
+        type=Path,
         help="Json file whose memory_* entries are the expected values",
     )
     parser.add_argument(
@@ -216,15 +211,16 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    with open(os.path.join(args.output_dir, METRICS_FILENAME), "w") as f:
-        f.writelines(f"{key} {value:.3f}\n" for key, value in measured.items())
+    (args.output_dir / METRICS_FILENAME).write_text(
+        "".join(f"{key} {value:.3f}\n" for key, value in measured.items())
+    )
 
     if not args.baseline:
         for key, value in measured.items():
             print(f"{METRIC_NAMES[key]}: {value:.3f} {UNIT}")
         return 0
 
-    baseline_file = args.baseline_label or args.baseline
+    baseline_file = args.baseline_label or str(args.baseline)
     try:
         metrics = [
             build_metric(
@@ -249,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     report = build_report(args.label, baseline_file, metrics)
-    write_report(report, os.path.join(args.output_dir, REPORT_JSON_FILENAME))
+    write_report(report, args.output_dir / REPORT_JSON_FILENAME)
 
     return print_summary(report)
 
