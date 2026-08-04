@@ -290,7 +290,7 @@
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "PfHBW3b77D/I6D3fVyfQxbocDafeQhCpaMQ6foZ9NwM=",
-        "usagesDigest": "tF8me4KuRIS7nvk/8uuCDkVLymmPhtiWP7Rb/sb5AME=",
+        "usagesDigest": "QIhHHJPGCBsm5juS4JLhy9wfvg7NZxxYP8Aufni0/Nk=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools",
           "REPO_MAPPING:,rules_swiftnav "
@@ -417,7 +417,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "tNRqpSV15RsvnkeQ9U07Wb8G9kPfpfP6+X6kj/UjZ2s=",
+        "usagesDigest": "BaCKsIj2+vQlmB2uzmW7hlOCwrO2xqnE8YsygmKEpWQ=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
           "yocto_generic": {
@@ -430,7 +430,7 @@
     "//doxygen:extensions.bzl%doxygen_extension": {
       "general": {
         "bzlTransitiveDigest": "FpPcFCi/TMdMIYzhkBJQDLoL6L4vfaGhOA4TTyqW2zA=",
-        "usagesDigest": "v5Jh8vDZyN1HtV7JoYa17c1CiEIWxuUiUm3pow6Cv6s=",
+        "usagesDigest": "zRgW95A2fg0i3QgU2/evHNePvyuLTgmvt2n0qMz/YbY=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
