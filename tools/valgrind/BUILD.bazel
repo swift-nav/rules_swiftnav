@@ -11,11 +11,23 @@
 # Valgrind macros and the runner they generate a test around. The reporting
 # tools that runner invokes live in //tools/valgrind/report.
 
+load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("@rules_swiftnav//cc:defs.bzl", "UNIT")
 
+# Exported for the memcheck macro, which compiles it as the src of the py_test it
+# generates in the consuming package.
 exports_files(
     ["runner.py"],
+    visibility = ["//visibility:public"],
+)
+
+# The same script as the executable of the profiling build action. Public because
+# the profile rule runs it in the consuming repository.
+py_binary(
+    name = "runner",
+    srcs = ["runner.py"],
+    main = "runner.py",
     visibility = ["//visibility:public"],
 )
 
