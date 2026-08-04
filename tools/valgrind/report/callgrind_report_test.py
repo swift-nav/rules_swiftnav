@@ -10,16 +10,18 @@ import unittest
 from pathlib import Path
 
 from tools.valgrind.report.callgrind_report import (
+    DEFAULT_TOLERANCE_PCT,
     INSTRUCTIONS_FILENAME,
     REPORT_JSON_FILENAME,
     find_output_files,
-    main,
+    run,
     sum_instructions,
 )
 from tools.valgrind.report.metrics import (
     STATUS_PASS,
     STATUS_REGRESSION,
     STATUS_STALE_BASELINE,
+    Report,
     read_report,
 )
 
@@ -84,90 +86,60 @@ class ReadCallgrindOutputTest(unittest.TestCase):
                 sum_instructions(find_output_files(Path(tmp)))
 
 
-class MainTest(unittest.TestCase):
-    @staticmethod
-    def _output_dir(tmp: str) -> str:
-        _write(Path(tmp) / "valgrind-callgrind.1", _SUMMARY_DUMP)
-        return tmp
+class RunTest(unittest.TestCase):
+    def setUp(self) -> None:
+        self.output_dir = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        _write(self.output_dir / "valgrind-callgrind.1", _SUMMARY_DUMP)
 
-    @staticmethod
-    def _run(tmp: str, baseline_json: str, tolerance_pct: str = "5") -> int:
-        baseline = _write(Path(tmp) / "baseline.json", baseline_json)
-        return main(
-            [
-                "--output-dir",
-                tmp,
-                "--label",
-                "my_target",
-                "--baseline",
-                str(baseline),
-                "--baseline-label",
-                "pkg/baseline.json",
-                "--tolerance-pct",
-                tolerance_pct,
-            ]
+    def _run(self, baseline_json: str) -> int:
+        return run(
+            self.output_dir,
+            label="my_target",
+            baseline=_write(self.output_dir / "baseline.json", baseline_json),
+            baseline_label="pkg/baseline.json",
         )
 
+    def _report(self) -> Report:
+        return read_report(self.output_dir / REPORT_JSON_FILENAME)
+
     def test_writes_instructions_file_without_a_baseline(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
+        self.assertEqual(run(self.output_dir), 0)
 
-            self.assertEqual(main(["--output-dir", tmp]), 0)
-
-            self.assertEqual(
-                (Path(tmp) / INSTRUCTIONS_FILENAME).read_text(), "1000000\n"
-            )
-            self.assertFalse((Path(tmp) / REPORT_JSON_FILENAME).exists())
+        self.assertEqual(
+            (self.output_dir / INSTRUCTIONS_FILENAME).read_text(), "1000000\n"
+        )
+        self.assertFalse((self.output_dir / REPORT_JSON_FILENAME).exists())
 
     def test_fails_when_no_callgrind_output_exists(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(main(["--output-dir", tmp]), 1)
+        with tempfile.TemporaryDirectory() as empty:
+            self.assertEqual(run(Path(empty)), 1)
 
     def test_passes_within_tolerance_and_writes_one_cpu_metric(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
+        self.assertEqual(self._run('{"cpu_instructions": 980000}'), 0)
 
-            self.assertEqual(self._run(tmp, '{"cpu_instructions": 980000}'), 0)
-
-            report = read_report(Path(tmp) / REPORT_JSON_FILENAME)
-            self.assertEqual(report["status"], STATUS_PASS)
-            self.assertEqual(report["label"], "my_target")
-            self.assertEqual(report["baseline_file"], "pkg/baseline.json")
-            self.assertEqual(len(report["metrics"]), 1)
-            metric = report["metrics"][0]
-            self.assertEqual(metric["key"], "cpu_instructions")
-            self.assertEqual(metric["name"], "CPU instructions")
-            self.assertEqual(metric["unit"], "")
-            self.assertEqual(metric["value"], 1000000)
-            self.assertEqual(metric["baseline"], 980000)
-            self.assertAlmostEqual(metric["tolerance_pct"], 5.0)
+        report = self._report()
+        self.assertEqual(report["status"], STATUS_PASS)
+        self.assertEqual(report["label"], "my_target")
+        self.assertEqual(report["baseline_file"], "pkg/baseline.json")
+        self.assertEqual(len(report["metrics"]), 1)
+        metric = report["metrics"][0]
+        self.assertEqual(metric["key"], "cpu_instructions")
+        self.assertEqual(metric["name"], "CPU instructions")
+        self.assertEqual(metric["unit"], "")
+        self.assertEqual(metric["value"], 1000000)
+        self.assertEqual(metric["baseline"], 980000)
+        self.assertAlmostEqual(metric["tolerance_pct"], DEFAULT_TOLERANCE_PCT)
 
     def test_fails_on_regression_beyond_tolerance(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
-
-            self.assertEqual(self._run(tmp, '{"cpu_instructions": 900000}'), 1)
-
-            self.assertEqual(
-                read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"],
-                STATUS_REGRESSION,
-            )
+        self.assertEqual(self._run('{"cpu_instructions": 900000}'), 1)
+        self.assertEqual(self._report()["status"], STATUS_REGRESSION)
 
     def test_stale_baseline_warns_but_succeeds(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
-
-            self.assertEqual(self._run(tmp, '{"cpu_instructions": 2000000}'), 0)
-
-            self.assertEqual(
-                read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"],
-                STATUS_STALE_BASELINE,
-            )
+        self.assertEqual(self._run('{"cpu_instructions": 2000000}'), 0)
+        self.assertEqual(self._report()["status"], STATUS_STALE_BASELINE)
 
     def test_fails_on_an_unusable_baseline(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
-            self.assertEqual(self._run(tmp, '{"cpu_instructions": "not a number"}'), 1)
+        self.assertEqual(self._run('{"cpu_instructions": "not a number"}'), 1)
 
 
 if __name__ == "__main__":

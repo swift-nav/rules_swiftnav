@@ -50,6 +50,9 @@ _DUMP_FILE_RE = re.compile(r"^valgrind-massif\.\d+$")
 UNIT = "MB"
 _BYTES_PER_MB = 1024 * 1024
 
+DEFAULT_LABEL = "massif"
+DEFAULT_TOLERANCE_PCT = 5.0
+
 METRIC_NAMES = {
     "memory_heap_mb": "Peak heap (massif)",
     "memory_heap_extra_mb": "Peak heap extra (massif)",
@@ -163,6 +166,69 @@ def measure(output_dir: Path, dump_dir: Path) -> dict[str, float]:
     }
 
 
+def run(
+    output_dir: Path,
+    dump_dir: Path | None = None,
+    label: str = DEFAULT_LABEL,
+    baseline: Path | None = None,
+    baseline_label: str | None = None,
+    tolerance_pct: float = DEFAULT_TOLERANCE_PCT,
+) -> int:
+    """Summarise a massif run, gating on the baselines when they are given.
+
+    dump_dir defaults to output_dir, for a run that kept its dumps beside the
+    reports. Returns the exit code: non-zero once a metric is more than
+    tolerance_pct above its baseline, over its limit, or unreadable.
+    """
+    dumps = dump_dir or output_dir
+    try:
+        measured = measure(output_dir, dumps)
+    except (OSError, ValueError) as err:
+        print(
+            f"Error: could not read massif output from {dumps}: {err}",
+            file=sys.stderr,
+        )
+        return 1
+
+    (output_dir / METRICS_FILENAME).write_text(
+        "".join(f"{key} {value:.3f}\n" for key, value in measured.items())
+    )
+
+    if not baseline:
+        for key, value in measured.items():
+            print(f"{METRIC_NAMES[key]}: {value:.3f} {UNIT}")
+        return 0
+
+    baseline_file = baseline_label or str(baseline)
+    try:
+        metrics = [
+            build_metric(
+                key,
+                METRIC_NAMES[key],
+                UNIT,
+                value,
+                read_baseline(baseline, key),
+                tolerance_pct,
+                read_limit(baseline, key),
+            )
+            for key, value in measured.items()
+        ]
+    except OSError as err:
+        print(
+            f"Error: baseline '{baseline_file}' could not be read at '{baseline}': {err}",
+            file=sys.stderr,
+        )
+        return 1
+    except ValueError as err:
+        print(f"Error: baseline '{baseline_file}' is unusable: {err}", file=sys.stderr)
+        return 1
+
+    report = build_report(label, baseline_file, metrics)
+    write_report(report, output_dir / REPORT_JSON_FILENAME)
+
+    return print_summary(report)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -179,7 +245,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--label",
-        default="massif",
+        default=DEFAULT_LABEL,
         help="Name of the profiled target, shown in the reports",
     )
     parser.add_argument(
@@ -196,58 +262,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--tolerance-pct",
         type=float,
-        default=5.0,
+        default=DEFAULT_TOLERANCE_PCT,
         help="Allowed percentage increase over the baseline",
     )
     args = parser.parse_args(argv)
 
-    dump_dir = args.dump_dir or args.output_dir
-    try:
-        measured = measure(args.output_dir, dump_dir)
-    except (OSError, ValueError) as err:
-        print(
-            f"Error: could not read massif output from {dump_dir}: {err}",
-            file=sys.stderr,
-        )
-        return 1
-
-    (args.output_dir / METRICS_FILENAME).write_text(
-        "".join(f"{key} {value:.3f}\n" for key, value in measured.items())
+    return run(
+        args.output_dir,
+        args.dump_dir,
+        args.label,
+        args.baseline,
+        args.baseline_label,
+        args.tolerance_pct,
     )
-
-    if not args.baseline:
-        for key, value in measured.items():
-            print(f"{METRIC_NAMES[key]}: {value:.3f} {UNIT}")
-        return 0
-
-    baseline_file = args.baseline_label or str(args.baseline)
-    try:
-        metrics = [
-            build_metric(
-                key,
-                METRIC_NAMES[key],
-                UNIT,
-                value,
-                read_baseline(args.baseline, key),
-                args.tolerance_pct,
-                read_limit(args.baseline, key),
-            )
-            for key, value in measured.items()
-        ]
-    except OSError as err:
-        print(
-            f"Error: baseline '{baseline_file}' could not be read at '{args.baseline}': {err}",
-            file=sys.stderr,
-        )
-        return 1
-    except ValueError as err:
-        print(f"Error: baseline '{baseline_file}' is unusable: {err}", file=sys.stderr)
-        return 1
-
-    report = build_report(args.label, baseline_file, metrics)
-    write_report(report, args.output_dir / REPORT_JSON_FILENAME)
-
-    return print_summary(report)
 
 
 if __name__ == "__main__":

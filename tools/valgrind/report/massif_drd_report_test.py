@@ -14,16 +14,17 @@ from tools.valgrind.report.massif_drd_report import (
     REPORT_JSON_FILENAME,
     STACK_USAGE_FILENAME,
     find_dump_files,
-    main,
     measure,
     parse_massif,
     parse_stack_usage,
+    run,
 )
 from tools.valgrind.report.metrics import (
     STATUS_OVER_LIMIT,
     STATUS_PASS,
     STATUS_REGRESSION,
     STATUS_STALE_BASELINE,
+    Report,
     read_report,
 )
 
@@ -161,123 +162,101 @@ class MeasureTest(unittest.TestCase):
             )
 
 
-class MainTest(unittest.TestCase):
-    @staticmethod
-    def _output_dir(tmp: str) -> str:
-        _write(Path(tmp) / "valgrind-massif.1", _MASSIF_OUT)
-        _write(Path(tmp) / STACK_USAGE_FILENAME, _STACK_USAGE)
-        return tmp
-
-    @staticmethod
-    def _run(tmp: str, baseline_json: str) -> int:
-        baseline = _write(Path(tmp) / "baseline.json", baseline_json)
-        return main(
-            [
-                "--output-dir",
-                tmp,
-                "--label",
-                "my_target",
-                "--baseline",
-                str(baseline),
-                "--baseline-label",
-                "pkg/baseline.json",
-                "--tolerance-pct",
-                "5",
-            ]
-        )
-
+class RunTest(unittest.TestCase):
     # Measured values are heap 10, extra 2, stacks 3, total 15 MB.
     _ON_BASELINE = """
         {"memory_heap_mb": 10, "memory_heap_extra_mb": 2,
          "memory_stack_mb": 3, "memory_total_mb": 15}
     """
 
+    def setUp(self) -> None:
+        self.output_dir = Path(self.enterContext(tempfile.TemporaryDirectory()))
+        _write(self.output_dir / "valgrind-massif.1", _MASSIF_OUT)
+        _write(self.output_dir / STACK_USAGE_FILENAME, _STACK_USAGE)
+
+    def _run(self, baseline_json: str) -> int:
+        return run(
+            self.output_dir,
+            label="my_target",
+            baseline=_write(self.output_dir / "baseline.json", baseline_json),
+            baseline_label="pkg/baseline.json",
+        )
+
+    def _report(self) -> Report:
+        return read_report(self.output_dir / REPORT_JSON_FILENAME)
+
     def test_writes_the_metrics_file_without_a_baseline(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
+        self.assertEqual(run(self.output_dir), 0)
 
-            self.assertEqual(main(["--output-dir", tmp]), 0)
-
-            self.assertEqual(
-                (Path(tmp) / METRICS_FILENAME).read_text(),
-                "memory_heap_mb 10.000\nmemory_heap_extra_mb 2.000\nmemory_stack_mb 3.000\nmemory_total_mb 15.000\n",
-            )
-            self.assertFalse((Path(tmp) / REPORT_JSON_FILENAME).exists())
+        self.assertEqual(
+            (self.output_dir / METRICS_FILENAME).read_text(),
+            "memory_heap_mb 10.000\nmemory_heap_extra_mb 2.000\nmemory_stack_mb 3.000\nmemory_total_mb 15.000\n",
+        )
+        self.assertFalse((self.output_dir / REPORT_JSON_FILENAME).exists())
 
     def test_fails_when_there_is_no_massif_output(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(main(["--output-dir", tmp]), 1)
+        with tempfile.TemporaryDirectory() as empty:
+            self.assertEqual(run(Path(empty)), 1)
 
     def test_passes_on_baseline_and_writes_every_metric(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
+        self.assertEqual(self._run(self._ON_BASELINE), 0)
 
-            self.assertEqual(self._run(tmp, self._ON_BASELINE), 0)
-
-            report = read_report(Path(tmp) / REPORT_JSON_FILENAME)
-            self.assertEqual(report["status"], STATUS_PASS)
-            self.assertEqual(report["label"], "my_target")
-            self.assertEqual(report["baseline_file"], "pkg/baseline.json")
-            self.assertEqual(
-                [metric["key"] for metric in report["metrics"]],
-                [
-                    "memory_heap_mb",
-                    "memory_heap_extra_mb",
-                    "memory_stack_mb",
-                    "memory_total_mb",
-                ],
-            )
-            self.assertEqual({metric["unit"] for metric in report["metrics"]}, {"MB"})
+        report = self._report()
+        self.assertEqual(report["status"], STATUS_PASS)
+        self.assertEqual(report["label"], "my_target")
+        self.assertEqual(report["baseline_file"], "pkg/baseline.json")
+        self.assertEqual(
+            [metric["key"] for metric in report["metrics"]],
+            [
+                "memory_heap_mb",
+                "memory_heap_extra_mb",
+                "memory_stack_mb",
+                "memory_total_mb",
+            ],
+        )
+        self.assertEqual({metric["unit"] for metric in report["metrics"]}, {"MB"})
 
     def test_fails_when_one_metric_regresses(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
+        baseline = """
+            {"memory_heap_mb": 5, "memory_heap_extra_mb": 2,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 1)
 
-            baseline = """
-                {"memory_heap_mb": 5, "memory_heap_extra_mb": 2,
-                 "memory_stack_mb": 3, "memory_total_mb": 15}
-            """
-            self.assertEqual(self._run(tmp, baseline), 1)
-
-            report = read_report(Path(tmp) / REPORT_JSON_FILENAME)
-            self.assertEqual(report["status"], STATUS_REGRESSION)
-            self.assertEqual(report["metrics"][0]["status"], STATUS_REGRESSION)
-            self.assertEqual(report["metrics"][1]["status"], STATUS_PASS)
+        report = self._report()
+        self.assertEqual(report["status"], STATUS_REGRESSION)
+        self.assertEqual(report["metrics"][0]["status"], STATUS_REGRESSION)
+        self.assertEqual(report["metrics"][1]["status"], STATUS_PASS)
 
     def test_fails_when_a_metric_is_over_its_absolute_limit(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
+        # On baseline, so only the ceiling can fail it.
+        baseline = """
+            {"memory_heap_mb": 10, "memory_heap_mb_max": 8, "memory_heap_extra_mb": 2,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 1)
 
-            # On baseline, so only the ceiling can fail it.
-            baseline = """
-                {"memory_heap_mb": 10, "memory_heap_mb_max": 8, "memory_heap_extra_mb": 2,
-                 "memory_stack_mb": 3, "memory_total_mb": 15}
-            """
-            self.assertEqual(self._run(tmp, baseline), 1)
-
-            report = read_report(Path(tmp) / REPORT_JSON_FILENAME)
-            self.assertEqual(report["status"], STATUS_OVER_LIMIT)
-            self.assertEqual(report["metrics"][0]["max"], 8)
+        report = self._report()
+        self.assertEqual(report["status"], STATUS_OVER_LIMIT)
+        self.assertEqual(report["metrics"][0]["max"], 8)
 
     def test_stale_baseline_warns_but_succeeds(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
-
-            baseline = """
-                {"memory_heap_mb": 40, "memory_heap_extra_mb": 2,
-                 "memory_stack_mb": 3, "memory_total_mb": 15}
-            """
-            self.assertEqual(self._run(tmp, baseline), 0)
-
-            self.assertEqual(
-                read_report(Path(tmp) / REPORT_JSON_FILENAME)["status"],
-                STATUS_STALE_BASELINE,
-            )
+        baseline = """
+            {"memory_heap_mb": 40, "memory_heap_extra_mb": 2,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 0)
+        self.assertEqual(self._report()["status"], STATUS_STALE_BASELINE)
 
     def test_fails_on_a_baseline_missing_a_metric(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp:
-            self._output_dir(tmp)
-            self.assertEqual(self._run(tmp, '{"memory_heap_mb": 10}'), 1)
+        self.assertEqual(self._run('{"memory_heap_mb": 10}'), 1)
+
+    def test_reads_the_dumps_from_a_separate_dump_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as dumps:
+            (self.output_dir / "valgrind-massif.1").unlink()
+            _write(Path(dumps) / "valgrind-massif.1", _MASSIF_OUT)
+
+            self.assertEqual(run(self.output_dir, dump_dir=Path(dumps)), 0)
 
 
 if __name__ == "__main__":

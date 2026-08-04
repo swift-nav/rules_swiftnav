@@ -42,6 +42,9 @@ REPORT_JSON_FILENAME = "valgrind-callgrind.report.json"
 METRIC_KEY = "cpu_instructions"
 METRIC_NAME = "CPU instructions"
 
+DEFAULT_LABEL = "callgrind"
+DEFAULT_TOLERANCE_PCT = 5.0
+
 # Only the per-process dumps, so the report files this tool writes into the
 # same directory are never mistaken for callgrind output on a re-run. callgrind
 # appends .<part> for a multi-part dump and -<tid> under --separate-threads.
@@ -88,6 +91,56 @@ def sum_instructions(paths: Iterable[Path]) -> int:
     return total
 
 
+def run(
+    output_dir: Path,
+    label: str = DEFAULT_LABEL,
+    baseline: Path | None = None,
+    baseline_label: str | None = None,
+    tolerance_pct: float = DEFAULT_TOLERANCE_PCT,
+) -> int:
+    """Summarise a callgrind run, gating on the baseline when one is given.
+
+    Returns the exit code: non-zero once the instruction count is more than
+    tolerance_pct above the baseline, or the output could not be read at all.
+    """
+    try:
+        measured = sum_instructions(find_output_files(output_dir))
+    except (OSError, ValueError) as err:
+        print(
+            f"Error: could not read callgrind output from {output_dir}: {err}",
+            file=sys.stderr,
+        )
+        return 1
+
+    (output_dir / INSTRUCTIONS_FILENAME).write_text(f"{measured}\n")
+
+    if not baseline:
+        print(f"{METRIC_NAME}: {measured:,}")
+        return 0
+
+    baseline_file = baseline_label or str(baseline)
+    try:
+        expected = read_baseline(baseline, METRIC_KEY)
+        limit = read_limit(baseline, METRIC_KEY)
+    except OSError as err:
+        print(
+            f"Error: baseline '{baseline_file}' could not be read at '{baseline}': {err}",
+            file=sys.stderr,
+        )
+        return 1
+    except ValueError as err:
+        print(f"Error: baseline '{baseline_file}' is unusable: {err}", file=sys.stderr)
+        return 1
+
+    metric = build_metric(
+        METRIC_KEY, METRIC_NAME, "", measured, expected, tolerance_pct, limit
+    )
+    report = build_report(label, baseline_file, [metric])
+    write_report(report, output_dir / REPORT_JSON_FILENAME)
+
+    return print_summary(report)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -98,7 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--label",
-        default="callgrind",
+        default=DEFAULT_LABEL,
         help="Name of the profiled target, shown in the reports",
     )
     parser.add_argument(
@@ -115,47 +168,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--tolerance-pct",
         type=float,
-        default=5.0,
+        default=DEFAULT_TOLERANCE_PCT,
         help="Allowed percentage increase over the baseline",
     )
     args = parser.parse_args(argv)
 
-    try:
-        measured = sum_instructions(find_output_files(args.output_dir))
-    except (OSError, ValueError) as err:
-        print(
-            f"Error: could not read callgrind output from {args.output_dir}: {err}",
-            file=sys.stderr,
-        )
-        return 1
-
-    (args.output_dir / INSTRUCTIONS_FILENAME).write_text(f"{measured}\n")
-
-    if not args.baseline:
-        print(f"{METRIC_NAME}: {measured:,}")
-        return 0
-
-    baseline_file = args.baseline_label or str(args.baseline)
-    try:
-        baseline = read_baseline(args.baseline, METRIC_KEY)
-        limit = read_limit(args.baseline, METRIC_KEY)
-    except OSError as err:
-        print(
-            f"Error: baseline '{baseline_file}' could not be read at '{args.baseline}': {err}",
-            file=sys.stderr,
-        )
-        return 1
-    except ValueError as err:
-        print(f"Error: baseline '{baseline_file}' is unusable: {err}", file=sys.stderr)
-        return 1
-
-    metric = build_metric(
-        METRIC_KEY, METRIC_NAME, "", measured, baseline, args.tolerance_pct, limit
+    return run(
+        args.output_dir,
+        args.label,
+        args.baseline,
+        args.baseline_label,
+        args.tolerance_pct,
     )
-    report = build_report(args.label, baseline_file, [metric])
-    write_report(report, args.output_dir / REPORT_JSON_FILENAME)
-
-    return print_summary(report)
 
 
 if __name__ == "__main__":
