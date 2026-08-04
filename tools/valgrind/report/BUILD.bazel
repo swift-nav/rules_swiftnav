@@ -8,19 +8,27 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-# Reporting side of the valgrind tooling: turning a profiling run into a
-# baseline comparison, and those comparisons into a PR comment. The valgrind
-# macros and runner scripts live one level up in //tools/valgrind.
+# Reporting side of the valgrind tooling: measuring a profiling run, gating
+# those measurements against a baseline, and turning the comparisons into a PR
+# comment. The valgrind macros and runner scripts live one level up in
+# //tools/valgrind.
 
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("@rules_swiftnav//cc:defs.bzl", "UNIT")
 
-# Report types shared by the measuring tools and the comment renderer.
+# Measurement and report types shared by every tool here. Public because the
+# generated comparison test compiles compare.py in the consuming package and
+# needs this as a dependency.
 py_library(
     name = "metrics",
     srcs = ["metrics.py"],
+    # This repository's root, so "tools.valgrind.report.metrics" resolves from a
+    # consuming repository too, without relying on
+    # --experimental_python_import_all_repositories being left on.
+    imports = ["../../.."],
+    visibility = ["//visibility:public"],
 )
 
 py_test(
@@ -31,45 +39,72 @@ py_test(
     deps = [":metrics"],
 )
 
-# Summarises callgrind output and gates it against an instructions baseline.
-# Public because swift_add_valgrind_callgrind puts it in the data of the
-# sh_test it generates in the consuming repository.
+# Measures a callgrind run's instruction count. Public because the profile rule
+# runs it as a tool of the action it generates in the consuming repository.
 py_binary(
-    name = "callgrind_report",
-    srcs = ["callgrind_report.py"],
-    main = "callgrind_report.py",
+    name = "callgrind_measure",
+    srcs = ["callgrind_measure.py"],
+    main = "callgrind_measure.py",
     visibility = ["//visibility:public"],
     deps = [":metrics"],
 )
 
 py_test(
-    name = "callgrind_report_test",
-    srcs = ["callgrind_report_test.py"],
-    main = "callgrind_report_test.py",
+    name = "callgrind_measure_test",
+    srcs = ["callgrind_measure_test.py"],
+    main = "callgrind_measure_test.py",
     tags = [UNIT],
     deps = [
-        ":callgrind_report",
+        ":callgrind_measure",
         ":metrics",
     ],
 )
 
-# Summarises massif (and DRD) output and gates it against memory baselines.
-# Public for the same reason as callgrind_report.
+# Measures a massif (and DRD) run's memory figures. Public for the same reason
+# as callgrind_measure.
 py_binary(
-    name = "massif_drd_report",
-    srcs = ["massif_drd_report.py"],
-    main = "massif_drd_report.py",
+    name = "massif_drd_measure",
+    srcs = ["massif_drd_measure.py"],
+    main = "massif_drd_measure.py",
     visibility = ["//visibility:public"],
     deps = [":metrics"],
 )
 
 py_test(
-    name = "massif_drd_report_test",
-    srcs = ["massif_drd_report_test.py"],
-    main = "massif_drd_report_test.py",
+    name = "massif_drd_measure_test",
+    srcs = ["massif_drd_measure_test.py"],
+    main = "massif_drd_measure_test.py",
     tags = [UNIT],
     deps = [
-        ":massif_drd_report",
+        ":massif_drd_measure",
+        ":metrics",
+    ],
+)
+
+# Gates a measurement against its baseline, and is the whole of the test the
+# valgrind macros generate. Exported rather than only a py_binary because that
+# test compiles it as a src in the consuming package, the same way the runner is
+# used one level up.
+exports_files(
+    ["compare.py"],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "compare",
+    srcs = ["compare.py"],
+    main = "compare.py",
+    visibility = ["//visibility:public"],
+    deps = [":metrics"],
+)
+
+py_test(
+    name = "compare_test",
+    srcs = ["compare_test.py"],
+    main = "compare_test.py",
+    tags = [UNIT],
+    deps = [
+        ":compare",
         ":metrics",
     ],
 )
