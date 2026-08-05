@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import ClassVar
 from unittest import mock
 
-from tools.valgrind import runner
+import runner
 
 _STACK_LINES = (
     "==42== thread 1 finished and used 2097152 bytes out of 8388608 on its stack. Margin: 6291456 bytes.\n"

@@ -12,8 +12,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from tools.valgrind.report.compare import DEFAULT_TOLERANCE_PCT, main, run
-from tools.valgrind.report.metrics import (
+from compare import DEFAULT_TOLERANCE_PCT, main, run
+from metrics import (
     STATUS_OVER_LIMIT,
     STATUS_PASS,
     STATUS_REGRESSION,

@@ -17,7 +17,7 @@ import sys
 from collections.abc import Iterable
 from pathlib import Path
 
-from tools.valgrind.report.metrics import (
+from metrics import (
     Measured,
     Measurement,
     write_measurement,

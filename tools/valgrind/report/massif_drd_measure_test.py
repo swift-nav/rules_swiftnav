@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.valgrind.report.massif_drd_measure import (
+from massif_drd_measure import (
     STACK_USAGE_FILENAME,
     find_dump_files,
     measure,
@@ -17,7 +17,7 @@ from tools.valgrind.report.massif_drd_measure import (
     parse_stack_usage,
     run,
 )
-from tools.valgrind.report.metrics import read_measurement
+from metrics import read_measurement
 
 _MB = 1024 * 1024
 

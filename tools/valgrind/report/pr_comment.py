@@ -25,7 +25,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from tools.valgrind.report.metrics import (
+from metrics import (
     STATUS_OVER_LIMIT,
     STATUS_PASS,
     STATUS_REGRESSION,

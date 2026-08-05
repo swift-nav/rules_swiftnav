@@ -9,12 +9,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tools.valgrind.report.callgrind_measure import (
+from callgrind_measure import (
     find_output_files,
     run,
     sum_instructions,
 )
-from tools.valgrind.report.metrics import read_measurement
+from metrics import read_measurement
 
 # Multi-event summary line: the first field is Ir, the rest are other events.
 _SUMMARY_DUMP = """\

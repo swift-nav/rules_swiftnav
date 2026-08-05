@@ -11,13 +11,13 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from tools.valgrind.report.metrics import (
+from metrics import (
     Report,
     build_metric,
     build_report,
     write_report,
 )
-from tools.valgrind.report.pr_comment import (
+from pr_comment import (
     DEFAULT_MARKER,
     METRIC_HEADER,
     format_comment,

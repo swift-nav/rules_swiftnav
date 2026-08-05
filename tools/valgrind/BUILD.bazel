@@ -38,6 +38,7 @@ py_test(
         "runner.py",
         "runner_test.py",
     ],
+    imports = ["."],
     main = "runner_test.py",
     tags = [UNIT],
 )

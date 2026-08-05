@@ -24,10 +24,11 @@ load("@rules_swiftnav//cc:defs.bzl", "UNIT")
 py_library(
     name = "metrics",
     srcs = ["metrics.py"],
-    # This repository's root, so "tools.valgrind.report.metrics" resolves from a
-    # consuming repository too, without relying on
-    # --experimental_python_import_all_repositories being left on.
-    imports = ["../../.."],
+    # This package alone, so every module here is a top-level import. Putting
+    # this repository's root on sys.path instead would make the import
+    # "tools.valgrind.report.metrics", and any consumer with its own top-level
+    # "tools" package would shadow ours and break the import.
+    imports = ["."],
     visibility = ["//visibility:public"],
 )
 

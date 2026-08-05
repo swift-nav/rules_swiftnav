@@ -31,7 +31,7 @@ import os
 import sys
 from pathlib import Path
 
-from tools.valgrind.report.metrics import (
+from metrics import (
     Measurement,
     build_metric,
     build_report,
