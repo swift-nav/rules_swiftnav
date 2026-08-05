@@ -43,6 +43,7 @@ load(
     "cxx20_standard_feature",
     "cxx98_standard_feature",
     "gnu_extensions_feature",
+    "swift_lto_thin_feature",
     "swift_no_default_warnings",
     "swift_relwdbg_feature",
 )
@@ -1459,6 +1460,7 @@ def _impl(ctx):
             swift_stdlib_feature,
             swift_libcpp_feature,
             swift_relwdbg_feature,
+            swift_lto_thin_feature,
         ]
     else:
         # macOS artifact name patterns differ from the defaults only for dynamic
@@ -1515,6 +1517,7 @@ def _impl(ctx):
             swift_stdlib_feature,
             swift_libcpp_feature,
             swift_relwdbg_feature,
+            swift_lto_thin_feature,
         ]
 
     return cc_common.create_cc_toolchain_config_info(

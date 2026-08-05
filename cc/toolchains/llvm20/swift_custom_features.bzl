@@ -382,6 +382,26 @@ cxx20_standard_feature = feature(
     ],
 )
 
+# ThinLTO: optimize across translation-unit and library boundaries at link
+# time. Defined as a toolchain feature (rather than global copts) so only
+# LLVM toolchains honor it — toolchains without the feature ignore
+# --features=lto_thin instead of choking on a clang-only flag. Named lto_thin
+# because "thin_lto" is reserved by Bazel's built-in LTO-indexing machinery,
+# which this toolchain does not implement.
+swift_lto_thin_feature = feature(
+    name = "lto_thin",
+    flag_sets = [
+        flag_set(
+            actions = _all_compile_actions,
+            flag_groups = [flag_group(flags = ["-flto=thin"])],
+        ),
+        flag_set(
+            actions = _all_link_actions,
+            flag_groups = [flag_group(flags = ["-flto=thin"])],
+        ),
+    ],
+)
+
 swift_relwdbg_feature = feature(
     name = "relwdbg",
     flag_sets = [
