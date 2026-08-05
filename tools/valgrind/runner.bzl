@@ -67,7 +67,7 @@ def valgrind_test(
             program_args
         ),
         data = deps,
-        tags = tags + ["valgrind-" + tool, "manual"],
+        tags = tags + ["valgrind", "valgrind-" + tool, "manual"],
         target_compatible_with = kwargs.pop("target_compatible_with", []) + ["@platforms//os:linux"],
         **kwargs
     )
@@ -127,8 +127,9 @@ def valgrind_gate(
         binary_env = binary_env,
         # manual because a wildcard build must not start an unbounded valgrind
         # pass; the gate test pulls it in as a dependency when asked for.
-        tags = tags + ["valgrind-" + tool, "manual"],
+        tags = tags + ["valgrind", "valgrind-" + tool, "manual"],
         target_compatible_with = compatible,
+        testonly = True,
         visibility = visibility,
     )
 
