@@ -20,6 +20,8 @@ from tools.valgrind.report.metrics import (
 from tools.valgrind.report.pr_comment import (
     DEFAULT_MARKER,
     METRIC_HEADER,
+    convert_metric,
+    convert_report,
     format_comment,
     format_percent,
     main,
@@ -163,6 +165,58 @@ class FormatCommentTest(unittest.TestCase):
         self.assertIn("tolerance per metric", comment)
 
 
+class ConvertUnitTest(unittest.TestCase):
+    def test_rescales_every_absolute_number_but_no_percentage(self) -> None:
+        heap = build_metric("memory_heap_mb", "Peak heap", "MB", 2.0, 1.0, 5.0, 4.0)
+
+        converted = convert_metric(heap, "KB")
+
+        self.assertEqual(converted["unit"], "KB")
+        self.assertEqual(converted["value"], 2048.0)
+        self.assertEqual(converted["baseline"], 1024.0)
+        self.assertEqual(converted["delta"], 1024.0)
+        self.assertEqual(converted["max"], 4096.0)
+        self.assertEqual(converted["delta_pct"], heap["delta_pct"])
+        self.assertEqual(converted["tolerance_pct"], heap["tolerance_pct"])
+
+    def test_leaves_a_metric_that_is_not_a_byte_quantity_alone(self) -> None:
+        instructions = build_metric(
+            "cpu_instructions", "CPU instructions", "", 1050, 1000, 5.0
+        )
+
+        self.assertEqual(convert_metric(instructions, "KB"), instructions)
+
+    def test_a_metric_without_a_ceiling_keeps_none(self) -> None:
+        heap = build_metric("memory_heap_mb", "Peak heap", "MB", 2.0, 1.0, 5.0)
+
+        self.assertIsNone(convert_metric(heap, "KB")["max"])
+
+    def test_report_without_a_unit_is_returned_as_measured(self) -> None:
+        report = _report("run_replay", 1050, 1000)
+
+        self.assertEqual(convert_report(report, None), report)
+
+    def test_a_sub_mb_figure_reads_as_kb_in_the_table(self) -> None:
+        # 215 bytes of heap extra: "0.000 MB" says nothing, "0.210 KB" does.
+        extra = build_metric(
+            "memory_heap_extra_mb",
+            "Peak heap extra (massif)",
+            "MB",
+            215 / 1024**2,
+            0.0002,
+            5.0,
+        )
+        report = build_report("massif_target", "pkg/baseline.json", [extra])
+
+        as_measured = format_comment([report], DEFAULT_MARKER, "Title", None)
+        as_kb = format_comment(
+            [convert_report(report, "KB")], DEFAULT_MARKER, "Title", None
+        )
+
+        self.assertIn("| 0.000 MB |", as_measured)
+        self.assertIn("| 0.210 KB |", as_kb)
+
+
 class MainTest(unittest.TestCase):
     def test_merges_every_report_given(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -179,6 +233,24 @@ class MainTest(unittest.TestCase):
             self.assertIn("<summary>✅ <code>first</code></summary>", comment)
             self.assertIn("<summary>✅ <code>second</code></summary>", comment)
             self.assertEqual(comment.count("<details open>"), 2)
+
+    def test_unit_flag_converts_the_reports_it_reads(self) -> None:
+        heap = build_metric("memory_heap_mb", "Peak heap", "MB", 2.0, 1.0, 5.0)
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "massif.json"
+            write_report(
+                build_report("massif_target", "pkg/baseline.json", [heap]), path
+            )
+
+            out = io.StringIO()
+            with redirect_stdout(out):
+                exit_code = main([str(path), "--unit", "KB"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn(
+                "| Peak heap | 2,048.000 KB | 1,024.000 KB | +1,024.000 KB (+100.00%) |",
+                out.getvalue(),
+            )
 
     def test_fails_on_an_unreadable_report(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
