@@ -5,9 +5,9 @@ test can compare that sum against a baseline.
 
 Usage:
     load("@rules_swiftnav//tools/valgrind:massif_drd.bzl",
-         "swift_add_valgrind_massif")
+         "swift_add_valgrind_massif_drd")
 
-    swift_add_valgrind_massif(
+    swift_add_valgrind_massif_drd(
         binary = ":my_binary",
         program_args = ["--config", "config.yaml"],
         workdir_data = ["config.yaml", ":input.file"],
@@ -22,7 +22,7 @@ load(":runner.bzl", "target_label", "valgrind_test")
 
 _REPORT_TOOL = "@rules_swiftnav//tools/valgrind/report:massif_drd_report"
 
-def swift_add_valgrind_massif(
+def swift_add_valgrind_massif_drd(
         binary,
         name = None,
         stack_usage = False,
