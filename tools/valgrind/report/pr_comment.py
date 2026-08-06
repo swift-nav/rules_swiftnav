@@ -14,9 +14,13 @@ Requirements:
   - The verdict is a symbol plus the reason in words. GitHub strips title
     attributes, so hover tooltips are not an option.
   - Blocks are sorted by label, so rewriting the comment never reshuffles them.
+  - Byte quantities can be rendered in a unit of the reader's choosing, for a
+    target whose figures are far from the one they were measured in: a decoder
+    peaking at 215 bytes of heap extra is "0.000 MB" but "0.210 KB".
 
 Run with Bazel:
     bazel run //tools/valgrind/report:pr_comment -- --commit abc1234 \\
+        --unit KB \\
         /abs/path/a/valgrind-callgrind.report.json \\
         /abs/path/b/valgrind-callgrind.report.json
 """
@@ -42,6 +46,11 @@ from tools.valgrind.report.metrics import (
 DEFAULT_MARKER = "<!-- valgrind-callgrind-regression -->"
 DEFAULT_TITLE = "Valgrind analysis"
 
+# A metric measured in one of these converts to any other by ratio. Everything
+# else — an instruction count, whose unit is empty — is left as measured.
+_UNIT_BYTES = {"B": 1, "KB": 1024, "MB": 1024**2, "GB": 1024**3}
+UNITS = sorted(_UNIT_BYTES)
+
 METRIC_HEADER = "\n".join(
     [
         "| Metric | Value | Baseline | Delta |",
@@ -61,6 +70,41 @@ _STATUS_WORDING = {
     STATUS_STALE_BASELINE: "baseline stale",
     STATUS_OVER_LIMIT: "over limit",
 }
+
+
+def convert_metric(metric: Metric, unit: str) -> Metric:
+    """Rescale a byte quantity to unit, leaving anything else as measured.
+
+    Only the absolute numbers move; delta_pct and tolerance_pct are ratios and
+    mean the same in any unit.
+    """
+    source = metric["unit"]
+    if source == unit or source not in _UNIT_BYTES:
+        return metric
+
+    factor = _UNIT_BYTES[source] / _UNIT_BYTES[unit]
+    converted = dict(metric)
+    for key in ("value", "baseline", "delta", "max"):
+        if converted[key] is not None:
+            converted[key] *= factor
+    converted["unit"] = unit
+    return Metric(**converted)
+
+
+def convert_report(report: Report, unit: str | None) -> Report:
+    """Render every byte quantity of a report in unit, or as measured if None.
+
+    Display only: the baseline file the block points at keeps the unit it was
+    written in, which is the one a refresh has to be typed back in.
+    """
+    if unit is None:
+        return report
+
+    converted = dict(report)
+    converted["metrics"] = [
+        convert_metric(metric, unit) for metric in report["metrics"]
+    ]
+    return Report(**converted)
 
 
 def format_percent(pct: float) -> str:
@@ -182,10 +226,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--commit", default=None, help="Commit SHA quoted in the footer"
     )
+    parser.add_argument(
+        "--unit",
+        default=None,
+        choices=UNITS,
+        help="Render byte quantities in this unit instead of the one they were "
+        "measured in. Leave unset to keep the measured unit",
+    )
     args = parser.parse_args(argv)
 
     try:
-        reports = [read_report(path) for path in args.reports]
+        reports = [
+            convert_report(read_report(path), args.unit) for path in args.reports
+        ]
     except (OSError, ValueError) as err:
         print(f"Error: could not read a valgrind report: {err}", file=sys.stderr)
         return 1
