@@ -1,12 +1,11 @@
 # check_attributes
 
 A Bazel [aspect](https://bazel.build/extending/aspects) that bans raw
-`__attribute__(...)` in C/C++ sources. Compiler-specific attributes must
-instead go behind guard macros defined in one central header —
-`libswiftnav/macros.h`, included as `swiftnav/macros.h` — so the codebase has
-a single, greppable place to handle compiler differences (GCC vs. Clang vs.
-MSVC, version quirks, etc.) instead of `__attribute__` sprinkled throughout
-production code.
+`__attribute__(...)` in C/C++ sources. Compiler-specific attributes must instead
+go behind guard macros defined in one central header — `libswiftnav/macros.h`,
+included as `swiftnav/macros.h` — so the codebase has a single, greppable place
+to handle compiler differences (GCC vs. Clang vs. MSVC, version quirks, etc.)
+instead of `__attribute__` sprinkled throughout production code.
 
 When the check fires, the reported error points at that header:
 
@@ -68,9 +67,10 @@ bazel build --config=check-attributes //...
 ```
 
 ## Excluding files
-`//check_attributes:excluded` is a `label_flag` (default: an empty
-`filegroup`) that lists files the check should skip entirely. The primary
-entry is `libswiftnav/macros.h` itself, which by definition contains the raw
+
+`//check_attributes:excluded` is a `label_flag` (default: an empty `filegroup`)
+that lists files the check should skip entirely. The primary entry is
+`libswiftnav/macros.h` itself, which by definition contains the raw
 `__attribute__` uses that every other file is expected to go through.
 
 Override it with a `filegroup` of your own:
@@ -126,13 +126,12 @@ void legacy_helper(void) MY_ATTR_UNUSED;
 
 Rule of thumb for adding a new macro:
 
-1. Add it to `libswiftnav/macros.h`; do not define compiler-attribute macros
-   in individual modules.
+1. Add it to `libswiftnav/macros.h`; do not define compiler-attribute macros in
+   individual modules.
 2. Guard it on the compiler (and version, if needed).
 3. Provide a no-op fallback for compilers that don't support it.
-4. Only add a file to the exclusion `filegroup` if it must legitimately
-   contain a raw attribute — in practice that is only
-   `libswiftnav/macros.h`.
+4. Only add a file to the exclusion `filegroup` if it must legitimately contain
+   a raw attribute — in practice that is only `libswiftnav/macros.h`.
 
 ## Limitations / known issues
 
@@ -152,10 +151,3 @@ Rule of thumb for adding a new macro:
 - Only the literal token `__attribute__` is detected. Other compiler-specific
   mechanisms — `__declspec`, `#pragma`, C++11 `[[...]]` attributes — are not
   caught by this check.
-
-## Related
-
-- `cc_files/get_cc_files.bzl` — shared helper this aspect uses to enumerate a
-  target's sources and headers.
-- `tools/lint/lint.sh` — another aspect-based check in this repo, built on
-  `@aspect_rules_lint`.
