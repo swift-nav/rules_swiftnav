@@ -417,7 +417,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "BaCKsIj2+vQlmB2uzmW7hlOCwrO2xqnE8YsygmKEpWQ=",
+        "usagesDigest": "uBrfesa7I2gVP5qZE3FJirceC21O5PCGIN6FwGnlQ4Y=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
           "yocto_generic": {
