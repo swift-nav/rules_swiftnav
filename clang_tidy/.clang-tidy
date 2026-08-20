@@ -1,6 +1,4 @@
 ---
-# Clang-Tidy 20 Swift Navigation - Merged Configuration
-
 Checks: >
   -*,
   bugprone-*,
@@ -76,8 +74,6 @@ Checks: >
   cppcoreguidelines-noexcept-swap,
   cppcoreguidelines-rvalue-reference-param-not-moved
 
-# Checks from original .clang-tidy treated as errors
-# Checks from .clang-tidy-optional treated as warnings (not listed here)
 WarningsAsErrors: >
   bugprone-*,
   cert-*,
@@ -98,10 +94,7 @@ WarningsAsErrors: >
   misc-throw-by-value-catch-by-reference,
   misc-uniqueptr-reset-release
 
-# --- Check-Specific Options ---
 CheckOptions:
-  - key: Standard
-    value: "17"
   - key: performance-for-range-copy.WarnOnAllAutoCopies
     value: "true"
   - key: bugprone-argument-comment.StrictMode
