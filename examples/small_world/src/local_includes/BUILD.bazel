@@ -1,0 +1,53 @@
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_library", "swift_cc_test")
+
+# Regression coverage for local_includes under -Wmissing-include-dirs: the
+# include path for the genfiles tree is only emitted when a path is prefixed
+# with $(GENDIR), so a package without generated headers does not get an -I
+# pointing at a bazel-out directory that never gets created.
+_MISSING_INCLUDE_DIRS_COPTS = [
+    "-Wmissing-include-dirs",
+    "-Werror",
+]
+
+swift_cc_library(
+    name = "counter",
+    srcs = [
+        "src/counter.cc",
+        "src/internal/detail.hpp",
+    ],
+    hdrs = ["include/local_includes/counter.hpp"],
+    copts = _MISSING_INCLUDE_DIRS_COPTS,
+    local_includes = ["src"],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
+
+genrule(
+    name = "generated_limit_hpp",
+    outs = ["generated_limit.hpp"],
+    cmd = "echo 'static constexpr int kGeneratedLimit = 99;' > $@",
+)
+
+swift_cc_library(
+    name = "limit",
+    srcs = [
+        "src/limit.cc",
+        ":generated_limit_hpp",
+    ],
+    hdrs = ["include/local_includes/limit.hpp"],
+    copts = _MISSING_INCLUDE_DIRS_COPTS,
+    local_includes = ["$(GENDIR)"],
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
+
+swift_cc_test(
+    name = "local_includes_test",
+    srcs = ["test/local_includes_test.cc"],
+    type = UNIT,
+    deps = [
+        ":counter",
+        ":limit",
+        "@googletest//:gtest_main",
+    ],
+)

@@ -23,17 +23,25 @@ def construct_local_include(path):
     Args:
         path: The include path relative to the package this macro is called from
 
-            Use the special argument $(GENDIR) to construct an include path for
-            any generated files the build depends on. Assumes these files are
-            not generated into a subdirectory.
+            Prefix the path with $(GENDIR) to construct an include path for
+            generated files the build depends on.
     """
     repo_name = native.repository_name()[1:]
     package_name = native.package_name()
+
+    # An include path into the generated tree is only emitted on request:
+    # unconditionally adding one makes -Wmissing-include-dirs fire for every
+    # package that has no generated files, since bazel never creates the dir.
+    gendir = path.startswith("$(GENDIR)")
+    if gendir:
+        path = path[len("$(GENDIR)"):].lstrip("/")
+
     if repo_name:
-        source_dir = paths.join("external", repo_name, package_name, path)
+        include_dir = paths.join("external", repo_name, package_name, path)
     else:
-        source_dir = paths.join(package_name, path)
-    return [
-        "-I{}".format(source_dir),
-        "-I{}".format(paths.join("$(GENDIR)", source_dir)),
-    ]
+        include_dir = paths.join(package_name, path)
+
+    if gendir:
+        include_dir = paths.join("$(GENDIR)", include_dir)
+
+    return ["-I{}".format(include_dir)]
