@@ -9,6 +9,7 @@ non-empty patch files to a specified directory.
 """
 
 import argparse
+import functools
 import json
 import os
 import re
@@ -71,6 +72,10 @@ def extract_files_from_bep(
     return report_files
 
 
+# Cached because a repository-wide clang-tidy run produces millions of results
+# spread over a few thousand distinct URIs, and the _virtual_includes branch below
+# costs a realpath() syscall per call.
+@functools.cache
 def normalize_path(uri: str, workspace_root: Path | None = None) -> str:
     """
     Normalize Bazel execroot paths to repository-relative paths.
