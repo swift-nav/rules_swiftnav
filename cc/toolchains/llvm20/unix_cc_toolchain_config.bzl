@@ -1258,6 +1258,12 @@ def _impl(ctx):
             flag_set(
                 actions = [ACTION_NAMES.lto_backend],
                 flag_groups = [
+                    # The LTO backend only runs codegen over bitcode, so every
+                    # preprocessor and driver flag Bazel replays from the
+                    # compile action (-U/-D, -idirafter, -stdlib, ...) lands
+                    # unused. With -Werror that aborts the build, and user
+                    # copts cannot be filtered out by the toolchain.
+                    flag_group(flags = ["-Wno-unused-command-line-argument"]),
                     flag_group(flags = [
                         "-c",
                         "-fthinlto-index=%{thinlto_index}",
