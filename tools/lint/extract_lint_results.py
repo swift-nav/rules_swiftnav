@@ -9,13 +9,14 @@ non-empty patch files to a specified directory.
 """
 
 import argparse
+import functools
 import json
 import os
 import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 
 def extract_files_from_bep(
@@ -71,6 +72,10 @@ def extract_files_from_bep(
     return report_files
 
 
+# Cached because a repository-wide clang-tidy run produces millions of results
+# spread over a few thousand distinct URIs, and the _virtual_includes branch below
+# costs a realpath() syscall per call.
+@functools.cache
 def normalize_path(uri: str, workspace_root: Path | None = None) -> str:
     """
     Normalize Bazel execroot paths to repository-relative paths.
@@ -242,41 +247,53 @@ def extract_rule_ids(run: dict[str, Any]) -> dict[str, Any]:
     return run
 
 
-def deduplicate_runs(runs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+class ResultKey(NamedTuple):
+    """Identity of a SARIF result, used to recognise duplicates."""
+
+    uri: str
+    start_line: int
+    start_column: int
+    rule_id: str
+
+    @classmethod
+    def of(cls, result: dict[str, Any]) -> "ResultKey":
+        """Build the key from a SARIF result's primary location."""
+        phys = result.get("locations", [{}])[0].get("physicalLocation", {})
+        region = phys.get("region", {})
+        return cls(
+            uri=phys.get("artifactLocation", {}).get("uri", ""),
+            start_line=region.get("startLine", 0),
+            start_column=region.get("startColumn", 0),
+            rule_id=result.get("ruleId", ""),
+        )
+
+
+def deduplicate_run(run: dict[str, Any], seen: set[ResultKey]) -> dict[str, Any]:
     """
-    Deduplicate results across a list of SARIF runs.
+    Drop results from a single run that are already present in `seen`.
 
     Header files are included by multiple .cc compilation units, producing one
     clang-tidy run per including file and therefore one copy of each header
-    diagnostic per includer. This function collapses those duplicates, keying
-    on (uri, startLine, startColumn, ruleId).
+    diagnostic per includer.
 
     Args:
-        runs: List of SARIF run objects (may contain duplicate results)
+        run: A SARIF run object (mutated in-place)
+        seen: Keys already emitted by earlier runs; extended in-place
 
     Returns:
-        The same list of runs with duplicate results removed. Duplicates are
-        dropped from later runs; the first occurrence is kept.
+        The same run object with duplicate results removed
     """
-    seen: set[tuple[str, int, int, str]] = set()
-    for run in runs:
-        unique = []
-        for result in run.get("results", []):
-            phys = result.get("locations", [{}])[0].get("physicalLocation", {})
-            uri = phys.get("artifactLocation", {}).get("uri", "")
-            region = phys.get("region", {})
-            key = (
-                uri,
-                region.get("startLine", 0),
-                region.get("startColumn", 0),
-                result.get("ruleId", ""),
-            )
-            if key not in seen:
-                seen.add(key)
-                unique.append(result)
-        if "results" in run:
-            run["results"] = unique
-    return runs
+    if "results" not in run:
+        return run
+
+    unique = []
+    for result in run["results"]:
+        key = ResultKey.of(result)
+        if key not in seen:
+            seen.add(key)
+            unique.append(result)
+    run["results"] = unique
+    return run
 
 
 def collect_and_merge_sarif(
@@ -375,6 +392,10 @@ def merge_sarif_reports(
     schema_uri = None
     processed_files = 0
     normalized_paths = 0
+    # Deduplicating as runs are read keeps peak memory proportional to the unique
+    # findings rather than to the per-compilation-unit duplicates, which outnumber
+    # them by two orders of magnitude on a repository-wide run.
+    seen: set[ResultKey] = set()
 
     for input_file in input_files:
         if not input_file.exists() or input_file.stat().st_size == 0:
@@ -400,6 +421,7 @@ def merge_sarif_reports(
                     normalized_run = extract_rule_ids(normalized_run)
                     if only_errors:
                         normalized_run = filter_errors_only(normalized_run)
+                    normalized_run = deduplicate_run(normalized_run, seen)
                     results = normalized_run.get("results", [])
                     if not results:
                         continue
@@ -414,10 +436,9 @@ def merge_sarif_reports(
             )
             sys.exit(1)
 
-    # Create the merged SARIF structure; filter out any runs left empty by deduplication
     merged_sarif = {
         "version": schema_version,
-        "runs": [r for r in deduplicate_runs(merged_runs) if r.get("results")],
+        "runs": merged_runs,
     }
 
     if schema_uri:
