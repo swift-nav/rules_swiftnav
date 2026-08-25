@@ -14,7 +14,7 @@ from unittest.mock import patch
 from tools.lint.extract_lint_results import (
     collect_and_merge_sarif,
     collect_patches,
-    deduplicate_runs,
+    deduplicate_run,
     extract_files_from_bep,
     extract_rule_ids,
     filter_errors_only,
@@ -34,6 +34,22 @@ def _write_sarif(path: Path, results: list, tool_name: str = "ClangTidy") -> Non
     }
     with open(path, "w") as f:
         json.dump(data, f)
+
+
+def _located(uri: str, line: int, rule_id: str) -> dict:
+    """Build a SARIF result carrying the fields deduplication keys on."""
+    return {
+        "ruleId": rule_id,
+        "message": {"text": "issue"},
+        "locations": [
+            {
+                "physicalLocation": {
+                    "artifactLocation": {"uri": uri},
+                    "region": {"startLine": line, "startColumn": 1},
+                }
+            }
+        ],
+    }
 
 
 def _file(name: str, path_prefix: list) -> dict:
@@ -513,7 +529,14 @@ class TestFilterErrorsOnly(unittest.TestCase):
         self.assertNotIn("results", result)
 
 
-class TestDeduplicateRuns(unittest.TestCase):
+class TestDeduplicateRun(unittest.TestCase):
+    def _dedupe(self, runs):
+        """Run every run through deduplicate_run with one shared `seen` set."""
+        seen = set()
+        for run in runs:
+            deduplicate_run(run, seen)
+        return runs
+
     def _result(self, uri, line, col, rule_id):
         return {
             "ruleId": rule_id,
@@ -537,14 +560,14 @@ class TestDeduplicateRuns(unittest.TestCase):
                 ]
             }
         ]
-        result = deduplicate_runs(runs)
+        result = self._dedupe(runs)
         self.assertEqual(len(result[0]["results"]), 2)
 
     def test_same_result_across_runs_deduplicated(self):
         """The same (uri, line, col, ruleId) in two runs keeps only the first occurrence."""
         dup = self._result("include/foo.h", 45, 3, "google-explicit-constructor")
         runs = [{"results": [dup]}, {"results": [dup]}]
-        result = deduplicate_runs(runs)
+        result = self._dedupe(runs)
         total = sum(len(r["results"]) for r in result)
         self.assertEqual(total, 1)
 
@@ -558,7 +581,7 @@ class TestDeduplicateRuns(unittest.TestCase):
                 ]
             }
         ]
-        result = deduplicate_runs(runs)
+        result = self._dedupe(runs)
         self.assertEqual(len(result[0]["results"]), 2)
 
     def test_same_rule_different_lines_both_kept(self):
@@ -571,13 +594,13 @@ class TestDeduplicateRuns(unittest.TestCase):
                 ]
             }
         ]
-        result = deduplicate_runs(runs)
+        result = self._dedupe(runs)
         self.assertEqual(len(result[0]["results"]), 2)
 
     def test_run_without_results_key_unchanged(self):
         """A run with no 'results' key is left intact."""
         runs = [{"tool": {"driver": {"name": "ClangTidy"}}}]
-        result = deduplicate_runs(runs)
+        result = self._dedupe(runs)
         self.assertNotIn("results", result[0])
 
     def test_multiple_duplicate_runs_mirrors_real_header_scenario(self):
@@ -599,7 +622,7 @@ class TestDeduplicateRuns(unittest.TestCase):
             {"results": [header_warn]},
             {"results": [header_warn]},
         ]
-        result = deduplicate_runs(runs)
+        result = self._dedupe(runs)
         total = sum(len(r["results"]) for r in result)
         self.assertEqual(total, 2)
 
@@ -680,10 +703,34 @@ class TestMergeSarifReports(unittest.TestCase):
     def test_returns_total_result_count(self):
         """Return value equals total number of results across all input files."""
         inp1, inp2 = self.p / "a.sarif", self.p / "b.sarif"
-        _write_sarif(inp1, [{"message": {"text": "e1"}}, {"message": {"text": "e2"}}])
-        _write_sarif(inp2, [{"message": {"text": "e3"}}])
+        _write_sarif(inp1, [_located("a.cc", 1, "r1"), _located("a.cc", 2, "r1")])
+        _write_sarif(inp2, [_located("b.cc", 1, "r1")])
         out = self.p / "out.sarif"
         self.assertEqual(merge_sarif_reports([inp1, inp2], out), 3)
+
+    def test_duplicates_across_files_counted_and_written_once(self):
+        """A header diagnostic repeated in several files survives only once."""
+        inp1, inp2 = self.p / "a.sarif", self.p / "b.sarif"
+        header = _located("lib/include/foo.h", 45, "google-explicit-constructor")
+        _write_sarif(inp1, [header, _located("a.cc", 7, "r1")])
+        _write_sarif(inp2, [header])
+        out = self.p / "out.sarif"
+        self.assertEqual(merge_sarif_reports([inp1, inp2], out), 2)
+        data = json.loads(out.read_text())
+        total = sum(len(r["results"]) for r in data["runs"])
+        self.assertEqual(total, 2)
+
+    def test_run_left_empty_by_deduplication_is_dropped(self):
+        """A file contributing only duplicates adds no run to the output."""
+        inp1, inp2 = self.p / "a.sarif", self.p / "b.sarif"
+        header = _located("lib/include/foo.h", 45, "rule-a")
+        _write_sarif(inp1, [header], tool_name="Tool1")
+        _write_sarif(inp2, [header], tool_name="Tool2")
+        out = self.p / "out.sarif"
+        merge_sarif_reports([inp1, inp2], out)
+        data = json.loads(out.read_text())
+        names = {r["tool"]["driver"]["name"] for r in data["runs"]}
+        self.assertEqual(names, {"Tool1"})
 
     def test_empty_files_are_skipped(self):
         """Zero-byte files are silently skipped."""
