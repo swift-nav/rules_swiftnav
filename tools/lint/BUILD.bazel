@@ -1,13 +1,29 @@
 load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+
+# Importable as tools.lint.bep from the repository root, whether rules_swiftnav
+# is the main repository or a dependency of one.
+py_library(
+    name = "bep",
+    srcs = ["bep.py"],
+    imports = ["../.."],
+)
+
+py_library(
+    name = "extract_lint_results_lib",
+    srcs = ["extract_lint_results.py"],
+    imports = ["../.."],
+    deps = [":bep"],
+)
 
 py_binary(
     name = "extract_lint_results",
     srcs = ["extract_lint_results.py"],
     main = "extract_lint_results.py",
     tags = ["manual"],
+    deps = [":bep"],
 )
 
 py_test(
@@ -23,10 +39,66 @@ py_test(
         "@platforms//os:macos": ["@platforms//cpu:aarch64"],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+    deps = [":bep"],
 )
 
-sh_binary(
+py_library(
+    name = "merge_cppcheck_xml_lib",
+    srcs = ["merge_cppcheck_xml.py"],
+    imports = ["../.."],
+    deps = [":bep"],
+)
+
+py_binary(
+    name = "merge_cppcheck_xml",
+    srcs = ["merge_cppcheck_xml.py"],
+    main = "merge_cppcheck_xml.py",
+    tags = ["manual"],
+    deps = [":bep"],
+)
+
+py_test(
+    name = "merge_cppcheck_xml_test",
+    srcs = [
+        "merge_cppcheck_xml.py",
+        "merge_cppcheck_xml_test.py",
+    ],
+    main = "merge_cppcheck_xml_test.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":bep"],
+)
+
+py_binary(
     name = "lint",
-    srcs = ["lint.sh"],
+    srcs = ["lint.py"],
+    main = "lint.py",
     visibility = ["//visibility:public"],
+    deps = [
+        ":extract_lint_results_lib",
+        ":merge_cppcheck_xml_lib",
+    ],
+)
+
+py_test(
+    name = "lint_test",
+    srcs = [
+        "lint.py",
+        "lint_test.py",
+    ],
+    main = "lint_test.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":extract_lint_results_lib",
+        ":merge_cppcheck_xml_lib",
+    ],
 )

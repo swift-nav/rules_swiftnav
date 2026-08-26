@@ -11,12 +11,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+from tools.lint.bep import files_from_bep
 from tools.lint.extract_lint_results import (
     collect_and_merge_sarif,
     collect_patches,
     deduplicate_run,
-    extract_files_from_bep,
-    extract_rule_ids,
     filter_errors_only,
     filter_external_dependencies,
     main,
@@ -70,7 +69,7 @@ def _write_bep(bep_path: Path, file_paths: list) -> None:
             f.write(_named_set_event(_file(name=parts[-1], path_prefix=parts[:-1])))
 
 
-class TestExtractFilesFromBep(unittest.TestCase):
+class TestFilesFromBep(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.p = Path(self.tmp.name)
@@ -84,9 +83,7 @@ class TestExtractFilesFromBep(unittest.TestCase):
         with open(bep, "w") as f:
             f.write(json.dumps({"started": {"uuid": "abc"}}) + "\n")
 
-        self.assertEqual(
-            extract_files_from_bep(bep, bazel_output_path=None, ext=".report"), []
-        )
+        self.assertEqual(files_from_bep(bep, workspace_root=None, suffix=".report"), [])
 
     def test_returns_files_matching_extension(self):
         """Only files whose name ends with the requested extension are returned."""
@@ -99,7 +96,7 @@ class TestExtractFilesFromBep(unittest.TestCase):
             )
         )
 
-        result = extract_files_from_bep(bep, bazel_output_path=None, ext=".report")
+        result = files_from_bep(bep, workspace_root=None, suffix=".report")
         self.assertEqual(result, [Path("/tmp/foo.report")])
 
     def test_collects_from_multiple_events(self):
@@ -110,7 +107,7 @@ class TestExtractFilesFromBep(unittest.TestCase):
             f.write(json.dumps({"started": {"uuid": "skip"}}) + "\n")
             f.write(_named_set_event(_file(name="b.report", path_prefix=["/tmp"])))
 
-        result = extract_files_from_bep(bep, bazel_output_path=None, ext=".report")
+        result = files_from_bep(bep, workspace_root=None, suffix=".report")
         self.assertEqual(len(result), 2)
 
     def test_relative_path_resolved_with_bazel_output_path(self):
@@ -124,8 +121,8 @@ class TestExtractFilesFromBep(unittest.TestCase):
             )
         )
 
-        result = extract_files_from_bep(
-            bep, bazel_output_path=Path("/workspace"), ext=".report"
+        result = files_from_bep(
+            bep, workspace_root=Path("/workspace"), suffix=".report"
         )
         self.assertEqual(
             result, [Path("/workspace/bazel-out/k8-fastbuild/bin/foo.report")]
@@ -140,8 +137,8 @@ class TestExtractFilesFromBep(unittest.TestCase):
             )
         )
 
-        result = extract_files_from_bep(
-            bep, bazel_output_path=Path("/workspace"), ext=".report"
+        result = files_from_bep(
+            bep, workspace_root=Path("/workspace"), suffix=".report"
         )
         self.assertEqual(result, [Path("/absolute/path/foo.report")])
 
@@ -153,7 +150,7 @@ class TestExtractFilesFromBep(unittest.TestCase):
             f.write(_named_set_event(_file(name="foo.report", path_prefix=["/tmp"])))
 
         with self.assertRaises(SystemExit) as ctx:
-            extract_files_from_bep(bep, bazel_output_path=None, ext=".report")
+            files_from_bep(bep, workspace_root=None, suffix=".report")
         self.assertEqual(ctx.exception.code, 1)
 
 
@@ -383,120 +380,6 @@ class TestFilterExternalDependencies(unittest.TestCase):
         self.assertEqual(len(result["results"]), 1)
 
 
-class TestExtractRuleIds(unittest.TestCase):
-    def _run(self, results):
-        return {
-            "tool": {"driver": {"name": "ClangTidy", "rules": []}},
-            "results": results,
-        }
-
-    def test_rule_id_extracted_from_message_bracket_suffix(self):
-        """ruleId is parsed from the trailing [check-name] in the message text."""
-        run = self._run(
-            [
-                {
-                    "level": "warning",
-                    "message": {"text": "some issue [misc-include-cleaner]"},
-                }
-            ]
-        )
-        result = extract_rule_ids(run)
-        self.assertEqual(result["results"][0]["ruleId"], "misc-include-cleaner")
-
-    def test_existing_rule_id_not_overwritten(self):
-        """Results that already have ruleId are left unchanged."""
-        run = self._run(
-            [{"ruleId": "existing-rule", "message": {"text": "msg [other-rule]"}}]
-        )
-        result = extract_rule_ids(run)
-        self.assertEqual(result["results"][0]["ruleId"], "existing-rule")
-
-    def test_message_without_bracket_suffix_skipped(self):
-        """Results whose message has no [check-name] suffix get no ruleId added."""
-        run = self._run(
-            [{"level": "warning", "message": {"text": "no check name here"}}]
-        )
-        result = extract_rule_ids(run)
-        self.assertNotIn("ruleId", result["results"][0])
-
-    def test_rules_array_populated_in_driver(self):
-        """Extracted check names are added to tool.driver.rules with defaultConfiguration.level."""
-        run = self._run(
-            [
-                {
-                    "level": "warning",
-                    "message": {"text": "issue [modernize-use-nullptr]"},
-                },
-                {"level": "error", "message": {"text": "issue [misc-include-cleaner]"}},
-            ]
-        )
-        result = extract_rule_ids(run)
-        rules_by_id = {r["id"]: r for r in result["tool"]["driver"]["rules"]}
-        self.assertIn("modernize-use-nullptr", rules_by_id)
-        self.assertIn("misc-include-cleaner", rules_by_id)
-        self.assertEqual(
-            rules_by_id["modernize-use-nullptr"]["defaultConfiguration"]["level"],
-            "warning",
-        )
-        self.assertEqual(
-            rules_by_id["misc-include-cleaner"]["defaultConfiguration"]["level"],
-            "error",
-        )
-
-    def test_duplicate_check_names_appear_once_in_rules(self):
-        """The same check name appearing in multiple results is deduplicated in rules."""
-        run = self._run(
-            [
-                {"message": {"text": "a [misc-include-cleaner]"}},
-                {"message": {"text": "b [misc-include-cleaner]"}},
-            ]
-        )
-        result = extract_rule_ids(run)
-        ids = [r["id"] for r in result["tool"]["driver"]["rules"]]
-        self.assertEqual(ids.count("misc-include-cleaner"), 1)
-
-    def test_merge_sarif_reports_populates_rule_ids(self):
-        """End-to-end: merge_sarif_reports fills in ruleId from message text."""
-        with tempfile.TemporaryDirectory() as tmp:
-            inp = Path(tmp) / "a.sarif"
-            data = {
-                "version": "2.1.0",
-                "runs": [
-                    {
-                        "tool": {"driver": {"name": "ClangTidy"}},
-                        "results": [
-                            {
-                                "level": "warning",
-                                "message": {
-                                    "text": "nested namespaces can be concatenated [modernize-concat-nested-namespaces]"
-                                },
-                                "locations": [
-                                    {
-                                        "physicalLocation": {
-                                            "artifactLocation": {"uri": "src/file.cc"},
-                                            "region": {
-                                                "startLine": 5,
-                                                "startColumn": 1,
-                                            },
-                                        }
-                                    }
-                                ],
-                            },
-                        ],
-                    }
-                ],
-            }
-            with open(inp, "w") as f:
-                json.dump(data, f)
-            out = Path(tmp) / "out.sarif"
-            merge_sarif_reports([inp], out)
-            result = json.loads(out.read_text())
-            self.assertEqual(
-                result["runs"][0]["results"][0]["ruleId"],
-                "modernize-concat-nested-namespaces",
-            )
-
-
 class TestFilterErrorsOnly(unittest.TestCase):
     def test_keeps_only_error_level_results(self):
         """warning, note, and none results are removed; error results are kept."""
@@ -530,6 +413,42 @@ class TestFilterErrorsOnly(unittest.TestCase):
 
 
 class TestDeduplicateRun(unittest.TestCase):
+    @staticmethod
+    def _unkeyed(uri: str, line: int, message: str) -> dict:
+        """A result with no ruleId, as the cppcheck and clang-tidy paths now emit."""
+        return {
+            "message": {"text": message},
+            "locations": [
+                {
+                    "physicalLocation": {
+                        "artifactLocation": {"uri": uri},
+                        "region": {"startLine": line, "startColumn": 1},
+                    }
+                }
+            ],
+        }
+
+    def test_results_without_rule_id_are_distinguished_by_message(self):
+        """Two checks on one line must both survive when neither result has a ruleId."""
+        run = {
+            "results": [
+                self._unkeyed("a.cc", 10, "never used [unusedStructMember]"),
+                self._unkeyed("a.cc", 10, "not initialized [uninitMemberVar]"),
+            ]
+        }
+        deduplicate_run(run, set())
+        self.assertEqual(len(run["results"]), 2)
+
+    def test_identical_unkeyed_results_still_deduplicated(self):
+        """The same finding reported from two compilation units collapses to one."""
+        runs = [
+            {"results": [self._unkeyed("a.h", 3, "never used [unusedStructMember]")]},
+            {"results": [self._unkeyed("a.h", 3, "never used [unusedStructMember]")]},
+        ]
+        self._dedupe(runs)
+        self.assertEqual(len(runs[0]["results"]), 1)
+        self.assertEqual(len(runs[1]["results"]), 0)
+
     def _dedupe(self, runs):
         """Run every run through deduplicate_run with one shared `seen` set."""
         seen = set()
@@ -1104,7 +1023,7 @@ class TestMain(unittest.TestCase):
         return bep, out
 
     def test_missing_bep_file_exits_with_code_1(self):
-        """A non-existent --build-event-json-file causes exit with code 1."""
+        """A non-existent --build-event-json-file returns code 1."""
         with patch(
             "sys.argv",
             [
@@ -1115,12 +1034,10 @@ class TestMain(unittest.TestCase):
                 str(self.p),
             ],
         ):
-            with self.assertRaises(SystemExit) as ctx:
-                main()
-        self.assertEqual(ctx.exception.code, 1)
+            self.assertEqual(main(), 1)
 
     def test_exit_code_triggered_when_errors_found(self):
-        """--exit-code N causes sys.exit(N) when total results > 0."""
+        """--exit-code N is returned when total results > 0."""
         bep, out = self._make_bep_with_sarif(num_results=2)
         with patch(
             "sys.argv",
@@ -1136,12 +1053,10 @@ class TestMain(unittest.TestCase):
                 "1",
             ],
         ):
-            with self.assertRaises(SystemExit) as ctx:
-                main()
-        self.assertEqual(ctx.exception.code, 1)
+            self.assertEqual(main(), 1)
 
     def test_exit_code_not_triggered_when_no_results(self):
-        """--exit-code N does not call sys.exit when there are no results."""
+        """--exit-code N is not returned when there are no results."""
         bep, out = self._make_bep_with_sarif(num_results=0)
         with patch(
             "sys.argv",
@@ -1157,7 +1072,7 @@ class TestMain(unittest.TestCase):
                 "1",
             ],
         ):
-            main()  # must not raise
+            self.assertEqual(main(), 0)
 
     def test_output_patch_folder_collects_patches(self):
         """--output-patch-folder causes non-empty patch files to be copied."""
@@ -1198,7 +1113,7 @@ class TestMain(unittest.TestCase):
                 str(self.p),
             ],
         ):
-            main()  # must not raise
+            self.assertEqual(main(), 0)
 
 
 if __name__ == "__main__":

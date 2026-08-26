@@ -16,60 +16,9 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Optional, Sequence
 
-
-def extract_files_from_bep(
-    build_event_json_file: Path,
-    bazel_output_path: Path,
-    ext: str,
-) -> list[Path]:
-    """
-    Extract file paths with the given extension from a Bazel Build Event Protocol JSON file.
-
-    The BEP file is newline-delimited JSON. Each line is parsed for namedSetOfFiles
-    entries, and files whose name ends with the given extension are collected.
-
-    Args:
-        build_event_json_file: Path to the Bazel build event JSON file
-        ext: File extension to filter
-        bazel_output_path: Workspace root used to resolve relative BEP paths
-            (e.g. paths starting with bazel-out/). When omitted, paths are kept
-            as-is (relative to the current working directory).
-
-    Returns:
-        List of matching file paths
-    """
-    report_files = []
-
-    with open(build_event_json_file, "r") as f:
-        for line in f:
-            line = line.strip().rstrip("\r")
-            if not line:
-                continue
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                print(
-                    f"Error: Build event JSON file contains errors: {build_event_json_file}",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
-
-            named_set = event.get("namedSetOfFiles")
-            if named_set is None:
-                continue
-
-            for file_info in named_set.get("files", []):
-                name = file_info.get("name", "")
-                if name.endswith(ext):
-                    path_prefix = file_info.get("pathPrefix", [])
-                    path = Path("/".join(path_prefix) + "/" + name)
-                    if not path.is_absolute() and bazel_output_path is not None:
-                        path = bazel_output_path / path
-                    report_files.append(path)
-
-    return report_files
+from tools.lint.bep import files_from_bep
 
 
 # Cached because a repository-wide clang-tidy run produces millions of results
@@ -135,11 +84,12 @@ def normalize_sarif_paths(
     Returns:
         The run object with normalized paths
     """
-    # Normalize paths in results
+    # relatedLocations carry secondary sites (cppcheck reports the base class of
+    # a MISRA violation there), so they need the same treatment as the primary.
     artifacts = (
         loc.get("physicalLocation", {}).get("artifactLocation")
         for res in run.get("results", [])
-        for loc in res.get("locations", [])
+        for loc in (res.get("locations") or []) + (res.get("relatedLocations") or [])
     )
 
     for artifact in artifacts:
@@ -199,72 +149,27 @@ def filter_errors_only(run: dict[str, Any]) -> dict[str, Any]:
     return run
 
 
-_CHECK_RE = re.compile(r"\[([a-zA-Z0-9_\-\.]+)\]$")
-
-
-def extract_rule_ids(run: dict[str, Any]) -> dict[str, Any]:
-    """
-    Backfill ruleId on SARIF results that are missing it.
-
-    clang-tidy embeds the check name at the end of each message as [check-name]
-    but does not populate the SARIF ruleId field.  SonarQube silently drops any
-    result that lacks a ruleId, so this function extracts the check name from
-    the message text and sets it as ruleId.
-
-    Also populates the tool.driver.rules array so SonarQube can resolve rule
-    metadata even when the original SARIF driver section lists no rules.
-
-    Args:
-        run: A SARIF run object (mutated in-place)
-
-    Returns:
-        The same run object with ruleId fields filled in
-    """
-    known_rules: dict[str, dict[str, Any]] = {
-        r["id"]: r for r in run.get("tool", {}).get("driver", {}).get("rules", [])
-    }
-
-    for result in run.get("results", []):
-        if "ruleId" in result:
-            continue
-        msg = result.get("message", {}).get("text", "").strip()
-        m = _CHECK_RE.search(msg)
-        if m:
-            rule_id = m.group(1)
-            result["ruleId"] = rule_id
-            if rule_id not in known_rules:
-                # Carry the SARIF level into defaultConfiguration so SonarQube
-                # can use it as the rule severity instead of defaulting to MEDIUM.
-                level = result.get("level", "warning")
-                known_rules[rule_id] = {
-                    "id": rule_id,
-                    "defaultConfiguration": {"level": level},
-                }
-
-    run.setdefault("tool", {}).setdefault("driver", {})["rules"] = list(
-        known_rules.values()
-    )
-    return run
-
-
 class ResultKey(NamedTuple):
     """Identity of a SARIF result, used to recognise duplicates."""
 
     uri: str
     start_line: int
     start_column: int
-    rule_id: str
+    check: str
 
     @classmethod
     def of(cls, result: dict[str, Any]) -> "ResultKey":
         """Build the key from a SARIF result's primary location."""
         phys = result.get("locations", [{}])[0].get("physicalLocation", {})
         region = phys.get("region", {})
+        # Linters that leave ruleId unset name the check at the end of the message
+        # instead. Without that fallback two different checks on one line collapse
+        # into a single key and one of them is dropped.
         return cls(
             uri=phys.get("artifactLocation", {}).get("uri", ""),
             start_line=region.get("startLine", 0),
             start_column=region.get("startColumn", 0),
-            rule_id=result.get("ruleId", ""),
+            check=result.get("ruleId") or result.get("message", {}).get("text", ""),
         )
 
 
@@ -314,10 +219,10 @@ def collect_and_merge_sarif(
     Returns:
         Total number of results in the merged report
     """
-    report_files = extract_files_from_bep(
+    report_files = files_from_bep(
         build_event_json_file=build_event_json_file,
-        bazel_output_path=bazel_output_path,
-        ext=".report",
+        workspace_root=bazel_output_path,
+        suffix=".report",
     )
     print(f"Found {len(report_files)} .report files from build events")
     for report in report_files:
@@ -344,10 +249,10 @@ def collect_patches(
         output_patch_folder: Directory to copy patch files into
         bazel_output_path: Workspace root used to resolve relative BEP paths
     """
-    patch_files = extract_files_from_bep(
+    patch_files = files_from_bep(
         build_event_json_file,
-        bazel_output_path=bazel_output_path,
-        ext=".patch",
+        workspace_root=bazel_output_path,
+        suffix=".patch",
     )
     output_patch_folder.mkdir(parents=True, exist_ok=True)
     copied = 0
@@ -418,7 +323,6 @@ def merge_sarif_reports(
                 for run in data["runs"]:
                     normalized_run = normalize_sarif_paths(run, workspace_root)
                     normalized_run = filter_external_dependencies(normalized_run)
-                    normalized_run = extract_rule_ids(normalized_run)
                     if only_errors:
                         normalized_run = filter_errors_only(normalized_run)
                     normalized_run = deduplicate_run(normalized_run, seen)
@@ -458,7 +362,15 @@ def merge_sarif_reports(
     return normalized_paths
 
 
-def main():
+def main(argv: Optional[Sequence[str]] = None) -> int:
+    """Run the extraction.
+
+    Args:
+        argv: Argument list without the program name, or None to read sys.argv.
+
+    Returns:
+        The process exit code.
+    """
     parser = argparse.ArgumentParser(
         description="Collect and merge SARIF report files from a Bazel Build Event Protocol JSON file into a single file."
     )
@@ -499,14 +411,14 @@ def main():
         help="Directory to collect non-empty patch files from the build event JSON file",
     )
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if not args.build_event_json_file.exists():
         print(
             f"Error: Build event JSON file does not exist: {args.build_event_json_file}",
             file=sys.stderr,
         )
-        sys.exit(1)
+        return 1
 
     total_results = 0
     if args.output_merged_sarif_file is not None:
@@ -525,8 +437,10 @@ def main():
         )
 
     if args.exit_code is not None and total_results > 0:
-        sys.exit(args.exit_code)
+        return args.exit_code
+
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
