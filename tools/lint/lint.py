@@ -428,9 +428,7 @@ def lint(workspace: Path, linter: Linter, args: argparse.Namespace) -> int:
         code = run_report_tool(
             "extract_lint_results",
             extract_lint_results.main,
-            extract_command(
-                workspace, linter, Path(build_events), args.min_severity
-            ),
+            extract_command(workspace, linter, Path(build_events), args.min_severity),
         )
         code = code or build_code
 
