@@ -164,6 +164,15 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--min-severity",
+        choices=extract_lint_results.SARIF_LEVELS,
+        default=None,
+        help=(
+            "Raise findings weaker than this severity up to it in the SARIF "
+            "report, so that reporters gating on severity treat them alike"
+        ),
+    )
+    parser.add_argument(
         "--build-events",
         metavar="FILE",
         help=(
@@ -263,7 +272,10 @@ def build_command(
 
 
 def extract_command(
-    workspace: Path, linter: Linter, build_event_json_file: Path
+    workspace: Path,
+    linter: Linter,
+    build_event_json_file: Path,
+    min_severity: Optional[str] = None,
 ) -> list[str]:
     """Build the command turning a linter's build events into a report.
 
@@ -271,18 +283,23 @@ def extract_command(
         workspace: Workspace root.
         linter: The linter.
         build_event_json_file: Path bazel wrote its build events to.
+        min_severity: Severity to raise weaker findings to, or None to keep the
+            severities the linter reported.
 
     Returns:
         The arguments for extract_lint_results.main.
     """
     reports = output_dir(workspace, linter)
-    return [
+    command = [
         f"--build-event-json-file={build_event_json_file}",
         f"--bazel-output-path={workspace}",
         f"--output-merged-sarif-file={reports / 'merged-report.sarif'}",
         f"--output-patch-folder={reports / 'patches'}",
         "--exit-code=1",
     ]
+    if min_severity is not None:
+        command.append(f"--min-severity={min_severity}")
+    return command
 
 
 def merge_command(
@@ -411,7 +428,9 @@ def lint(workspace: Path, linter: Linter, args: argparse.Namespace) -> int:
         code = run_report_tool(
             "extract_lint_results",
             extract_lint_results.main,
-            extract_command(workspace, linter, Path(build_events)),
+            extract_command(
+                workspace, linter, Path(build_events), args.min_severity
+            ),
         )
         code = code or build_code
 

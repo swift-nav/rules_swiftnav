@@ -55,6 +55,19 @@ class TestParseArgs(unittest.TestCase):
         args = parse_args(["--linters", "clang-tidy,cppcheck"])
         self.assertEqual(args.linters, "clang-tidy,cppcheck")
 
+    def test_min_severity_defaults_to_none(self):
+        """Without the flag the linters' own severities are kept."""
+        self.assertIsNone(parse_args([]).min_severity)
+
+    def test_min_severity_is_parsed(self):
+        """--min-severity is exposed as min_severity."""
+        self.assertEqual(parse_args(["--min-severity", "error"]).min_severity, "error")
+
+    def test_min_severity_rejects_an_unknown_level(self):
+        """Only SARIF levels are accepted, so typos fail loudly."""
+        with self.assertRaises(SystemExit):
+            parse_args(["--min-severity", "critical"])
+
 
 class TestSelectLinters(unittest.TestCase):
     def test_default_is_clang_tidy_only(self):
@@ -176,6 +189,20 @@ class TestExtractCommand(unittest.TestCase):
     def test_exit_code_is_requested(self):
         """The driver's exit code comes from extract_lint_results."""
         self.assertIn("--exit-code=1", extract_command(WORKSPACE, CPPCHECK, BEP))
+
+    def test_min_severity_is_forwarded(self):
+        """The extraction step is what rewrites the severities."""
+        self.assertIn(
+            "--min-severity=error",
+            extract_command(WORKSPACE, CPPCHECK, BEP, "error"),
+        )
+
+    def test_min_severity_is_omitted_when_unset(self):
+        """Callers that do not ask for a floor get the unchanged command."""
+        self.assertEqual(
+            extract_command(WORKSPACE, CPPCHECK, BEP, None),
+            extract_command(WORKSPACE, CPPCHECK, BEP),
+        )
 
 
 class TestMergeCommand(unittest.TestCase):
