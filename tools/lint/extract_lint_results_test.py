@@ -22,6 +22,7 @@ from tools.lint.extract_lint_results import (
     merge_sarif_reports,
     normalize_path,
     normalize_sarif_paths,
+    raise_severities,
 )
 
 
@@ -714,6 +715,42 @@ class TestMergeSarifReports(unittest.TestCase):
         self.assertEqual(len(data["runs"][0]["results"]), 1)
         self.assertEqual(data["runs"][0]["results"][0]["level"], "error")
 
+    def test_min_severity_raises_weaker_results(self):
+        """With min_severity="error", notes and warnings are reported as errors."""
+        inp = self.p / "a.sarif"
+        _write_sarif(
+            inp,
+            [
+                {"level": "note", "message": {"text": "note"}},
+                {"level": "warning", "message": {"text": "warn"}},
+                {"level": "error", "message": {"text": "err"}},
+            ],
+        )
+        out = self.p / "out.sarif"
+        count = merge_sarif_reports([inp], out, min_severity="error")
+        data = json.loads(out.read_text())
+        self.assertEqual(count, 3)
+        self.assertEqual(
+            [result["level"] for result in data["runs"][0]["results"]],
+            ["error", "error", "error"],
+        )
+
+    def test_min_severity_selects_after_only_errors_filtered(self):
+        """--only-errors still selects on the severity the linter reported."""
+        inp = self.p / "a.sarif"
+        _write_sarif(
+            inp,
+            [
+                {"level": "error", "message": {"text": "err"}},
+                {"level": "warning", "message": {"text": "warn"}},
+            ],
+        )
+        out = self.p / "out.sarif"
+        count = merge_sarif_reports([inp], out, only_errors=True, min_severity="error")
+        data = json.loads(out.read_text())
+        self.assertEqual(count, 1)
+        self.assertEqual(data["runs"][0]["results"][0]["message"]["text"], "err")
+
     def test_bazel_execroot_paths_are_normalized(self):
         """Bazel execroot URIs in results are rewritten to repo-relative paths."""
         inp = self.p / "a.sarif"
@@ -1114,6 +1151,30 @@ class TestMain(unittest.TestCase):
             ],
         ):
             self.assertEqual(main(), 0)
+
+
+class TestRaiseSeverities(unittest.TestCase):
+    def test_stronger_results_are_left_alone(self):
+        """A floor only lifts, so an error survives a warning floor."""
+        run = {"results": [{"level": "error"}, {"level": "note"}]}
+        raised = raise_severities(run, "warning")
+        self.assertEqual(
+            [result["level"] for result in raised["results"]], ["error", "warning"]
+        )
+
+    def test_absent_level_is_raised(self):
+        """SARIF reads a missing level as a warning, which the floor lifts."""
+        run = {"results": [{"message": {"text": "no level"}}]}
+        self.assertEqual(raise_severities(run, "error")["results"][0]["level"], "error")
+
+    def test_unknown_level_is_raised(self):
+        """A level outside the SARIF set cannot be shown to outrank the floor."""
+        run = {"results": [{"level": "critical"}]}
+        self.assertEqual(raise_severities(run, "error")["results"][0]["level"], "error")
+
+    def test_run_without_results_is_untouched(self):
+        """Runs that reported nothing stay valid."""
+        self.assertEqual(raise_severities({}, "error"), {})
 
 
 if __name__ == "__main__":

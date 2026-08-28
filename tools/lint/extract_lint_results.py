@@ -149,6 +149,38 @@ def filter_errors_only(run: dict[str, Any]) -> dict[str, Any]:
     return run
 
 
+# SARIF severities, weakest first.
+SARIF_LEVELS = ("none", "note", "warning", "error")
+
+# SARIF leaves the level optional and defines the absent value as "warning".
+DEFAULT_SARIF_LEVEL = "warning"
+
+
+def raise_severities(run: dict[str, Any], min_severity: str) -> dict[str, Any]:
+    """
+    Raise every result in a SARIF run that sits below `min_severity` up to it.
+
+    Reporters such as reviewdog gate on the severity each result carries, so a
+    linter whose own classification is weaker than the policy a repository wants
+    to enforce is lifted here rather than in every consumer.
+
+    Args:
+        run: A SARIF run object (mutated in-place)
+        min_severity: The lowest severity results are allowed to keep
+
+    Returns:
+        The same run object with the raised severities
+    """
+    floor = SARIF_LEVELS.index(min_severity)
+    for result in run.get("results", []):
+        level = result.get("level", DEFAULT_SARIF_LEVEL)
+        # An unrecognised level is raised too: it cannot be shown to outrank the
+        # floor, and leaving it be would silently exempt it from the policy.
+        if level not in SARIF_LEVELS or SARIF_LEVELS.index(level) < floor:
+            result["level"] = min_severity
+    return run
+
+
 class ResultKey(NamedTuple):
     """Identity of a SARIF result, used to recognise duplicates."""
 
@@ -206,6 +238,7 @@ def collect_and_merge_sarif(
     output_merged_sarif_file: Path,
     bazel_output_path: Path,
     only_errors: bool = False,
+    min_severity: Optional[str] = None,
 ) -> int:
     """
     Find all .report files from the BEP file and merge them into a single SARIF file.
@@ -215,6 +248,8 @@ def collect_and_merge_sarif(
         output_merged_sarif_file: Output path for the merged SARIF report
         bazel_output_path: Workspace root used to resolve relative BEP paths
         only_errors: If True, filter results to only include error-level findings
+        min_severity: Raise results weaker than this severity up to it, or None
+            to keep the severities the linters reported
 
     Returns:
         Total number of results in the merged report
@@ -232,6 +267,7 @@ def collect_and_merge_sarif(
         input_files=report_files,
         output_file=output_merged_sarif_file,
         only_errors=only_errors,
+        min_severity=min_severity,
         workspace_root=bazel_output_path,
     )
 
@@ -270,6 +306,7 @@ def merge_sarif_reports(
     input_files: list[Path],
     output_file: Path,
     only_errors: bool = False,
+    min_severity: Optional[str] = None,
     workspace_root: Path | None = None,
 ) -> int:
     """
@@ -280,6 +317,8 @@ def merge_sarif_reports(
         input_files: List of paths to input SARIF files
         output_file: Path to write the merged SARIF file
         only_errors: If True, filter results to only include error-level findings
+        min_severity: Raise results weaker than this severity up to it, or None
+            to keep the severities the linters reported
         workspace_root: Repository root used to resolve _virtual_includes symlinks
     """
     if not input_files:
@@ -325,6 +364,8 @@ def merge_sarif_reports(
                     normalized_run = filter_external_dependencies(normalized_run)
                     if only_errors:
                         normalized_run = filter_errors_only(normalized_run)
+                    if min_severity is not None:
+                        normalized_run = raise_severities(normalized_run, min_severity)
                     normalized_run = deduplicate_run(normalized_run, seen)
                     results = normalized_run.get("results", [])
                     if not results:
@@ -405,6 +446,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Keep only error-level results in the merged report, removing warnings and other findings",
     )
     parser.add_argument(
+        "--min-severity",
+        choices=SARIF_LEVELS,
+        default=None,
+        help="Raise results weaker than this severity up to it, leaving stronger ones alone",
+    )
+    parser.add_argument(
         "--output-patch-folder",
         type=Path,
         default=None,
@@ -427,6 +474,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             output_merged_sarif_file=args.output_merged_sarif_file,
             bazel_output_path=args.bazel_output_path,
             only_errors=args.only_errors,
+            min_severity=args.min_severity,
         )
 
     if args.output_patch_folder is not None:
