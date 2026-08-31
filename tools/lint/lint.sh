@@ -50,6 +50,10 @@ args=(
     "--remote_download_regex=.*AspectRulesLint.*"
     "--config=lint"
     "--output_groups=rules_lint_machine"
+    # rules_lint puts the human-readable report in the _validation output
+    # group, which Bazel builds regardless of --output_groups. Without this,
+    # clang-tidy runs twice per source file for a report nobody reads.
+    "--norun_validations"
     "--keep_going"
 )
 
