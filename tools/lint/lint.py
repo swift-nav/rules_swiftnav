@@ -262,6 +262,10 @@ def build_command(
     ]
     command += [f"--aspects={aspect}" for aspect in linter.aspects]
     command += [f"--output_groups={group}" for group in linter.output_groups]
+    # rules_lint puts the human-readable report in the _validation output
+    # group, which Bazel builds regardless of --output_groups. Without this,
+    # clang-tidy runs twice per source file for a report nobody reads.
+    command.append("--norun_validations")
     command.append("--keep_going")
     if create_patches:
         command += [

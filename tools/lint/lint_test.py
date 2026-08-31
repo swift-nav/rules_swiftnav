@@ -121,6 +121,7 @@ class TestBuildCommand(unittest.TestCase):
                 "--skip_incompatible_explicit_targets",
                 "--aspects=//tools/lint:linters.bzl%clang_tidy",
                 "--output_groups=rules_lint_machine",
+                "--norun_validations",
                 "--keep_going",
                 "//...",
             ],
