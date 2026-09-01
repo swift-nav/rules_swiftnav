@@ -5,6 +5,7 @@ set -euo pipefail
 CREATE_PATCHES=false
 APPLY_PATCHES=false
 TARGETS=()
+TARGETS_FILE=""
 
 if [[ -z "${BUILD_WORKSPACE_DIRECTORY:-}" ]]; then
     echo "Environment variable BUILD_WORKSPACE_DIRECTORY is not set. Assuming ${PWD} is the workspace root."
@@ -29,6 +30,15 @@ while [[ $# -gt 0 ]]; do
                 shift
             done
             ;;
+        --targets-file)
+            shift
+            if [[ $# -eq 0 ]]; then
+                echo "--targets-file requires a path"
+                exit 1
+            fi
+            TARGETS_FILE="$1"
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             exit 1
@@ -36,8 +46,18 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Set default targets if none provided
-if [[ ${#TARGETS[@]} -eq 0 ]]; then
+if [[ -n "$TARGETS_FILE" ]]; then
+    # Relative paths are meant from the workspace, not the runfiles directory
+    # bazel run starts in. An empty file lints nothing rather than everything.
+    if [[ "$TARGETS_FILE" != /* ]]; then
+        TARGETS_FILE="$BUILD_WORKSPACE_DIRECTORY/$TARGETS_FILE"
+    fi
+    while IFS= read -r target || [[ -n "$target" ]]; do
+        if [[ -n "$target" ]]; then
+            TARGETS+=("$target")
+        fi
+    done <"$TARGETS_FILE"
+elif [[ ${#TARGETS[@]} -eq 0 ]]; then
     TARGETS=("//...")
 fi
 
@@ -65,7 +85,7 @@ if [[ "$CREATE_PATCHES" == true ]]; then
 fi
 
 # Run linters
-(cd "$BUILD_WORKSPACE_DIRECTORY" && bazel build "${args[@]}" "${TARGETS[@]}")
+(cd "$BUILD_WORKSPACE_DIRECTORY" && bazel build "${args[@]}" ${TARGETS[@]+"${TARGETS[@]}"})
 
 OUTPUT_DIR="$BUILD_WORKSPACE_DIRECTORY/clang-tidy-output"
 OUTPUT_DIR_MERGED_SARIF="$OUTPUT_DIR/merged-report.sarif"
