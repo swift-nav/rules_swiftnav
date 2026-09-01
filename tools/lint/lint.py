@@ -149,11 +149,21 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         action="store_true",
         help="Create patches and apply them to the workspace",
     )
-    parser.add_argument(
+    targets = parser.add_mutually_exclusive_group()
+    targets.add_argument(
         "--targets",
         nargs="+",
         default=["//..."],
         help="Targets to lint",
+    )
+    targets.add_argument(
+        "--targets-file",
+        metavar="FILE",
+        help=(
+            "Read the targets to lint from FILE, one per line. An empty file "
+            "lints nothing, so callers computing the target set need no "
+            "special case for it"
+        ),
     )
     parser.add_argument(
         "--linters",
@@ -216,6 +226,22 @@ def output_dir(workspace: Path, linter: Linter) -> Path:
         The output directory.
     """
     return workspace / f"{linter.name}-output"
+
+
+def read_targets_file(workspace: Path, path: str) -> list[str]:
+    """Read the targets listed in a `--targets-file`.
+
+    Args:
+        workspace: Workspace root, which a relative path resolves against.
+        path: The file, one target per line.
+
+    Returns:
+        The targets, blank lines dropped; empty for an empty file.
+    """
+    file = Path(path)
+    if not file.is_absolute():
+        file = workspace / file
+    return [line.strip() for line in file.read_text().splitlines() if line.strip()]
 
 
 def build_events_path(workspace: Path, linter: Linter, template: str) -> Path:
@@ -401,7 +427,10 @@ def lint(workspace: Path, linter: Linter, args: argparse.Namespace) -> int:
     Returns:
         The exit code reported for this linter.
     """
-    targets = list(args.targets)
+    if args.targets_file:
+        targets = read_targets_file(workspace, args.targets_file)
+    else:
+        targets = list(args.targets)
 
     banner(linter.name)
 

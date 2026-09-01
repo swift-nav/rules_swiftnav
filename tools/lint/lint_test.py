@@ -5,6 +5,7 @@ Run with Bazel:
     bazel test //tools/...
 """
 
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from tools.lint.lint import (
     merge_command,
     output_dir,
     parse_args,
+    read_targets_file,
     select_linters,
 )
 
@@ -37,6 +39,20 @@ class TestParseArgs(unittest.TestCase):
         """--targets accepts several targets."""
         args = parse_args(["--targets", "//a:b", "//c/..."])
         self.assertEqual(args.targets, ["//a:b", "//c/..."])
+
+    def test_targets_file_is_parsed(self):
+        """--targets-file is exposed as targets_file."""
+        args = parse_args(["--targets-file", "targets.txt"])
+        self.assertEqual(args.targets_file, "targets.txt")
+
+    def test_targets_file_defaults_to_none(self):
+        """Without the flag the targets come from --targets."""
+        self.assertIsNone(parse_args([]).targets_file)
+
+    def test_targets_and_targets_file_are_exclusive(self):
+        """Two target sources would leave one silently ignored."""
+        with self.assertRaises(SystemExit):
+            parse_args(["--targets", "//a:b", "--targets-file", "targets.txt"])
 
     def test_create_patches(self):
         """--create-patches does not imply applying them."""
@@ -239,6 +255,36 @@ class TestIncompatibleTargets(unittest.TestCase):
                 "--skip_incompatible_explicit_targets",
                 build_command(linter, ["//..."], BEP, False),
             )
+
+
+class TestReadTargetsFile(unittest.TestCase):
+    """Reading the --targets-file."""
+
+    def setUp(self):
+        self.workspace = Path(tempfile.mkdtemp())
+
+    def test_one_target_per_line_blank_lines_dropped(self):
+        """Trailing newlines and separators do not become targets."""
+        (self.workspace / "targets.txt").write_text("//a:b\n\n  //c/...  \n")
+        self.assertEqual(
+            read_targets_file(self.workspace, "targets.txt"), ["//a:b", "//c/..."]
+        )
+
+    def test_empty_file_lints_nothing(self):
+        """An empty file must not fall back to linting everything."""
+        (self.workspace / "targets.txt").write_text("")
+        self.assertEqual(read_targets_file(self.workspace, "targets.txt"), [])
+
+    def test_relative_path_resolves_against_workspace(self):
+        """bazel run starts in the runfiles tree, not where the caller is."""
+        (self.workspace / "targets.txt").write_text("//a:b\n")
+        self.assertEqual(read_targets_file(self.workspace, "targets.txt"), ["//a:b"])
+
+    def test_absolute_path_is_kept(self):
+        """An absolute path is used as given."""
+        file = self.workspace / "targets.txt"
+        file.write_text("//a:b\n")
+        self.assertEqual(read_targets_file(Path("/elsewhere"), str(file)), ["//a:b"])
 
 
 class TestBuildEventsPath(unittest.TestCase):
