@@ -27,12 +27,12 @@ py_binary(
 )
 
 py_test(
-    name = "extract_lint_results_test",
+    name = "test_extract_lint_results",
     srcs = [
         "extract_lint_results.py",
-        "extract_lint_results_test.py",
+        "test_extract_lint_results.py",
     ],
-    main = "extract_lint_results_test.py",
+    main = "test_extract_lint_results.py",
     tags = [UNIT],
     target_compatible_with = select({
         "@platforms//os:linux": ["@platforms//cpu:x86_64"],
@@ -58,12 +58,12 @@ py_binary(
 )
 
 py_test(
-    name = "merge_cppcheck_xml_test",
+    name = "test_merge_cppcheck_xml",
     srcs = [
         "merge_cppcheck_xml.py",
-        "merge_cppcheck_xml_test.py",
+        "test_merge_cppcheck_xml.py",
     ],
-    main = "merge_cppcheck_xml_test.py",
+    main = "test_merge_cppcheck_xml.py",
     tags = [UNIT],
     target_compatible_with = select({
         "@platforms//os:linux": ["@platforms//cpu:x86_64"],
@@ -85,12 +85,12 @@ py_binary(
 )
 
 py_test(
-    name = "lint_test",
+    name = "test_lint",
     srcs = [
         "lint.py",
-        "lint_test.py",
+        "test_lint.py",
     ],
-    main = "lint_test.py",
+    main = "test_lint.py",
     tags = [UNIT],
     target_compatible_with = select({
         "@platforms//os:linux": ["@platforms//cpu:x86_64"],
