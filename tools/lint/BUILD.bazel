@@ -1,32 +1,82 @@
 load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_swiftnav//cc:defs.bzl", "UNIT")
 
-py_binary(
+# Importable as tools.lint.bep from the repository root, whether rules_swiftnav
+# is the main repository or a dependency of one.
+py_library(
+    name = "bep",
+    srcs = ["bep.py"],
+    imports = ["../.."],
+)
+
+py_library(
     name = "extract_lint_results",
     srcs = ["extract_lint_results.py"],
-    main = "extract_lint_results.py",
-    tags = ["manual"],
+    imports = ["../.."],
+    deps = [":bep"],
 )
 
 py_test(
-    name = "extract_lint_results_test",
-    srcs = [
-        "extract_lint_results.py",
-        "extract_lint_results_test.py",
-    ],
-    main = "extract_lint_results_test.py",
+    name = "test_extract_lint_results",
+    srcs = ["test_extract_lint_results.py"],
+    main = "test_extract_lint_results.py",
     tags = [UNIT],
     target_compatible_with = select({
         "@platforms//os:linux": ["@platforms//cpu:x86_64"],
         "@platforms//os:macos": ["@platforms//cpu:aarch64"],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
+    deps = [":extract_lint_results"],
 )
 
-sh_binary(
+py_library(
+    name = "merge_cppcheck_xml",
+    srcs = ["merge_cppcheck_xml.py"],
+    imports = ["../.."],
+    deps = [":bep"],
+)
+
+py_test(
+    name = "test_merge_cppcheck_xml",
+    srcs = ["test_merge_cppcheck_xml.py"],
+    main = "test_merge_cppcheck_xml.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":merge_cppcheck_xml"],
+)
+
+py_binary(
     name = "lint",
-    srcs = ["lint.sh"],
+    srcs = ["lint.py"],
+    main = "lint.py",
     visibility = ["//visibility:public"],
+    deps = [
+        ":extract_lint_results",
+        ":merge_cppcheck_xml",
+    ],
+)
+
+py_test(
+    name = "test_lint",
+    srcs = [
+        "lint.py",
+        "test_lint.py",
+    ],
+    main = "test_lint.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":extract_lint_results",
+        ":merge_cppcheck_xml",
+    ],
 )
