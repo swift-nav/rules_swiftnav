@@ -12,26 +12,15 @@ py_library(
 )
 
 py_library(
-    name = "extract_lint_results_lib",
+    name = "extract_lint_results",
     srcs = ["extract_lint_results.py"],
     imports = ["../.."],
     deps = [":bep"],
 )
 
-py_binary(
-    name = "extract_lint_results",
-    srcs = ["extract_lint_results.py"],
-    main = "extract_lint_results.py",
-    tags = ["manual"],
-    deps = [":bep"],
-)
-
 py_test(
     name = "test_extract_lint_results",
-    srcs = [
-        "extract_lint_results.py",
-        "test_extract_lint_results.py",
-    ],
+    srcs = ["test_extract_lint_results.py"],
     main = "test_extract_lint_results.py",
     tags = [UNIT],
     target_compatible_with = select({
@@ -39,30 +28,19 @@ py_test(
         "@platforms//os:macos": ["@platforms//cpu:aarch64"],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    deps = [":bep"],
+    deps = [":extract_lint_results"],
 )
 
 py_library(
-    name = "merge_cppcheck_xml_lib",
+    name = "merge_cppcheck_xml",
     srcs = ["merge_cppcheck_xml.py"],
     imports = ["../.."],
     deps = [":bep"],
 )
 
-py_binary(
-    name = "merge_cppcheck_xml",
-    srcs = ["merge_cppcheck_xml.py"],
-    main = "merge_cppcheck_xml.py",
-    tags = ["manual"],
-    deps = [":bep"],
-)
-
 py_test(
     name = "test_merge_cppcheck_xml",
-    srcs = [
-        "merge_cppcheck_xml.py",
-        "test_merge_cppcheck_xml.py",
-    ],
+    srcs = ["test_merge_cppcheck_xml.py"],
     main = "test_merge_cppcheck_xml.py",
     tags = [UNIT],
     target_compatible_with = select({
@@ -70,7 +48,7 @@ py_test(
         "@platforms//os:macos": ["@platforms//cpu:aarch64"],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    deps = [":bep"],
+    deps = [":merge_cppcheck_xml"],
 )
 
 py_binary(
@@ -79,8 +57,8 @@ py_binary(
     main = "lint.py",
     visibility = ["//visibility:public"],
     deps = [
-        ":extract_lint_results_lib",
-        ":merge_cppcheck_xml_lib",
+        ":extract_lint_results",
+        ":merge_cppcheck_xml",
     ],
 )
 
@@ -98,7 +76,7 @@ py_test(
         "//conditions:default": ["@platforms//:incompatible"],
     }),
     deps = [
-        ":extract_lint_results_lib",
-        ":merge_cppcheck_xml_lib",
+        ":extract_lint_results",
+        ":merge_cppcheck_xml",
     ],
 )
