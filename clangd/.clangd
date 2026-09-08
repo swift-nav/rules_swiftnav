@@ -7,29 +7,12 @@ CompileFlags:
     - -Wdocumentation-pedantic
     - -Wconversion
     - -Wsign-compare
+    - -ferror-limit=0
 
 Diagnostics:
+  Includes:
+    AnalyzeAngledIncludes: true
   ClangTidy:
-    Add:
-      - bugprone-*
-      - performance-*
-      - cert-*
-      - cppcoreguidelines-*
-      - hicpp-*
-      - modernize-*
-      - readability-*
-      - portability-*
-    Remove:
-      - modernize-use-trailing-return-type
-      - cppcoreguidelines-avoid-magic-numbers
-      - readability-magic-numbers
-    CheckOptions:
-      readability-function-size.StatementThreshold: 50
-      readability-function-size.ParameterThreshold: 5
-      readability-function-size.NestingThreshold: 4
-      hicpp-avoid-c-arrays.AllowStringArrays: true
-      modernize-avoid-c-arrays.AllowStringArrays: true
-      cppcoreguidelines-avoid-c-arrays.AllowStringArrays: true
-      readability-function-cognitive-complexity.Threshold: 10
+    FastCheckFilter: None
   UnusedIncludes: Strict
   MissingIncludes: Strict
