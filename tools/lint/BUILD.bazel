@@ -80,3 +80,24 @@ py_test(
         ":merge_cppcheck_xml",
     ],
 )
+
+py_binary(
+    name = "changed_targets",
+    srcs = ["changed_targets.py"],
+    imports = ["../.."],
+    main = "changed_targets.py",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "test_changed_targets",
+    size = "small",
+    srcs = [
+        "changed_targets.py",
+        "test_changed_targets.py",
+    ],
+    imports = ["../.."],
+    main = "test_changed_targets.py",
+    tags = [UNIT],
+)
