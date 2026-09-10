@@ -44,6 +44,28 @@ def _get_commands(output_lib, libs):
     commands.append("end")
     return commands
 
+def _archiver_name(cc_toolchain):
+    """Returns the basename of the toolchain archiver, e.g. "llvm-ar" or "libtool".
+
+    The hermetic llvm toolchains point ar_executable at a wrapper script named
+    after the tool (cc/toolchains/llvm20/*/wrappers/llvm-ar), so the basename
+    identifies the archiver regardless of where it lives.
+    """
+    return cc_toolchain.ar_executable.rsplit("/", 1)[-1]
+
+def _supports_mri(ctx, cc_toolchain):
+    """Whether the toolchain archiver accepts MRI scripts (`ar -M`).
+
+    GNU ar and llvm-ar do, on every platform. Apple libtool and BSD ar do not,
+    and those are only ever the archiver of a macOS toolchain.
+    """
+    archiver = _archiver_name(cc_toolchain)
+    if archiver == "llvm-ar":
+        return True
+    if archiver == "libtool":
+        return False
+    return not ctx.target_platform_has_constraint(ctx.attr._macos_constraint[platform_common.ConstraintValueInfo])
+
 def _run_ar_mri(ctx, cc_toolchain, script_file, output_lib, libs):
     ctx.actions.run_shell(
         command = "{} -M < {}".format(cc_toolchain.ar_executable, script_file.path),
@@ -54,9 +76,9 @@ def _run_ar_mri(ctx, cc_toolchain, script_file, output_lib, libs):
     )
 
 def _run_ar_bsd(ctx, cc_toolchain, output_lib, libs):
-    # macOS uses libtool instead of ar for creating static libraries
     args = ctx.actions.args()
-    if cc_toolchain.ar_executable.endswith("libtool"):
+    if _archiver_name(cc_toolchain) == "libtool":
+        # Apple libtool merges the members of input archives.
         args.add("-static")
         args.add("-o")
         args.add(output_lib.path)
@@ -85,17 +107,22 @@ def _cc_static_library_impl(ctx):
 
     libs = _get_libs(ctx, linker_inputs)
 
-    # Use different ar strategies based on platform
-    # GNU ar supports MRI scripts, BSD ar (macOS) does not
-    if ctx.target_platform_has_constraint(ctx.attr._macos_constraint[platform_common.ConstraintValueInfo]):
-        _run_ar_bsd(ctx, cc_toolchain, output_lib, libs)
-    else:
+    # Pick the merge strategy by archiver, not by target platform. GNU ar and
+    # llvm-ar support MRI scripts on every platform, and that is the only way
+    # llvm-ar folds the members of input archives into the output: `llvm-ar rc
+    # out.a a.a b.a` nests the inputs as archive members instead, which the
+    # linker then rejects ("archive member 'libfoo.a' not a mach-o file").
+    # Only Apple libtool and BSD ar, which lack MRI support, take the other
+    # path.
+    if _supports_mri(ctx, cc_toolchain):
         script_file = ctx.actions.declare_file("{}.mri".format(ctx.attr.name))
         ctx.actions.write(
             output = script_file,
             content = "\n".join(_get_commands(output_lib, libs)) + "\n",
         )
         _run_ar_mri(ctx, cc_toolchain, script_file, output_lib, libs)
+    else:
+        _run_ar_bsd(ctx, cc_toolchain, output_lib, libs)
 
     cc_infos = [dep[CcInfo] for dep in ctx.attr.deps if CcInfo in dep]
     merged_cc_info = cc_common.merge_cc_infos(cc_infos = cc_infos)

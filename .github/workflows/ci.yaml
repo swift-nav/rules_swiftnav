@@ -43,6 +43,11 @@ jobs:
     # several ELF-only options on macOS, so this exercises the same strip()
     # target that bird-sweater relies on. The Linux job above cannot catch a
     # Mach-O-only flag regression.
+    #
+    # Also guards cc_static_library on macOS: with the hermetic llvm toolchain
+    # the archiver is llvm-ar, which only merges input archives through an
+    # MRI script. The Linux job already takes that path, so only this job can
+    # catch a regression to the old platform-based branch.
     runs-on: macos-latest
     steps:
       - name: Checkout source
@@ -54,7 +59,7 @@ jobs:
           disk-cache: ${{ github.workflow }}
           repository-cache: true
 
-      - name: Build and test strip example
+      - name: Build and test strip and static library examples
         run: |
           cd examples/small_world
-          bazel test //src/strip_tool/...
+          bazel test //src/strip_tool/... //src/static_library/...

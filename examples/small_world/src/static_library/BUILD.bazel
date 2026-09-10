@@ -1,0 +1,50 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "cc_static_library", "swift_cc_test")
+
+# Regression test for cc_static_library. Merges a library with transitive deps
+# (fibonacci -> add) plus a sibling (sign) into one archive and guards two
+# things, on both Linux and macOS via CI:
+#   1. The merged archive contains object files, not nested .a members. With
+#      the hermetic llvm toolchain the archiver is llvm-ar on every platform,
+#      and `llvm-ar rc out.a a.a b.a` (the old macOS path) nests the inputs
+#      instead of merging them.
+#   2. The merged archive actually links: a nested archive fails on macOS with
+#      "archive member 'libfoo.a' not a mach-o file".
+cc_static_library(
+    name = "merged",
+    deps = [
+        "//src/base_math:sign",
+        "//src/fibonacci",
+    ],
+)
+
+# Lists the archive members and fails if any of them is itself an archive.
+genrule(
+    name = "merged_members",
+    srcs = [":merged"],
+    outs = ["merged_members.txt"],
+    cmd = "ar t $(location :merged) > $@ && " +
+          "if grep -q '\\.a$$' $@; then " +
+          "echo 'merged archive contains nested .a members:' >&2; cat $@ >&2; exit 1; fi && " +
+          "grep -q '\\.o$$' $@",
+)
+
+build_test(
+    name = "merged_members_test",
+    targets = [":merged_members"],
+)
+
+# Links against the merged archive only. Depending on :merged directly would
+# also forward the original per-library archives through CcInfo, letting the
+# linker resolve every symbol without ever opening the merged one.
+swift_cc_test(
+    name = "merged_link_test",
+    srcs = [
+        "merged_link_test.cc",
+        ":merged",
+        "//src/base_math:sign.hdrs",
+        "//src/fibonacci:fibonacci.hdrs",
+    ],
+    type = UNIT,
+    deps = ["@googletest//:gtest_main"],
+)
