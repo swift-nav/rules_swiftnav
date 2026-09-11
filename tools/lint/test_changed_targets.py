@@ -8,6 +8,7 @@ Run with Bazel:
 import io
 import subprocess
 import unittest
+from pathlib import Path
 from unittest import mock
 
 import tools.lint.changed_targets as changed_targets
@@ -15,6 +16,7 @@ from tools.lint.changed_targets import (
     QUERY_PARTIAL_EXIT_CODE,
     SOURCE_EXTENSIONS,
     QueryError,
+    bazel_query,
     main,
     owning_targets,
     parse_args,
@@ -146,6 +148,36 @@ class TestQueryLabels(unittest.TestCase):
             with self.assertRaises(QueryError) as raised:
                 query_labels(completed(1, stderr="boom\n"))
         self.assertEqual(raised.exception.returncode, 1)
+
+
+class TestBazelQuery(unittest.TestCase):
+    def run_query(self, expression: str) -> subprocess.CompletedProcess:
+        recorded = {}
+
+        def fake_run(command, **kwargs):
+            recorded["command"] = command
+            query_file = command[-1].removeprefix("--query_file=")
+            recorded["expression"] = Path(query_file).read_text()
+            return completed(0, "//a:a\n")
+
+        with mock.patch.object(subprocess, "run", side_effect=fake_run):
+            bazel_query(Path("/workspace"))(expression)
+        return recorded
+
+    def test_expression_goes_to_a_file_not_argv(self):
+        """A large pull request exceeds MAX_ARG_STRLEN if the expression is an argument."""
+        expression = "same_pkg_direct_rdeps(set(%s))" % " ".join(
+            f"pkg/file{index}.cc" for index in range(20000)
+        )
+        recorded = self.run_query(expression)
+        self.assertEqual(recorded["expression"], expression)
+        self.assertNotIn(expression, recorded["command"])
+        self.assertTrue(recorded["command"][-1].startswith("--query_file="))
+
+    def test_query_file_is_removed(self):
+        recorded = self.run_query("//a:a")
+        query_file = recorded["command"][-1].removeprefix("--query_file=")
+        self.assertFalse(Path(query_file).exists())
 
 
 class TestMain(unittest.TestCase):

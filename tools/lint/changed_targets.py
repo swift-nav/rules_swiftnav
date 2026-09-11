@@ -12,6 +12,7 @@ import argparse
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Callable, Sequence
 
@@ -106,23 +107,28 @@ def query_labels(result: subprocess.CompletedProcess) -> list[str]:
 
 def bazel_query(workspace: Path) -> RunQuery:
     def run(expression: str) -> list[str]:
-        return query_labels(
-            subprocess.run(
-                [
-                    "bazel",
-                    "query",
-                    "--keep_going",
-                    "--output=label",
-                    "--noshow_progress",
-                    "--ui_event_filters=-info",
-                    expression,
-                ],
-                cwd=workspace,
-                check=False,
-                capture_output=True,
-                text=True,
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".query", encoding="utf-8"
+        ) as query_file:
+            query_file.write(expression)
+            query_file.flush()
+            return query_labels(
+                subprocess.run(
+                    [
+                        "bazel",
+                        "query",
+                        "--keep_going",
+                        "--output=label",
+                        "--noshow_progress",
+                        "--ui_event_filters=-info",
+                        f"--query_file={query_file.name}",
+                    ],
+                    cwd=workspace,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                )
             )
-        )
 
     return run
 
