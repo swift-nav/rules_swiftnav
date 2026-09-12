@@ -12,7 +12,6 @@
 
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//stamp:stamp_file.bzl", "stamp_file")
-load(":cc_static_library.bzl", _cc_static_library = "cc_static_library")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
 load(":utils.bzl", "construct_local_include")
 
@@ -155,7 +154,7 @@ def cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
     data. The generated source is compiled directly into the library archive.
 
     Also creates an additional library target appended with ".stamped" as an
-    alias kept for backwards compatibility with cc_static_library consumers.
+    alias kept for backwards compatibility with existing consumers.
 
     Currently only stable status variables are supported.
 
@@ -185,7 +184,7 @@ def cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
         **kwargs
     )
 
-    # Alias kept for backwards compatibility with cc_static_library consumers
+    # Alias kept for backwards compatibility with existing consumers
     native.alias(
         name = name + STAMPED_LIB_SUFFIX,
         actual = name,
@@ -193,11 +192,34 @@ def cc_stamped_library(name, out, template, hdrs, defaults, **kwargs):
     )
 
 def cc_static_library(name, deps, visibility = ["//visibility:private"]):
-    _cc_static_library(
-        name = name,
-        deps = deps,
-        visibility = visibility,
-    )
+    """Removed. Use cc_static_library from rules_cc instead.
+
+    This rule merged the archives of its deps. Upstream instead archives the
+    object files of the transitive deps directly, which avoids nesting input
+    archives as members -- the bug this rule hit on macOS, where the archiver
+    is llvm-ar and `llvm-ar rc out.a a.a b.a` produces an archive no linker
+    can consume.
+
+    Migrating is a one line change to the load statement. Two differences to
+    be aware of:
+
+      - Upstream emits `lib<name>.a`, this rule emitted `<name>.a`.
+      - Upstream returns no CcInfo, so the target cannot go in the `deps` of
+        another cc rule. Wrap it in cc_import, or pass the archive via `srcs`.
+
+    Args:
+        name: Unused, kept so the failure names the offending target.
+        deps: Unused.
+        visibility: Unused.
+    """
+    _ = (deps, visibility)  # @unused
+    fail((
+        "cc_static_library was removed from rules_swiftnav; target '{name}' " +
+        "must load it from rules_cc instead:\n" +
+        "    load(\"@rules_cc//cc:cc_static_library.bzl\", \"cc_static_library\")\n" +
+        "Upstream emits lib{name}.a rather than {name}.a, and provides no " +
+        "CcInfo (wrap it in cc_import to use it as a dep)."
+    ).format(name = name))
 
 def swift_c_library(**kwargs):
     """Wraps cc_library to enforce standards for a production c library.
