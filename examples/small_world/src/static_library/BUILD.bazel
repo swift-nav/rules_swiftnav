@@ -1,0 +1,54 @@
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_test")
+
+# Guards the toolchains, not the rule. cc_static_library comes from rules_cc,
+# but the archiver it runs comes from whichever toolchain is registered, and
+# the llvm20 toolchains here point ar_executable at an llvm-ar wrapper.
+#
+# llvm-ar is unforgiving about how it is invoked: `llvm-ar rc out.a a.a b.a`
+# nests the input archives as members rather than merging their objects, and
+# the result fails to link on macOS with "archive member 'libfoo.a' not a
+# mach-o file". A wrapper or toolchain change that regresses the archiver
+# would reintroduce exactly that, silently, because an archive full of nested
+# archives still builds fine.
+#
+# Merges a library with a transitive dep (fibonacci -> add) plus a sibling
+# (sign), and checks both halves: the archive holds objects, and it links.
+cc_static_library(
+    name = "merged",
+    deps = [
+        "//src/base_math:sign",
+        "//src/fibonacci",
+    ],
+)
+
+# Lists the archive members and fails if any of them is itself an archive.
+genrule(
+    name = "merged_members",
+    srcs = [":merged"],
+    outs = ["merged_members.txt"],
+    cmd = "ar t $(location :merged) > $@ && " +
+          "if grep -q '\\.a$$' $@; then " +
+          "echo 'merged archive contains nested .a members:' >&2; cat $@ >&2; exit 1; fi && " +
+          "grep -q '\\.o$$' $@",
+)
+
+build_test(
+    name = "merged_members_test",
+    targets = [":merged_members"],
+)
+
+# Links against the merged archive alone. It has to come in through srcs:
+# cc_static_library provides no CcInfo, so it cannot go in deps at all.
+swift_cc_test(
+    name = "merged_link_test",
+    srcs = [
+        "merged_link_test.cc",
+        ":merged",
+        "//src/base_math:sign.hdrs",
+        "//src/fibonacci:fibonacci.hdrs",
+    ],
+    type = UNIT,
+    deps = ["@googletest//:gtest_main"],
+)

@@ -38,11 +38,18 @@ jobs:
           bazel run //tools/buildifier:buildifier
           git diff --exit-code
 
-  strip-macos:
-    # Guards the strip rule against Mach-O regressions: llvm-strip rejects
-    # several ELF-only options on macOS, so this exercises the same strip()
-    # target that bird-sweater relies on. The Linux job above cannot catch a
-    # Mach-O-only flag regression.
+  archive-tools-macos:
+    # Guards the toolchains against Mach-O regressions in the binutils they
+    # wrap. Both of these are macOS-only failure modes that the Linux job
+    # above cannot catch:
+    #
+    #   strip: llvm-strip rejects several ELF-only options on macOS, so this
+    #   exercises the same strip() target that bird-sweater relies on.
+    #
+    #   cc_static_library: the archiver is llvm-ar, which nests input archives
+    #   as members if invoked as `llvm-ar rc out.a a.a b.a`. The result still
+    #   builds, and only fails at link time with "archive member 'libfoo.a'
+    #   not a mach-o file", so nothing else would notice.
     runs-on: macos-latest
     steps:
       - name: Checkout source
@@ -54,7 +61,7 @@ jobs:
           disk-cache: ${{ github.workflow }}
           repository-cache: true
 
-      - name: Build and test strip example
+      - name: Build and test strip and static library examples
         run: |
           cd examples/small_world
-          bazel test //src/strip_tool/...
+          bazel test //src/strip_tool/... //src/static_library/...
