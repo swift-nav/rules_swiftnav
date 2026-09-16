@@ -1,0 +1,23 @@
+# Copyright (C) 2022-2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+load("@rules_python//python:py_binary.bzl", "py_binary")
+
+exports_files(
+    ["update.sh"],
+    visibility = ["//visibility:public"],
+)
+
+py_binary(
+    name = "generate_init_script",
+    srcs = ["generate_init_script.py"],
+    main = "generate_init_script.py",
+    visibility = ["//visibility:public"],
+)
