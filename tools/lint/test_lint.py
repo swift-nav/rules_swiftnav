@@ -12,6 +12,7 @@ from pathlib import Path
 from tools.lint.lint import (
     CLANG_TIDY,
     CPPCHECK,
+    TY,
     build_command,
     build_events_path,
     extract_command,
@@ -109,6 +110,14 @@ class TestSelectLinters(unittest.TestCase):
         with self.assertRaises(SystemExit):
             select_linters("clang-tidy,nosuchlinter")
 
+    def test_ty_is_selectable(self):
+        """ty can be requested alongside the C++ linters."""
+        self.assertEqual(select_linters("ty"), [TY])
+
+    def test_default_excludes_ty(self):
+        """Callers on C++-only workspaces do not get a ty run by default."""
+        self.assertNotIn(TY, select_linters(parse_args([]).linters))
+
 
 class TestOutputPaths(unittest.TestCase):
     def test_clang_tidy_path_is_unchanged(self):
@@ -122,6 +131,7 @@ class TestOutputPaths(unittest.TestCase):
         self.assertEqual(
             output_dir(WORKSPACE, CPPCHECK), Path("/workspace/cppcheck-output")
         )
+        self.assertEqual(output_dir(WORKSPACE, TY), Path("/workspace/ty-output"))
 
 
 class TestBuildCommand(unittest.TestCase):
@@ -162,15 +172,21 @@ class TestBuildCommand(unittest.TestCase):
         self.assertIn("--output_groups=rules_lint_machine", command)
         self.assertIn("--output_groups=rules_lint_xml", command)
 
+    def test_ty_requests_its_aspect_and_only_the_sarif(self):
+        """ty has no XML deliverable, so only the machine report is collected."""
+        command = build_command(TY, ["//a:b"], BEP, create_patches=False)
+        self.assertIn("--aspects=//tools/lint:linters.bzl%ty", command)
+        self.assertIn("--output_groups=rules_lint_machine", command)
+        self.assertNotIn("--output_groups=rules_lint_xml", command)
+
     def test_each_linter_requests_only_its_own_aspect(self):
         """A shared aspect would put one linter's findings in another's report."""
-        for linter, own, other in (
-            (CLANG_TIDY, "clang_tidy", "cppcheck"),
-            (CPPCHECK, "cppcheck", "clang_tidy"),
-        ):
+        aspects = {CLANG_TIDY: "clang_tidy", CPPCHECK: "cppcheck", TY: "ty"}
+        for linter, own in aspects.items():
             command = build_command(linter, ["//a:b"], BEP, create_patches=False)
             self.assertIn(f"--aspects=//tools/lint:linters.bzl%{own}", command)
-            self.assertNotIn(f"--aspects=//tools/lint:linters.bzl%{other}", command)
+            for other in set(aspects.values()) - {own}:
+                self.assertNotIn(f"--aspects=//tools/lint:linters.bzl%{other}", command)
             self.assertNotIn("--config=lint", command)
 
     def test_targets_come_last(self):
@@ -226,6 +242,7 @@ class TestMergeCommand(unittest.TestCase):
     def test_clang_tidy_has_nothing_to_merge(self):
         """A linter without XML reports skips the merge step."""
         self.assertIsNone(merge_command(WORKSPACE, CLANG_TIDY, BEP))
+        self.assertIsNone(merge_command(WORKSPACE, TY, BEP))
 
     def test_cppcheck_xml_is_merged_next_to_its_sarif(self):
         """The merged XML lands in the linter's own output directory."""
@@ -250,7 +267,7 @@ class TestIncompatibleTargets(unittest.TestCase):
 
     def test_skip_incompatible_explicit_targets_is_passed(self):
         """Callers may name a Windows or fuzzer target through --targets."""
-        for linter in (CLANG_TIDY, CPPCHECK):
+        for linter in (CLANG_TIDY, CPPCHECK, TY):
             self.assertIn(
                 "--skip_incompatible_explicit_targets",
                 build_command(linter, ["//..."], BEP, False),

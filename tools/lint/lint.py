@@ -6,6 +6,10 @@ Drives one `bazel build` per requested linter, each writing its own Build Event
 Protocol file, and hands those events to extract_lint_results to produce one
 SARIF report (and optionally patches) per linter. Linters that also emit raw
 machine reports, such as cppcheck's XML, get those merged into one file as well.
+
+Each linter names an aspect the consuming workspace defines in its own
+//tools/lint/linters.bzl, typically from the aspect_rules_lint factories
+(lint_clang_tidy_aspect, lint_cppcheck_aspect, lint_ty_aspect).
 """
 
 import argparse
@@ -118,7 +122,13 @@ CPPCHECK = Linter(
     output_groups=("rules_lint_machine", XML_OUTPUT_GROUP),
 )
 
-LINTERS = {linter.name: linter for linter in (CLANG_TIDY, CPPCHECK)}
+TY = Linter(
+    name="ty",
+    aspects=("//tools/lint:linters.bzl%ty",),
+    output_groups=("rules_lint_machine",),
+)
+
+LINTERS = {linter.name: linter for linter in (CLANG_TIDY, CPPCHECK, TY)}
 
 DEFAULT_LINTERS = CLANG_TIDY.name
 
