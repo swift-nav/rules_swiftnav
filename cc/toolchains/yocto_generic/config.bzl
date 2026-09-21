@@ -20,6 +20,7 @@ load(
     "STRIP",
     "SYSROOT",
 )
+load("//cc/toolchains:external_include_paths.bzl", "EXTERNAL_INCLUDE_PATHS_FEATURE")
 
 def _impl(ctx):
     tool_paths = [
@@ -148,6 +149,7 @@ def _impl(ctx):
             ],
         ),
         opt_feature,
+        EXTERNAL_INCLUDE_PATHS_FEATURE,
     ]
 
     return cc_common.create_cc_toolchain_config_info(
