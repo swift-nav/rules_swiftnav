@@ -70,6 +70,7 @@ def _impl(ctx):
         ),
     ]
     common_compile_flags = [
+        "-fno-canonical-system-headers",
         # Reproducibility
         "-Wno-builtin-macro-redefined",
         "-D__DATE__=\"redacted\"",
