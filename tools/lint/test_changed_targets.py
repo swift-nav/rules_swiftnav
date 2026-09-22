@@ -13,8 +13,9 @@ from unittest import mock
 
 import tools.lint.changed_targets as changed_targets
 from tools.lint.changed_targets import (
+    CC,
     QUERY_PARTIAL_EXIT_CODE,
-    SOURCE_EXTENSIONS,
+    RUST,
     QueryError,
     bazel_query,
     main,
@@ -39,26 +40,38 @@ class TestParseArgs(unittest.TestCase):
             parse_args([])
 
     def test_defaults(self):
+        """C/C++ stays the default so callers that predate --language are unaffected."""
         args = parse_args(["--base", "origin/master"])
         self.assertEqual(args.base, "origin/master")
-        self.assertEqual(args.extensions, list(SOURCE_EXTENSIONS))
+        self.assertEqual(args.language, "cc")
+        self.assertIsNone(args.extensions)
 
     def test_extensions_override(self):
         args = parse_args(["--base", "abc", "--extensions", "cc", "h"])
         self.assertEqual(args.extensions, ["cc", "h"])
 
+    def test_language_choice(self):
+        args = parse_args(["--base", "abc", "--language", "rust"])
+        self.assertEqual(args.language, "rust")
+
+    def test_unknown_language_is_rejected(self):
+        with self.assertRaises(SystemExit):
+            parse_args(["--base", "abc", "--language", "go"])
+
 
 class TestSourceFiles(unittest.TestCase):
     def test_keeps_only_source_extensions(self):
         files = ["a/b.cc", "a/b.h", "a/BUILD.bazel", "MODULE.bazel", "x/y.py"]
-        self.assertEqual(
-            source_files(files, SOURCE_EXTENSIONS, []), ["a/b.cc", "a/b.h"]
-        )
+        self.assertEqual(source_files(files, CC.extensions, []), ["a/b.cc", "a/b.h"])
+
+    def test_rust_extensions_keep_only_rust_sources(self):
+        files = ["a/b.rs", "a/b.cc", "a/BUILD.bazel", "Cargo.toml"]
+        self.assertEqual(source_files(files, RUST.extensions, []), ["a/b.rs"])
 
     def test_drops_ignored_directories(self):
         files = ["third_party/lib/x.cc", "third_party_ext/x.cc", "src/x.cc"]
         self.assertEqual(
-            source_files(files, SOURCE_EXTENSIONS, ["third_party"]),
+            source_files(files, CC.extensions, ["third_party"]),
             ["third_party_ext/x.cc", "src/x.cc"],
         )
 
@@ -126,6 +139,32 @@ class TestOwningTargets(unittest.TestCase):
         )
 
 
+class TestOwningTargetsRust(unittest.TestCase):
+    def test_rust_kinds_are_queried(self):
+        """Filtering on cc_ kinds selected nothing for a Rust-only change."""
+        answers = {
+            "same_pkg_direct_rdeps(set(a/lib.rs))": ["//a:lib"],
+            'set(//a:lib) - kind("^rust_.* rule$", set(//a:lib))': [],
+            'kind("^rust_(library|binary|test) rule$", set(//a:lib))': ["//a:lib"],
+        }
+        self.assertEqual(
+            owning_targets(["a/lib.rs"], lambda q: answers[q], RUST), ["//a:lib"]
+        )
+
+    def test_filegroup_owner_is_expanded(self):
+        answers = {
+            "same_pkg_direct_rdeps(set(a/lib.rs))": ["//a:srcs"],
+            'set(//a:srcs) - kind("^rust_.* rule$", set(//a:srcs))': ["//a:srcs"],
+            "same_pkg_direct_rdeps(set(//a:srcs))": ["//a:lib"],
+            'kind("^rust_(library|binary|test) rule$", set(//a:lib //a:srcs))': [
+                "//a:lib"
+            ],
+        }
+        self.assertEqual(
+            owning_targets(["a/lib.rs"], lambda q: answers[q], RUST), ["//a:lib"]
+        )
+
+
 class TestQueryLabels(unittest.TestCase):
     def test_success_returns_labels(self):
         self.assertEqual(
@@ -181,17 +220,15 @@ class TestBazelQuery(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    def run_main(self, run_query):
+    def run_main(self, run_query, argv=("--base", "origin/master"), changed="a/x.cc"):
         with (
-            mock.patch.object(
-                changed_targets, "changed_files", return_value=["a/x.cc"]
-            ),
+            mock.patch.object(changed_targets, "changed_files", return_value=[changed]),
             mock.patch.object(changed_targets, "ignored_directories", return_value=[]),
             mock.patch.object(changed_targets, "bazel_query", return_value=run_query),
             mock.patch("sys.stdout", new=io.StringIO()) as stdout,
             mock.patch("sys.stderr", new=io.StringIO()),
         ):
-            return main(["--base", "origin/master"]), stdout.getvalue()
+            return main(list(argv)), stdout.getvalue()
 
     def test_query_failure_propagates_exit_code(self):
         """A returncode of 0 here would let CI lint nothing while staying green."""
@@ -211,6 +248,20 @@ class TestMain(unittest.TestCase):
             'kind("^cc_(library|binary|test) rule$", set(//a:a))': ["//a:a"],
         }
         returncode, stdout = self.run_main(lambda expression: answers[expression])
+        self.assertEqual(returncode, 0)
+        self.assertEqual(stdout, "//a:a\n")
+
+    def test_rust_language_selects_rust_targets(self):
+        answers = {
+            "same_pkg_direct_rdeps(set(a/x.rs))": ["//a:a"],
+            'set(//a:a) - kind("^rust_.* rule$", set(//a:a))': [],
+            'kind("^rust_(library|binary|test) rule$", set(//a:a))': ["//a:a"],
+        }
+        returncode, stdout = self.run_main(
+            lambda expression: answers[expression],
+            argv=("--base", "origin/master", "--language", "rust"),
+            changed="a/x.rs",
+        )
         self.assertEqual(returncode, 0)
         self.assertEqual(stdout, "//a:a\n")
 
