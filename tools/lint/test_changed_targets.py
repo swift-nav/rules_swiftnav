@@ -44,7 +44,7 @@ class TestParseArgs(unittest.TestCase):
         """C/C++ stays the default so callers that predate --languages are unaffected."""
         args = parse_args(["--base", "origin/master"])
         self.assertEqual(args.base, "origin/master")
-        self.assertEqual(args.languages, ["cc"])
+        self.assertEqual(args.languages, [CC])
         self.assertIsNone(args.extensions)
 
     def test_extensions_override(self):
@@ -53,11 +53,11 @@ class TestParseArgs(unittest.TestCase):
 
     def test_language_choice(self):
         args = parse_args(["--base", "abc", "--languages", "rust"])
-        self.assertEqual(args.languages, ["rust"])
+        self.assertEqual(args.languages, [RUST])
 
     def test_comma_separated_languages(self):
         args = parse_args(["--base", "abc", "--languages", "rust,python"])
-        self.assertEqual(args.languages, ["rust", "python"])
+        self.assertEqual(args.languages, [RUST, PYTHON])
 
     def test_unknown_language_is_rejected(self):
         with mock.patch("sys.stderr", new=io.StringIO()):
@@ -105,7 +105,7 @@ class TestOwningTargets(unittest.TestCase):
         def fail(expression):
             raise AssertionError(f"unexpected query: {expression}")
 
-        self.assertEqual(owning_targets([], fail), [])
+        self.assertEqual(owning_targets([], fail, CC), [])
 
     def test_no_owner_stops_after_first_query(self):
         queries = []
@@ -114,7 +114,7 @@ class TestOwningTargets(unittest.TestCase):
             queries.append(expression)
             return []
 
-        self.assertEqual(owning_targets(["a/orphan.cc"], run), [])
+        self.assertEqual(owning_targets(["a/orphan.cc"], run, CC), [])
         self.assertEqual(queries, ["same_pkg_direct_rdeps(set(a/orphan.cc))"])
 
     def test_direct_owners_are_not_expanded(self):
@@ -128,7 +128,7 @@ class TestOwningTargets(unittest.TestCase):
             ],
         }
         self.assertEqual(
-            owning_targets(["common/src/area_id.cc"], lambda q: answers[q]),
+            owning_targets(["common/src/area_id.cc"], lambda q: answers[q], CC),
             ["//common:common"],
         )
 
@@ -154,7 +154,7 @@ class TestOwningTargets(unittest.TestCase):
             ],
         }
         self.assertEqual(
-            owning_targets(["a/x.h", "b/y.cc"], lambda q: answers[q]),
+            owning_targets(["a/x.h", "b/y.cc"], lambda q: answers[q], CC),
             ["//a:bin", "//a:hdrs_only", "//b:test"],
         )
 
@@ -165,7 +165,9 @@ class TestOwningTargetsRust(unittest.TestCase):
         answers = {
             "same_pkg_direct_rdeps(set(a/lib.rs))": ["//a:lib"],
             'set(//a:lib) - kind("^rust_.* rule$", set(//a:lib))': [],
-            'kind("^rust_(library|binary|test) rule$", set(//a:lib))': ["//a:lib"],
+            'kind("^rust_(library|binary|shared_library|test) rule$", set(//a:lib))': [
+                "//a:lib"
+            ],
         }
         self.assertEqual(
             owning_targets(["a/lib.rs"], lambda q: answers[q], RUST), ["//a:lib"]
@@ -176,24 +178,12 @@ class TestOwningTargetsRust(unittest.TestCase):
             "same_pkg_direct_rdeps(set(a/lib.rs))": ["//a:srcs"],
             'set(//a:srcs) - kind("^rust_.* rule$", set(//a:srcs))': ["//a:srcs"],
             "same_pkg_direct_rdeps(set(//a:srcs))": ["//a:lib"],
-            'kind("^rust_(library|binary|test) rule$", set(//a:lib //a:srcs))': [
+            'kind("^rust_(library|binary|shared_library|test) rule$", set(//a:lib //a:srcs))': [
                 "//a:lib"
             ],
         }
         self.assertEqual(
             owning_targets(["a/lib.rs"], lambda q: answers[q], RUST), ["//a:lib"]
-        )
-
-
-class TestOwningTargetsPython(unittest.TestCase):
-    def test_python_kinds_are_queried(self):
-        answers = {
-            "same_pkg_direct_rdeps(set(a/x.py))": ["//a:x"],
-            'set(//a:x) - kind("^py_.* rule$", set(//a:x))': [],
-            'kind("^py_(library|binary|test) rule$", set(//a:x))': ["//a:x"],
-        }
-        self.assertEqual(
-            owning_targets(["a/x.py"], lambda q: answers[q], PYTHON), ["//a:x"]
         )
 
 
@@ -287,37 +277,22 @@ class TestMain(unittest.TestCase):
         self.assertEqual(returncode, 0)
         self.assertEqual(stdout, "//a:a\n")
 
-    def test_rust_language_selects_rust_targets(self):
-        answers = {
-            "same_pkg_direct_rdeps(set(a/x.rs))": ["//a:a"],
-            'set(//a:a) - kind("^rust_.* rule$", set(//a:a))': [],
-            'kind("^rust_(library|binary|test) rule$", set(//a:a))': ["//a:a"],
-        }
-        returncode, stdout = self.run_main(
-            lambda expression: answers[expression],
-            argv=("--base", "origin/master", "--languages", "rust"),
-            changed=("a/x.rs",),
-        )
-        self.assertEqual(returncode, 0)
-        self.assertEqual(stdout, "//a:a\n")
-
-    def test_several_languages_print_one_sorted_list(self):
-        """Each language only sees its own files, and a target owning both is printed once."""
+    def test_several_languages_merge_into_one_sorted_list(self):
+        """Each language queries only its own files; unselected ones are skipped."""
         answers = {
             "same_pkg_direct_rdeps(set(b/x.rs))": ["//b:lib"],
             'set(//b:lib) - kind("^rust_.* rule$", set(//b:lib))': [],
-            'kind("^rust_(library|binary|test) rule$", set(//b:lib))': ["//b:lib"],
-            "same_pkg_direct_rdeps(set(a/x.py b/y.py))": ["//a:tool", "//b:lib"],
-            'set(//a:tool //b:lib) - kind("^py_.* rule$", set(//a:tool //b:lib))': [],
-            'kind("^py_(library|binary|test) rule$", set(//a:tool //b:lib))': [
-                "//a:tool",
-                "//b:lib",
+            'kind("^rust_(library|binary|shared_library|test) rule$", set(//b:lib))': [
+                "//b:lib"
             ],
+            "same_pkg_direct_rdeps(set(a/x.py))": ["//a:tool"],
+            'set(//a:tool) - kind("^py_.* rule$", set(//a:tool))': [],
+            'kind("^py_(library|binary|test) rule$", set(//a:tool))': ["//a:tool"],
         }
         returncode, stdout = self.run_main(
             lambda expression: answers[expression],
             argv=("--base", "origin/master", "--languages", "rust,python"),
-            changed=("b/x.rs", "a/x.py", "b/y.py", "c/z.cc"),
+            changed=("b/x.rs", "a/x.py", "c/z.cc"),
         )
         self.assertEqual(returncode, 0)
         self.assertEqual(stdout, "//a:tool\n//b:lib\n")

@@ -25,8 +25,8 @@ class Language(NamedTuple):
     # Rule kinds belonging to the language. An owner outside them, such as a
     # filegroup, only passes the sources on and needs a second rdeps round.
     own_kinds: str
-    # Owners that pass their sources on despite being own_kinds, as a query term
-    # over the owner set. Empty when the language has none.
+    # Query term selecting owners that pass their sources on despite being
+    # own_kinds; {owners} stands for the owner labels.
     passthrough_extra: str = ""
 
 
@@ -43,15 +43,15 @@ CC = Language(
 RUST = Language(
     label="Rust",
     extensions=("rs",),
-    # The clippy aspect visits rust_{binary,library,test} only.
-    linted_kinds="^rust_(library|binary|test) rule$",
+    # The clippy aspect's default rule_kinds.
+    linted_kinds="^rust_(library|binary|shared_library|test) rule$",
     own_kinds="^rust_.* rule$",
 )
 
 PYTHON = Language(
     label="Python",
     extensions=("py", "pyi"),
-    # The ty aspect visits py_{binary,library,test} by default.
+    # The ty aspect's default rule_kinds.
     linted_kinds="^py_(library|binary|test) rule$",
     own_kinds="^py_.* rule$",
 )
@@ -67,14 +67,14 @@ QUERY_PARTIAL_EXIT_CODE = 3
 RunQuery = Callable[[str], list[str]]
 
 
-def language_list(value: str) -> list[str]:
+def language_list(value: str) -> list[Language]:
     names = [name.strip() for name in value.split(",") if name.strip()]
     unknown = [name for name in names if name not in LANGUAGES]
     if unknown or not names:
         raise argparse.ArgumentTypeError(
             f"expected a comma-separated list of {', '.join(sorted(LANGUAGES))}"
         )
-    return names
+    return [LANGUAGES[name] for name in names]
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
@@ -89,7 +89,7 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser.add_argument(
         "--languages",
         type=language_list,
-        default=["cc"],
+        default=[CC],
         help="Comma-separated languages whose sources and rule kinds are selected, "
         f"from {', '.join(sorted(LANGUAGES))}",
     )
@@ -192,7 +192,7 @@ def bazel_query(workspace: Path) -> RunQuery:
 
 
 def owning_targets(
-    files: Sequence[str], run_query: RunQuery, language: Language = CC
+    files: Sequence[str], run_query: RunQuery, language: Language
 ) -> list[str]:
     """Linted rules that compile the files, directly or through a same-package filegroup.
 
@@ -229,8 +229,7 @@ def main(argv: Sequence[str]) -> int:
     run_query = bazel_query(workspace)
 
     targets: set[str] = set()
-    for name in args.languages:
-        language = LANGUAGES[name]
+    for language in args.languages:
         files = source_files(
             changed,
             args.extensions if args.extensions is not None else language.extensions,

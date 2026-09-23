@@ -11,6 +11,7 @@ from pathlib import Path
 
 from tools.lint.lint import (
     CLANG_TIDY,
+    CLIPPY,
     CPPCHECK,
     TY,
     build_command,
@@ -181,7 +182,12 @@ class TestBuildCommand(unittest.TestCase):
 
     def test_each_linter_requests_only_its_own_aspect(self):
         """A shared aspect would put one linter's findings in another's report."""
-        aspects = {CLANG_TIDY: "clang_tidy", CPPCHECK: "cppcheck", TY: "ty"}
+        aspects = {
+            CLANG_TIDY: "clang_tidy",
+            CPPCHECK: "cppcheck",
+            TY: "ty",
+            CLIPPY: "clippy",
+        }
         for linter, own in aspects.items():
             command = build_command(linter, ["//a:b"], BEP, create_patches=False)
             self.assertIn(f"--aspects=//tools/lint:linters.bzl%{own}", command)
