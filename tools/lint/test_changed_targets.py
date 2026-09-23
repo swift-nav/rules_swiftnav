@@ -252,7 +252,9 @@ class TestBazelQuery(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    def run_main(self, run_query, argv=("--base", "origin/master"), changed=("a/x.cc",)):
+    def run_main(
+        self, run_query, argv=("--base", "origin/master"), changed=("a/x.cc",)
+    ):
         with (
             mock.patch.object(
                 changed_targets, "changed_files", return_value=list(changed)
