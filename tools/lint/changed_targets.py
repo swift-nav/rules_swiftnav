@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Print the C/C++ targets that compile the source files changed since a git ref.
+Print the targets that compile the source files changed since a git ref.
 
 On a pull request reviewdog only shows findings on changed lines, so linting
 anything but the targets that compile the changed files is wasted work. Owners
@@ -13,13 +13,66 @@ import os
 import subprocess
 import sys
 import tempfile
+from enum import Enum
 from pathlib import Path
-from typing import Callable, Sequence
+from typing import Callable, NamedTuple, Sequence
 
-SOURCE_EXTENSIONS = ("c", "cc", "cpp", "cxx", "h", "hh", "hpp", "hxx")
 
-# Only these rule kinds get lint actions from the aspects in linters.bzl.
-LINTED_RULE_KINDS = "^cc_(library|binary|test) rule$"
+class LanguageConfig(NamedTuple):
+    label: str
+    extensions: tuple[str, ...]
+    # Only these rule kinds get lint actions from the aspects in linters.bzl.
+    linted_kinds: str
+    # Rule kinds belonging to the language. An owner outside them, such as a
+    # filegroup, only passes the sources on and needs a second rdeps round.
+    own_kinds: str
+    # Query term selecting owners that pass their sources on despite being
+    # own_kinds; {owners} stands for the owner labels.
+    passthrough_extra: str = ""
+
+
+CC = LanguageConfig(
+    label="C/C++",
+    extensions=("c", "cc", "cpp", "cxx", "h", "hh", "hpp", "hxx"),
+    linted_kinds="^cc_(library|binary|test) rule$",
+    own_kinds="^cc_.* rule$",
+    # A header-only cc_library compiles nothing, so its headers only get
+    # findings from a same-package consumer compiling against them.
+    passthrough_extra='attr("srcs", "^\\[\\]$", kind("cc_library rule", set({owners})))',
+)
+
+RUST = LanguageConfig(
+    label="Rust",
+    extensions=("rs",),
+    # The clippy aspect's default rule_kinds.
+    linted_kinds="^rust_(library|binary|shared_library|test) rule$",
+    own_kinds="^rust_.* rule$",
+)
+
+PYTHON = LanguageConfig(
+    label="Python",
+    extensions=("py", "pyi"),
+    # The ty aspect's default rule_kinds.
+    linted_kinds="^py_(library|binary|test) rule$",
+    own_kinds="^py_.* rule$",
+)
+
+
+class Language(str, Enum):
+    CC = "cc"
+    RUST = "rust"
+    PYTHON = "python"
+
+    # argparse shows choices with str(); the default would print "Language.CC".
+    def __str__(self) -> str:
+        return self.value
+
+
+LANGUAGES: dict[Language, LanguageConfig] = {
+    Language.CC: CC,
+    Language.RUST: RUST,
+    Language.PYTHON: PYTHON,
+}
 
 # bazel query --keep_going reports the errors it skipped and exits 3 rather than
 # failing. Usually that is a changed file that no target lists in its srcs or
@@ -32,7 +85,7 @@ RunQuery = Callable[[str], list[str]]
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Print the C/C++ targets owning the files changed since a git ref."
+        description="Print the targets owning the files changed since a git ref."
     )
     parser.add_argument(
         "--base",
@@ -40,12 +93,24 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help="Git ref to diff against; the diff runs from its merge base with HEAD",
     )
     parser.add_argument(
+        "--languages",
+        type=Language,
+        choices=list(Language),
+        nargs="+",
+        default=[Language.CC],
+        help="Languages whose sources and rule kinds are selected",
+    )
+    parser.add_argument(
         "--extensions",
         nargs="+",
-        default=list(SOURCE_EXTENSIONS),
-        help="File extensions that count as C/C++ sources",
+        default=None,
+        help="File extensions that count as sources, overriding the language "
+        "default; only valid with a single language",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.extensions is not None and len(args.languages) > 1:
+        parser.error("--extensions takes a single language")
+    return args
 
 
 def changed_files(workspace: Path, base: str) -> list[str]:
@@ -78,7 +143,7 @@ def ignored_directories(workspace: Path) -> list[str]:
 def source_files(
     files: Sequence[str], extensions: Sequence[str], ignored: Sequence[str]
 ) -> list[str]:
-    """Keep the C/C++ sources that live inside the Bazel workspace."""
+    """Keep the sources that live inside the Bazel workspace."""
     suffixes = tuple(f".{extension}" for extension in extensions)
     selected = []
     for file in files:
@@ -133,13 +198,14 @@ def bazel_query(workspace: Path) -> RunQuery:
     return run
 
 
-def owning_targets(files: Sequence[str], run_query: RunQuery) -> list[str]:
+def owning_targets(
+    files: Sequence[str], run_query: RunQuery, language: LanguageConfig
+) -> list[str]:
     """Linted rules that compile the files, directly or through a same-package filegroup.
 
     A second same_pkg_direct_rdeps round runs only for owners that do not lint
-    the files themselves: filegroups and other non-cc rules listing them, and
-    header-only libraries, whose headers get findings from a same-package
-    consumer compiling against them.
+    the files themselves: rules outside the language that list them, plus
+    whatever passthrough_extra adds.
     """
     if not files:
         return []
@@ -147,10 +213,10 @@ def owning_targets(files: Sequence[str], run_query: RunQuery) -> list[str]:
     if not direct:
         return []
     owners = " ".join(direct)
-    passthrough = run_query(
-        f'set({owners}) - kind("^cc_.* rule$", set({owners})) '
-        f'+ attr("srcs", "^\\[\\]$", kind("cc_library rule", set({owners})))'
-    )
+    expression = f'set({owners}) - kind("{language.own_kinds}", set({owners}))'
+    if language.passthrough_extra:
+        expression += " + " + language.passthrough_extra.format(owners=owners)
+    passthrough = run_query(expression)
     indirect = (
         run_query(f"same_pkg_direct_rdeps(set({' '.join(passthrough)}))")
         if passthrough
@@ -158,32 +224,37 @@ def owning_targets(files: Sequence[str], run_query: RunQuery) -> list[str]:
     )
     candidates = sorted(set(direct) | set(indirect))
     return sorted(
-        run_query(f'kind("{LINTED_RULE_KINDS}", set({" ".join(candidates)}))')
+        run_query(f'kind("{language.linted_kinds}", set({" ".join(candidates)}))')
     )
 
 
 def main(argv: Sequence[str]) -> int:
     args = parse_args(argv)
     workspace = Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY") or os.getcwd())
+    changed = changed_files(workspace, args.base)
+    ignored = ignored_directories(workspace)
+    run_query = bazel_query(workspace)
 
-    files = source_files(
-        changed_files(workspace, args.base),
-        args.extensions,
-        ignored_directories(workspace),
-    )
-    print(f"{len(files)} changed C/C++ file(s)", file=sys.stderr)
-    for file in files:
-        print(f"  {file}", file=sys.stderr)
+    targets: set[str] = set()
+    for language in (LANGUAGES[name] for name in args.languages):
+        files = source_files(
+            changed,
+            args.extensions if args.extensions is not None else language.extensions,
+            ignored,
+        )
+        print(f"{len(files)} changed {language.label} file(s)", file=sys.stderr)
+        for file in files:
+            print(f"  {file}", file=sys.stderr)
+        try:
+            targets.update(owning_targets(files, run_query, language))
+        except QueryError as error:
+            print(error, file=sys.stderr)
+            return error.returncode
 
-    try:
-        targets = owning_targets(files, bazel_query(workspace))
-    except QueryError as error:
-        print(error, file=sys.stderr)
-        return error.returncode
     # With stdout redirected, as in CI, the list would otherwise be invisible.
     echo = not sys.stdout.isatty()
     print(f"{len(targets)} target(s) to lint", file=sys.stderr)
-    for target in targets:
+    for target in sorted(targets):
         if echo:
             print(f"  {target}", file=sys.stderr)
         print(target)
