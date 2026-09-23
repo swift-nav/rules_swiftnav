@@ -14,6 +14,7 @@ from unittest import mock
 import tools.lint.changed_targets as changed_targets
 from tools.lint.changed_targets import (
     CC,
+    PYTHON,
     QUERY_PARTIAL_EXIT_CODE,
     RUST,
     QueryError,
@@ -40,10 +41,10 @@ class TestParseArgs(unittest.TestCase):
             parse_args([])
 
     def test_defaults(self):
-        """C/C++ stays the default so callers that predate --language are unaffected."""
+        """C/C++ stays the default so callers that predate --languages are unaffected."""
         args = parse_args(["--base", "origin/master"])
         self.assertEqual(args.base, "origin/master")
-        self.assertEqual(args.language, "cc")
+        self.assertEqual(args.languages, ["cc"])
         self.assertIsNone(args.extensions)
 
     def test_extensions_override(self):
@@ -51,12 +52,25 @@ class TestParseArgs(unittest.TestCase):
         self.assertEqual(args.extensions, ["cc", "h"])
 
     def test_language_choice(self):
-        args = parse_args(["--base", "abc", "--language", "rust"])
-        self.assertEqual(args.language, "rust")
+        args = parse_args(["--base", "abc", "--languages", "rust"])
+        self.assertEqual(args.languages, ["rust"])
+
+    def test_comma_separated_languages(self):
+        args = parse_args(["--base", "abc", "--languages", "rust,python"])
+        self.assertEqual(args.languages, ["rust", "python"])
 
     def test_unknown_language_is_rejected(self):
-        with self.assertRaises(SystemExit):
-            parse_args(["--base", "abc", "--language", "go"])
+        with mock.patch("sys.stderr", new=io.StringIO()):
+            with self.assertRaises(SystemExit):
+                parse_args(["--base", "abc", "--languages", "rust,go"])
+
+    def test_extensions_with_several_languages_is_rejected(self):
+        """One extension list cannot stand in for several languages' defaults."""
+        with mock.patch("sys.stderr", new=io.StringIO()):
+            with self.assertRaises(SystemExit):
+                parse_args(
+                    ["--base", "abc", "--languages", "cc,rust", "--extensions", "cc"]
+                )
 
 
 class TestSourceFiles(unittest.TestCase):
@@ -67,6 +81,12 @@ class TestSourceFiles(unittest.TestCase):
     def test_rust_extensions_keep_only_rust_sources(self):
         files = ["a/b.rs", "a/b.cc", "a/BUILD.bazel", "Cargo.toml"]
         self.assertEqual(source_files(files, RUST.extensions, []), ["a/b.rs"])
+
+    def test_python_extensions_keep_only_python_sources(self):
+        files = ["a/b.py", "a/b.pyi", "a/b.rs", "a/BUILD.bazel", "pyproject.toml"]
+        self.assertEqual(
+            source_files(files, PYTHON.extensions, []), ["a/b.py", "a/b.pyi"]
+        )
 
     def test_drops_ignored_directories(self):
         files = ["third_party/lib/x.cc", "third_party_ext/x.cc", "src/x.cc"]
@@ -165,6 +185,18 @@ class TestOwningTargetsRust(unittest.TestCase):
         )
 
 
+class TestOwningTargetsPython(unittest.TestCase):
+    def test_python_kinds_are_queried(self):
+        answers = {
+            "same_pkg_direct_rdeps(set(a/x.py))": ["//a:x"],
+            'set(//a:x) - kind("^py_.* rule$", set(//a:x))': [],
+            'kind("^py_(library|binary|test) rule$", set(//a:x))': ["//a:x"],
+        }
+        self.assertEqual(
+            owning_targets(["a/x.py"], lambda q: answers[q], PYTHON), ["//a:x"]
+        )
+
+
 class TestQueryLabels(unittest.TestCase):
     def test_success_returns_labels(self):
         self.assertEqual(
@@ -220,9 +252,11 @@ class TestBazelQuery(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    def run_main(self, run_query, argv=("--base", "origin/master"), changed="a/x.cc"):
+    def run_main(self, run_query, argv=("--base", "origin/master"), changed=("a/x.cc",)):
         with (
-            mock.patch.object(changed_targets, "changed_files", return_value=[changed]),
+            mock.patch.object(
+                changed_targets, "changed_files", return_value=list(changed)
+            ),
             mock.patch.object(changed_targets, "ignored_directories", return_value=[]),
             mock.patch.object(changed_targets, "bazel_query", return_value=run_query),
             mock.patch("sys.stdout", new=io.StringIO()) as stdout,
@@ -259,11 +293,32 @@ class TestMain(unittest.TestCase):
         }
         returncode, stdout = self.run_main(
             lambda expression: answers[expression],
-            argv=("--base", "origin/master", "--language", "rust"),
-            changed="a/x.rs",
+            argv=("--base", "origin/master", "--languages", "rust"),
+            changed=("a/x.rs",),
         )
         self.assertEqual(returncode, 0)
         self.assertEqual(stdout, "//a:a\n")
+
+    def test_several_languages_print_one_sorted_list(self):
+        """Each language only sees its own files, and a target owning both is printed once."""
+        answers = {
+            "same_pkg_direct_rdeps(set(b/x.rs))": ["//b:lib"],
+            'set(//b:lib) - kind("^rust_.* rule$", set(//b:lib))': [],
+            'kind("^rust_(library|binary|test) rule$", set(//b:lib))': ["//b:lib"],
+            "same_pkg_direct_rdeps(set(a/x.py b/y.py))": ["//a:tool", "//b:lib"],
+            'set(//a:tool //b:lib) - kind("^py_.* rule$", set(//a:tool //b:lib))': [],
+            'kind("^py_(library|binary|test) rule$", set(//a:tool //b:lib))': [
+                "//a:tool",
+                "//b:lib",
+            ],
+        }
+        returncode, stdout = self.run_main(
+            lambda expression: answers[expression],
+            argv=("--base", "origin/master", "--languages", "rust,python"),
+            changed=("b/x.rs", "a/x.py", "b/y.py", "c/z.cc"),
+        )
+        self.assertEqual(returncode, 0)
+        self.assertEqual(stdout, "//a:tool\n//b:lib\n")
 
 
 if __name__ == "__main__":

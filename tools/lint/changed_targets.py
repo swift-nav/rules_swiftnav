@@ -48,7 +48,15 @@ RUST = Language(
     own_kinds="^rust_.* rule$",
 )
 
-LANGUAGES = {"cc": CC, "rust": RUST}
+PYTHON = Language(
+    label="Python",
+    extensions=("py", "pyi"),
+    # The ty aspect visits py_{binary,library,test} by default.
+    linted_kinds="^py_(library|binary|test) rule$",
+    own_kinds="^py_.* rule$",
+)
+
+LANGUAGES = {"cc": CC, "rust": RUST, "python": PYTHON}
 
 # bazel query --keep_going reports the errors it skipped and exits 3 rather than
 # failing. Usually that is a changed file that no target lists in its srcs or
@@ -57,6 +65,16 @@ LANGUAGES = {"cc": CC, "rust": RUST}
 QUERY_PARTIAL_EXIT_CODE = 3
 
 RunQuery = Callable[[str], list[str]]
+
+
+def language_list(value: str) -> list[str]:
+    names = [name.strip() for name in value.split(",") if name.strip()]
+    unknown = [name for name in names if name not in LANGUAGES]
+    if unknown or not names:
+        raise argparse.ArgumentTypeError(
+            f"expected a comma-separated list of {', '.join(sorted(LANGUAGES))}"
+        )
+    return names
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
@@ -69,18 +87,23 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help="Git ref to diff against; the diff runs from its merge base with HEAD",
     )
     parser.add_argument(
-        "--language",
-        choices=sorted(LANGUAGES),
-        default="cc",
-        help="Language whose sources and rule kinds are selected",
+        "--languages",
+        type=language_list,
+        default=["cc"],
+        help="Comma-separated languages whose sources and rule kinds are selected, "
+        f"from {', '.join(sorted(LANGUAGES))}",
     )
     parser.add_argument(
         "--extensions",
         nargs="+",
         default=None,
-        help="File extensions that count as sources, overriding the language default",
+        help="File extensions that count as sources, overriding the language "
+        "default; only valid with a single language",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.extensions is not None and len(args.languages) > 1:
+        parser.error("--extensions takes a single language")
+    return args
 
 
 def changed_files(workspace: Path, base: str) -> list[str]:
@@ -201,26 +224,31 @@ def owning_targets(
 def main(argv: Sequence[str]) -> int:
     args = parse_args(argv)
     workspace = Path(os.environ.get("BUILD_WORKSPACE_DIRECTORY") or os.getcwd())
-    language = LANGUAGES[args.language]
+    changed = changed_files(workspace, args.base)
+    ignored = ignored_directories(workspace)
+    run_query = bazel_query(workspace)
 
-    files = source_files(
-        changed_files(workspace, args.base),
-        args.extensions if args.extensions is not None else language.extensions,
-        ignored_directories(workspace),
-    )
-    print(f"{len(files)} changed {language.label} file(s)", file=sys.stderr)
-    for file in files:
-        print(f"  {file}", file=sys.stderr)
+    targets: set[str] = set()
+    for name in args.languages:
+        language = LANGUAGES[name]
+        files = source_files(
+            changed,
+            args.extensions if args.extensions is not None else language.extensions,
+            ignored,
+        )
+        print(f"{len(files)} changed {language.label} file(s)", file=sys.stderr)
+        for file in files:
+            print(f"  {file}", file=sys.stderr)
+        try:
+            targets.update(owning_targets(files, run_query, language))
+        except QueryError as error:
+            print(error, file=sys.stderr)
+            return error.returncode
 
-    try:
-        targets = owning_targets(files, bazel_query(workspace), language)
-    except QueryError as error:
-        print(error, file=sys.stderr)
-        return error.returncode
     # With stdout redirected, as in CI, the list would otherwise be invisible.
     echo = not sys.stdout.isatty()
     print(f"{len(targets)} target(s) to lint", file=sys.stderr)
-    for target in targets:
+    for target in sorted(targets):
         if echo:
             print(f"  {target}", file=sys.stderr)
         print(target)
