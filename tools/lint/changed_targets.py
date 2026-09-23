@@ -13,11 +13,12 @@ import os
 import subprocess
 import sys
 import tempfile
+from enum import Enum
 from pathlib import Path
 from typing import Callable, NamedTuple, Sequence
 
 
-class Language(NamedTuple):
+class LanguageConfig(NamedTuple):
     label: str
     extensions: tuple[str, ...]
     # Only these rule kinds get lint actions from the aspects in linters.bzl.
@@ -30,7 +31,7 @@ class Language(NamedTuple):
     passthrough_extra: str = ""
 
 
-CC = Language(
+CC = LanguageConfig(
     label="C/C++",
     extensions=("c", "cc", "cpp", "cxx", "h", "hh", "hpp", "hxx"),
     linted_kinds="^cc_(library|binary|test) rule$",
@@ -40,7 +41,7 @@ CC = Language(
     passthrough_extra='attr("srcs", "^\\[\\]$", kind("cc_library rule", set({owners})))',
 )
 
-RUST = Language(
+RUST = LanguageConfig(
     label="Rust",
     extensions=("rs",),
     # The clippy aspect's default rule_kinds.
@@ -48,7 +49,7 @@ RUST = Language(
     own_kinds="^rust_.* rule$",
 )
 
-PYTHON = Language(
+PYTHON = LanguageConfig(
     label="Python",
     extensions=("py", "pyi"),
     # The ty aspect's default rule_kinds.
@@ -56,7 +57,22 @@ PYTHON = Language(
     own_kinds="^py_.* rule$",
 )
 
-LANGUAGES = {"cc": CC, "rust": RUST, "python": PYTHON}
+
+class Language(str, Enum):
+    CC = "cc"
+    RUST = "rust"
+    PYTHON = "python"
+
+    # argparse shows choices with str(); the default would print "Language.CC".
+    def __str__(self) -> str:
+        return self.value
+
+
+LANGUAGES: dict[Language, LanguageConfig] = {
+    Language.CC: CC,
+    Language.RUST: RUST,
+    Language.PYTHON: PYTHON,
+}
 
 # bazel query --keep_going reports the errors it skipped and exits 3 rather than
 # failing. Usually that is a changed file that no target lists in its srcs or
@@ -65,16 +81,6 @@ LANGUAGES = {"cc": CC, "rust": RUST, "python": PYTHON}
 QUERY_PARTIAL_EXIT_CODE = 3
 
 RunQuery = Callable[[str], list[str]]
-
-
-def language_list(value: str) -> list[Language]:
-    names = [name.strip() for name in value.split(",") if name.strip()]
-    unknown = [name for name in names if name not in LANGUAGES]
-    if unknown or not names:
-        raise argparse.ArgumentTypeError(
-            f"expected a comma-separated list of {', '.join(sorted(LANGUAGES))}"
-        )
-    return [LANGUAGES[name] for name in names]
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
@@ -88,10 +94,11 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--languages",
-        type=language_list,
-        default=[CC],
-        help="Comma-separated languages whose sources and rule kinds are selected, "
-        f"from {', '.join(sorted(LANGUAGES))}",
+        type=Language,
+        choices=list(Language),
+        nargs="+",
+        default=[Language.CC],
+        help="Languages whose sources and rule kinds are selected",
     )
     parser.add_argument(
         "--extensions",
@@ -192,7 +199,7 @@ def bazel_query(workspace: Path) -> RunQuery:
 
 
 def owning_targets(
-    files: Sequence[str], run_query: RunQuery, language: Language
+    files: Sequence[str], run_query: RunQuery, language: LanguageConfig
 ) -> list[str]:
     """Linted rules that compile the files, directly or through a same-package filegroup.
 
@@ -229,7 +236,7 @@ def main(argv: Sequence[str]) -> int:
     run_query = bazel_query(workspace)
 
     targets: set[str] = set()
-    for language in args.languages:
+    for language in (LANGUAGES[name] for name in args.languages):
         files = source_files(
             changed,
             args.extensions if args.extensions is not None else language.extensions,

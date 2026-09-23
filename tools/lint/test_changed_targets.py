@@ -17,6 +17,7 @@ from tools.lint.changed_targets import (
     PYTHON,
     QUERY_PARTIAL_EXIT_CODE,
     RUST,
+    Language,
     QueryError,
     bazel_query,
     main,
@@ -44,7 +45,7 @@ class TestParseArgs(unittest.TestCase):
         """C/C++ stays the default so callers that predate --languages are unaffected."""
         args = parse_args(["--base", "origin/master"])
         self.assertEqual(args.base, "origin/master")
-        self.assertEqual(args.languages, [CC])
+        self.assertEqual(args.languages, [Language.CC])
         self.assertIsNone(args.extensions)
 
     def test_extensions_override(self):
@@ -53,23 +54,23 @@ class TestParseArgs(unittest.TestCase):
 
     def test_language_choice(self):
         args = parse_args(["--base", "abc", "--languages", "rust"])
-        self.assertEqual(args.languages, [RUST])
+        self.assertEqual(args.languages, [Language.RUST])
 
-    def test_comma_separated_languages(self):
-        args = parse_args(["--base", "abc", "--languages", "rust,python"])
-        self.assertEqual(args.languages, [RUST, PYTHON])
+    def test_several_languages(self):
+        args = parse_args(["--base", "abc", "--languages", "rust", "python"])
+        self.assertEqual(args.languages, [Language.RUST, Language.PYTHON])
 
     def test_unknown_language_is_rejected(self):
         with mock.patch("sys.stderr", new=io.StringIO()):
             with self.assertRaises(SystemExit):
-                parse_args(["--base", "abc", "--languages", "rust,go"])
+                parse_args(["--base", "abc", "--languages", "rust", "go"])
 
     def test_extensions_with_several_languages_is_rejected(self):
         """One extension list cannot stand in for several languages' defaults."""
         with mock.patch("sys.stderr", new=io.StringIO()):
             with self.assertRaises(SystemExit):
                 parse_args(
-                    ["--base", "abc", "--languages", "cc,rust", "--extensions", "cc"]
+                    ["--base", "abc", "--languages", "cc", "rust", "--extensions", "cc"]
                 )
 
 
@@ -291,7 +292,7 @@ class TestMain(unittest.TestCase):
         }
         returncode, stdout = self.run_main(
             lambda expression: answers[expression],
-            argv=("--base", "origin/master", "--languages", "rust,python"),
+            argv=("--base", "origin/master", "--languages", "rust", "python"),
             changed=("b/x.rs", "a/x.py", "c/z.cc"),
         )
         self.assertEqual(returncode, 0)
