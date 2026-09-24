@@ -156,6 +156,19 @@ class TestDefaults(unittest.TestCase):
         self.assertNotIn("sonarlint", generated)
         self.assertNotIn("rust", generated)
 
+    def test_coverage_gutters_read_the_bazel_report_and_the_html_report(self):
+        settings = workspace()["settings"]
+        self.assertEqual(
+            settings["coverage-gutters.coverageBaseDir"], "bazel-out/_coverage/"
+        )
+        self.assertEqual(
+            settings["coverage-gutters.coverageFileNames"], ["_coverage_report.dat"]
+        )
+        self.assertEqual(
+            settings["coverage-gutters.coverageReportFileName"],
+            "code_coverage_html/index.html",
+        )
+
     def test_lldbinit_is_sourced_when_present(self):
         settings = workspace(has_lldbinit=True)["settings"]
         self.assertEqual(

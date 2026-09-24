@@ -414,7 +414,9 @@ def default_settings(folder: str, has_lldbinit: bool) -> dict[str, Any]:
         ],
         "coverage-gutters.coverageBaseDir": "bazel-out/_coverage/",
         "coverage-gutters.coverageFileNames": ["_coverage_report.dat"],
-        "coverage-gutters.coverageReportFileName": "cov_html/index.html",
+        # Where the repositories' scripts/generate_code_coverage.sh write the
+        # genhtml report of the Bazel one above.
+        "coverage-gutters.coverageReportFileName": "code_coverage_html/index.html",
         "coverage-gutters.showLineCoverage": True,
         "coverage-gutters.showRulerCoverage": True,
         "coverage-gutters.watchOnActivate": False,
