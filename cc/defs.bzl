@@ -13,7 +13,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//stamp:stamp_file.bzl", "stamp_file")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
-load(":utils.bzl", "construct_local_include")
+load(":utils.bzl", "construct_local_include", "test_naming_error")
 
 # Name for a unit test
 UNIT = "unit"
@@ -97,27 +97,6 @@ def _test_compatible_with():
         "@platforms//os:windows": ["@platforms//:incompatible"],
         "//conditions:default": [],
     })
-
-# Enforce that test targets and their source files are named with a '_test'
-# suffix and without a 'test_' prefix
-def _check_test_naming(name, srcs):
-    if not name.endswith("_test") or name.startswith("test_"):
-        fail("Test target '{}' must be named with a '_test' suffix and no 'test_' prefix".format(name))
-
-    # srcs may be a select(), in which case the individual files can't be inspected
-    if type(srcs) != "list":
-        return
-
-    for src in srcs:
-        # Labels refer to other targets, not files owned by this test
-        if type(src) != "string" or src.startswith(":") or src.startswith("//") or src.startswith("@"):
-            continue
-        basename = src.rsplit("/", 1)[-1]
-        stem, _, ext = basename.rpartition(".")
-        if ext not in ["c", "cc", "cpp", "cxx"]:
-            continue
-        if not stem.endswith("_test") or stem.startswith("test_"):
-            fail("Test source '{}' of '{}' must be named with a '_test' suffix and no 'test_' prefix".format(src, name))
 
 def _create_srcs(**kwargs):
     native.filegroup(
@@ -724,7 +703,9 @@ def swift_c_test(name, type, **kwargs):
     srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
 
-    _check_test_naming(name, srcs)
+    naming_error = test_naming_error(name, srcs)
+    if naming_error:
+        fail(naming_error)
 
     native.filegroup(
         name = srcs_name,
@@ -785,7 +766,9 @@ def swift_cc_test(name, type, **kwargs):
     srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
 
-    _check_test_naming(name, srcs)
+    naming_error = test_naming_error(name, srcs)
+    if naming_error:
+        fail(naming_error)
 
     native.filegroup(
         name = srcs_name,
