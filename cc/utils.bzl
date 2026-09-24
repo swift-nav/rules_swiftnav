@@ -45,3 +45,42 @@ def construct_local_include(path):
         include_dir = paths.join("$(GENDIR)", include_dir)
 
     return ["-I{}".format(include_dir)]
+
+def _test_name_error(kind, name):
+    if not name.endswith("_test") or name.startswith("test_"):
+        return "{} must be named with a '_test' suffix and no 'test_' prefix".format(kind)
+    return None
+
+def test_naming_error(name, srcs):
+    """Checks that a test target and its sources follow the test naming convention.
+
+    The target name and the stem of every C/C++ source file listed in srcs must
+    end with '_test' and must not start with 'test_'.
+
+    Args:
+        name: The name of the test target.
+        srcs: The srcs of the test target. Labels, non-C/C++ files and select()
+            values are ignored since they can't be inspected by a macro.
+
+    Returns:
+        An error message describing the first violation, or None.
+    """
+    error = _test_name_error("Test target '{}'".format(name), name)
+    if error:
+        return error
+
+    if type(srcs) != "list":
+        return None
+
+    for src in srcs:
+        # Labels refer to other targets, not files owned by this test
+        if type(src) != "string" or src.startswith(":") or src.startswith("//") or src.startswith("@"):
+            continue
+        stem, _, ext = paths.basename(src).rpartition(".")
+        if ext not in ["c", "cc", "cpp", "cxx"]:
+            continue
+        error = _test_name_error("Test source '{}' of '{}'".format(src, name), stem)
+        if error:
+            return error
+
+    return None
