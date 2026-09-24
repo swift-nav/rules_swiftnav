@@ -83,15 +83,14 @@ def parse_targets(query_xml: str) -> list[Target]:
         query_xml: The query's output.
 
     Returns:
-        The targets, in query order. A `.binary` suffix is dropped since such
-        targets are wrapped by a rule named without it.
+        The targets, in query order.
     """
     targets = []
     for rule in ET.fromstring(query_xml).iter("rule"):
         tags = rule.find('list[@name="tags"]')
         targets.append(
             Target(
-                label=rule.get("name", "").removesuffix(".binary"),
+                label=rule.get("name", ""),
                 kind=rule.get("class", ""),
                 tags=tuple(tag.get("value", "") for tag in tags.iter("string"))
                 if tags is not None
@@ -342,9 +341,14 @@ def target_names(targets: list[Target]) -> dict[str, str]:
 
     Returns:
         Map of label to name: the target's name, or its full label when
-        another target has the same name.
+        another target has the same name. A `.binary` suffix is dropped:
+        wrapper macros such as orion_cc_binary name their cc_binary so, and
+        the wrapper's name is the one people know.
     """
-    short = {target.label: target.label.split(":")[-1] for target in targets}
+    short = {
+        target.label: target.label.split(":")[-1].removesuffix(".binary")
+        for target in targets
+    }
     counts: dict[str, int] = {}
     for name in short.values():
         counts[name] = counts.get(name, 0) + 1
@@ -371,9 +375,9 @@ def target_configurations(
     launches = []
     for target in runnable:
         name = names[target.label]
-        program = (
-            f"${{workspaceFolder:{folder}}}/bazel-bin/"
-            + target.label.removeprefix("//").replace(":", "/")
+        package, _, target_name = target.label.removeprefix("//").partition(":")
+        program = f"${{workspaceFolder:{folder}}}/bazel-bin/" + "/".join(
+            part for part in (package, target_name) if part
         )
         # --build_runfile_links makes `bazel build` create the runfiles tree,
         # which otherwise only `bazel test` does.

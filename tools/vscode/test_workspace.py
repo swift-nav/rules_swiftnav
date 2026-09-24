@@ -60,7 +60,7 @@ class TestParseTargets(unittest.TestCase):
                 Target("//a:lib", "cc_library", ()),
                 Target("//a:lib_test", "cc_test", ("unit",)),
                 Target("//b:replay_test", "cc_test", ("integration",)),
-                Target("//c:tool", "cc_binary", ()),
+                Target("//c:tool.binary", "cc_binary", ()),
             ],
         )
 
@@ -210,7 +210,7 @@ class TestTargets(unittest.TestCase):
         inputs = by("id", workspace(targets=self.TARGETS)["tasks"]["inputs"])
         self.assertEqual(
             inputs["target"]["options"],
-            ["//...", "//a:lib", "//a:lib_test", "//b:replay_test", "//c:tool"],
+            ["//...", "//a:lib", "//a:lib_test", "//b:replay_test", "//c:tool.binary"],
         )
 
     def test_each_test_and_binary_gets_a_build_task_and_launch(self):
@@ -229,6 +229,27 @@ class TestTargets(unittest.TestCase):
         self.assertEqual(
             launches["lib_test"]["cwd"],
             "${workspaceFolder:repo}/bazel-bin/a/lib_test.runfiles/_main/",
+        )
+
+    def test_dot_binary_targets_are_named_without_the_suffix(self):
+        """Wrapper macros such as orion_cc_binary only define `<name>.binary`."""
+        generated = workspace(targets=self.TARGETS)
+        tasks = by("label", generated["tasks"]["tasks"])
+        launches = by("name", generated["launch"]["configurations"])
+        self.assertTrue(
+            tasks["tool"]["command"].endswith("--build_runfile_links //c:tool.binary")
+        )
+        self.assertEqual(
+            launches["tool"]["program"],
+            "${workspaceFolder:repo}/bazel-bin/c/tool.binary",
+        )
+
+    def test_root_package_targets_are_directly_in_bazel_bin(self):
+        targets = [Target("//:root_test", "cc_test", ())]
+        launches = by("name", workspace(targets=targets)["launch"]["configurations"])
+        self.assertEqual(
+            launches["root_test"]["program"],
+            "${workspaceFolder:repo}/bazel-bin/root_test",
         )
 
     def test_launches_are_grouped_by_kind(self):
