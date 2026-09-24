@@ -7,7 +7,6 @@ configuration for each cc_test and cc_binary. A repository adds to it, or
 overrides parts of it, with a JSON config (see README.md for its keys).
 """
 
-import copy
 import json
 import xml.etree.ElementTree as ET
 from typing import Any, NamedTuple, Optional
@@ -26,10 +25,6 @@ CONFIG_KEYS = frozenset(
         "extensions",
     ]
 )
-
-# Entries of these lists are identified by the given key, so a later config
-# replaces an entry of the same name instead of adding a duplicate.
-NAMED_LISTS = {"tasks": "label", "inputs": "id", "launch": "name"}
 
 CPPCHECK_REPORT = "cppcheck-output/merged-report.xml"
 
@@ -152,30 +147,6 @@ def merge_settings(base: dict, overlay: dict) -> dict:
             merged[key] = merge_settings(merged[key], value)
         else:
             merged[key] = value
-    return merged
-
-
-def merge_configs(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
-    """Overlay a config on another.
-
-    Args:
-        base: The config to start from, typically the repository's.
-        overlay: The config to apply on top, typically a developer's local one.
-
-    Returns:
-        The merged config. Named entries are replaced by name, settings deep
-        merged, other lists combined, and folders replaced.
-    """
-    merged = copy.deepcopy(base)
-    for key, value in overlay.items():
-        if key in NAMED_LISTS:
-            merged[key] = merge_named(merged.get(key, []), value, NAMED_LISTS[key])
-        elif key == "settings":
-            merged[key] = merge_settings(merged.get(key, {}), value)
-        elif key == "folders":
-            merged[key] = value
-        else:
-            merged[key] = list(dict.fromkeys(merged.get(key, []) + value))
     return merged
 
 

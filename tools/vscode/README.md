@@ -69,6 +69,7 @@ are an error.
 | `settings` | Deep merged over the default settings. |
 | `extensions` | Added to the recommended extensions. |
 
-A `.vscode-workspace.local.json` with the same keys is applied on top, for
-settings of your own, such as a crash file to debug. Keep it out of version
-control.
+Settings, tasks and launch configurations of your own go in the repository's
+`.vscode/settings.json`, `.vscode/tasks.json` and `.vscode/launch.json`, which
+VS Code merges into the workspace, or in your user settings. Keep `.vscode/`
+out of version control; regenerating the workspace never touches it.

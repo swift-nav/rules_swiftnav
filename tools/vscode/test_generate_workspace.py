@@ -73,16 +73,20 @@ class TestMain(unittest.TestCase):
         self.assertEqual(self.run_main(["--output", "w.code-workspace"], environ), 0)
         self.assertTrue((subdir / "w.code-workspace").exists())
 
-    def test_repository_and_local_configs_are_applied(self):
+    def test_repository_config_is_applied(self):
         (self.repo / ".vscode-workspace.json").write_text(
-            json.dumps({"settings": {"a": 1, "b": 1}, "test_exclude_tags": ["fuzz"]})
+            json.dumps({"settings": {"a": 1}, "test_exclude_tags": ["fuzz"]})
         )
+        self.assertEqual(self.run_main(), 0)
+        self.assertEqual(self.written()["settings"]["a"], 1)
+
+    def test_personal_additions_are_left_to_vscode(self):
+        """Per developer settings, tasks and launches go in the ignored .vscode/."""
         (self.repo / ".vscode-workspace.local.json").write_text(
             json.dumps({"settings": {"b": 2}})
         )
         self.assertEqual(self.run_main(), 0)
-        settings = self.written()["settings"]
-        self.assertEqual((settings["a"], settings["b"]), (1, 2))
+        self.assertNotIn("b", self.written()["settings"])
 
     def test_repository_is_named_after_its_module(self):
         """Worktrees and clones under another directory name give the same file."""

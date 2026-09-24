@@ -13,7 +13,6 @@ from tools.vscode.workspace import (
     Target,
     generate,
     load_config,
-    merge_configs,
     parse_targets,
 )
 
@@ -80,41 +79,6 @@ class TestLoadConfig(unittest.TestCase):
     def test_rejects_invalid_json(self):
         with self.assertRaisesRegex(ConfigError, "cfg.json"):
             load_config("{", "cfg.json")
-
-
-class TestMergeConfigs(unittest.TestCase):
-    """Overlaying a developer's local config on the repository's."""
-
-    def test_named_entries_are_replaced_by_name(self):
-        merged = merge_configs(
-            {"tasks": [{"label": "a", "command": "1"}, {"label": "b", "command": "2"}]},
-            {"tasks": [{"label": "a", "command": "3"}, {"label": "c", "command": "4"}]},
-        )
-        self.assertEqual(
-            merged["tasks"],
-            [
-                {"label": "a", "command": "3"},
-                {"label": "b", "command": "2"},
-                {"label": "c", "command": "4"},
-            ],
-        )
-
-    def test_settings_are_deep_merged(self):
-        merged = merge_configs(
-            {"settings": {"x": {"a": 1, "b": 2}}},
-            {"settings": {"x": {"b": 3}}},
-        )
-        self.assertEqual(merged["settings"], {"x": {"a": 1, "b": 3}})
-
-    def test_extensions_are_combined(self):
-        merged = merge_configs({"extensions": ["a", "b"]}, {"extensions": ["b", "c"]})
-        self.assertEqual(merged["extensions"], ["a", "b", "c"])
-
-    def test_folders_are_replaced(self):
-        merged = merge_configs(
-            {"folders": [{"path": "."}]}, {"folders": [{"path": "x"}]}
-        )
-        self.assertEqual(merged["folders"], [{"path": "x"}])
 
 
 class TestDefaults(unittest.TestCase):

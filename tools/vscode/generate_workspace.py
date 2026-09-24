@@ -6,8 +6,7 @@ Run from the repository:
     bazel run @rules_swiftnav//tools/vscode:generate_workspace
 
 It writes <repository>.code-workspace from the defaults of workspace.py, the
-repository's cc targets, and the optional .vscode-workspace.json (committed)
-and .vscode-workspace.local.json (per developer, not committed) configs.
+repository's cc targets, and its optional .vscode-workspace.json config.
 """
 
 import argparse
@@ -23,11 +22,10 @@ from tools.vscode.workspace import (
     ConfigError,
     generate,
     load_config,
-    merge_configs,
     parse_targets,
 )
 
-CONFIG_FILES = (".vscode-workspace.json", ".vscode-workspace.local.json")
+CONFIG_FILE = ".vscode-workspace.json"
 
 
 def query_cc_targets(workspace_dir: Path) -> str:
@@ -66,14 +64,12 @@ def repository_name(workspace_dir: Path) -> str:
     return workspace_dir.name
 
 
-def load_configs(workspace_dir: Path) -> dict:
-    """Load the repository's config and overlay the local one, if they exist."""
-    config: dict = {}
-    for name in CONFIG_FILES:
-        path = workspace_dir / name
-        if path.exists():
-            config = merge_configs(config, load_config(path.read_text(), str(path)))
-    return config
+def load_repository_config(workspace_dir: Path) -> dict:
+    """Load the repository's config, empty if it has none."""
+    path = workspace_dir / CONFIG_FILE
+    if not path.exists():
+        return {}
+    return load_config(path.read_text(), str(path))
 
 
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
@@ -127,7 +123,7 @@ def main(
 
     try:
         workspace = generate(
-            config=load_configs(workspace_dir),
+            config=load_repository_config(workspace_dir),
             targets=parse_targets(query(workspace_dir)),
             repo_name=repo_name,
             has_lldbinit=(workspace_dir / ".lldbinit").exists(),
