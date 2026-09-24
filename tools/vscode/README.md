@@ -62,7 +62,7 @@ are an error.
 |---|---|
 | `folders` | Replaces the workspace folders, `[{"path": ".", "name": "<repository>"}]` by default. |
 | `test_exclude_tags` | Tags of tests `Build all tests` skips, through `--build_tag_filters`. |
-| `tasks` | Added, or replace the task with the same `label`. |
+| `tasks` | Added, or replace the task with the same `label`. A task marked `isDefault` becomes the default of its group in place of the generated one. |
 | `disable_tasks` | Labels of tasks to remove. Naming a task that does not exist is an error. |
 | `inputs` | Added to the task and launch inputs, or replace the one with the same `id`. |
 | `launch` | Added, or replace the launch configuration with the same `name`. |

@@ -308,6 +308,31 @@ class TestRepositoryConfig(unittest.TestCase):
         self.assertEqual(tasks["format"]["command"], "make format")
         self.assertIn("extra", tasks)
 
+    def test_a_default_task_of_the_repository_takes_over_the_group(self):
+        """Two default build tasks make VS Code prompt instead of running one."""
+        config = {
+            "tasks": [
+                {
+                    "label": "coverage",
+                    "type": "shell",
+                    "command": "true",
+                    "group": {"kind": "build", "isDefault": True},
+                }
+            ]
+        }
+        tasks = workspace(config)["tasks"]["tasks"]
+        defaults = [
+            task["label"]
+            for task in tasks
+            if isinstance(task.get("group"), dict)
+            and task["group"].get("kind") == "build"
+            and task["group"].get("isDefault")
+        ]
+        self.assertEqual(defaults, ["coverage"])
+        self.assertEqual(
+            by("label", tasks)["Generate compile commands"]["group"], "build"
+        )
+
     def test_tasks_can_be_disabled(self):
         tasks = by(
             "label", workspace({"disable_tasks": ["Run Cppcheck"]})["tasks"]["tasks"]

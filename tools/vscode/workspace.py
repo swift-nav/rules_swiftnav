@@ -10,7 +10,7 @@ overrides parts of it, with a JSON config (see README.md for its keys).
 import copy
 import json
 import xml.etree.ElementTree as ET
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Optional
 
 BUILD_ALL_TESTS = "Build all tests"
 
@@ -456,6 +456,38 @@ def default_settings(folder: str, has_lldbinit: bool) -> dict[str, Any]:
     return settings
 
 
+def default_group(task: dict[str, Any]) -> Optional[str]:
+    """The group a task is the default task of, if any."""
+    group = task.get("group")
+    if isinstance(group, dict) and group.get("isDefault"):
+        return group.get("kind")
+    return None
+
+
+def yield_default_groups(
+    tasks: list[dict[str, Any]], repo_tasks: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Let the repository's default tasks replace the generated ones.
+
+    VS Code prompts instead of running when a group has two default tasks.
+
+    Args:
+        tasks: The generated tasks.
+        repo_tasks: The repository's tasks.
+
+    Returns:
+        The generated tasks, no longer default for the groups the repository
+        has a default task for.
+    """
+    taken = {default_group(task) for task in repo_tasks} - {None}
+    return [
+        {**task, "group": task["group"]["kind"]}
+        if default_group(task) in taken
+        else task
+        for task in tasks
+    ]
+
+
 def generate(
     config: dict[str, Any],
     targets: list[Target],
@@ -479,8 +511,10 @@ def generate(
     folder = repo_name
     target_tasks, target_launches = target_configurations(targets, folder)
 
+    repo_tasks = config.get("tasks", [])
     tasks = default_tasks(folder, config.get("test_exclude_tags", [])) + target_tasks
-    tasks = merge_named(tasks, config.get("tasks", []), "label")
+    tasks = yield_default_groups(tasks, repo_tasks)
+    tasks = merge_named(tasks, repo_tasks, "label")
     labels = {task["label"] for task in tasks}
     disabled = set(config.get("disable_tasks", []))
     unknown = sorted(disabled - labels)
