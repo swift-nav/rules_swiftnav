@@ -98,10 +98,11 @@ def _test_compatible_with():
         "//conditions:default": [],
     })
 
-# Enforce that test targets and their source files are named with a '_test' suffix
+# Enforce that test targets and their source files are named with a '_test'
+# suffix and without a 'test_' prefix
 def _check_test_naming(name, srcs):
-    if not name.endswith("_test"):
-        fail("Test target '{}' must be named with a '_test' suffix".format(name))
+    if not name.endswith("_test") or name.startswith("test_"):
+        fail("Test target '{}' must be named with a '_test' suffix and no 'test_' prefix".format(name))
 
     # srcs may be a select(), in which case the individual files can't be inspected
     if type(srcs) != "list":
@@ -115,8 +116,8 @@ def _check_test_naming(name, srcs):
         stem, _, ext = basename.rpartition(".")
         if ext not in ["c", "cc", "cpp", "cxx"]:
             continue
-        if not stem.endswith("_test"):
-            fail("Test source '{}' of '{}' must be named with a '_test' suffix".format(src, name))
+        if not stem.endswith("_test") or stem.startswith("test_"):
+            fail("Test source '{}' of '{}' must be named with a '_test' suffix and no 'test_' prefix".format(src, name))
 
 def _create_srcs(**kwargs):
     native.filegroup(
@@ -699,7 +700,8 @@ def swift_c_test(name, type, **kwargs):
     of the test. The name of the sources is created with the '.srcs' suffix.
 
     The test target name and its C/C++ source files must end with a '_test'
-    suffix (e.g. `foo_test` built from `foo_test.cc`).
+    suffix and must not start with a 'test_' prefix (e.g. `foo_test` built
+    from `foo_test.cc`, not `test_foo` or `test_foo_test.cc`).
 
     Args:
         name: A unique name for this rule.
@@ -759,7 +761,8 @@ def swift_cc_test(name, type, **kwargs):
     of the test. The name of the sources is created with the '.srcs' suffix.
 
     The test target name and its C/C++ source files must end with a '_test'
-    suffix (e.g. `foo_test` built from `foo_test.cc`).
+    suffix and must not start with a 'test_' prefix (e.g. `foo_test` built
+    from `foo_test.cc`, not `test_foo` or `test_foo_test.cc`).
 
     Args:
         name: A unique name for this rule.
