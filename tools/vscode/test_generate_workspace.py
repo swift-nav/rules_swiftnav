@@ -84,6 +84,15 @@ class TestMain(unittest.TestCase):
         settings = self.written()["settings"]
         self.assertEqual((settings["a"], settings["b"]), (1, 2))
 
+    def test_repository_is_named_after_its_module(self):
+        """Worktrees and clones under another directory name give the same file."""
+        (self.repo / "MODULE.bazel").write_text(
+            'module(\n    name = "the-module",\n    version = "0.1.0",\n)\n'
+        )
+        self.assertEqual(self.run_main(), 0)
+        workspace = self.written("the-module.code-workspace")
+        self.assertEqual(workspace["folders"], [{"path": ".", "name": "the-module"}])
+
     def test_lldbinit_is_detected(self):
         (self.repo / ".lldbinit").write_text("")
         self.assertEqual(self.run_main(), 0)

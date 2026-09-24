@@ -6,8 +6,9 @@ Generates a `.code-workspace` for a Bazel C++ repository:
 bazel run @rules_swiftnav//tools/vscode:generate_workspace
 ```
 
-This writes `<repository>.code-workspace` at the repository root. Pass
-`--output` to write it somewhere else.
+This writes `<repository>.code-workspace` at the repository root, where
+`<repository>` is the module name in `MODULE.bazel`, so every clone or worktree
+generates the same file. Pass `--output` to write it somewhere else.
 
 ## What every repository gets
 

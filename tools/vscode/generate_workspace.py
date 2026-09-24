@@ -13,6 +13,7 @@ and .vscode-workspace.local.json (per developer, not committed) configs.
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -43,6 +44,26 @@ def query_cc_targets(workspace_dir: Path) -> str:
         cwd=workspace_dir,
         text=True,
     )
+
+
+def repository_name(workspace_dir: Path) -> str:
+    """Name the repository after its module.
+
+    The directory name differs between clones and worktrees, which would change
+    the generated file depending on who generates it.
+
+    Args:
+        workspace_dir: The repository root.
+
+    Returns:
+        The name of the module in MODULE.bazel, else the directory name.
+    """
+    module = workspace_dir / "MODULE.bazel"
+    if module.exists():
+        match = re.search(r'module\(\s*name\s*=\s*"([^"]+)"', module.read_text())
+        if match:
+            return match.group(1)
+    return workspace_dir.name
 
 
 def load_configs(workspace_dir: Path) -> dict:
@@ -97,7 +118,7 @@ def main(
         print("Error: run with `bazel run`, or pass --workspace-dir", file=sys.stderr)
         return 1
     workspace_dir = (working_dir / workspace_dir).absolute()
-    repo_name = workspace_dir.name
+    repo_name = repository_name(workspace_dir)
     output = (
         working_dir / args.output
         if args.output
