@@ -98,6 +98,26 @@ def _test_compatible_with():
         "//conditions:default": [],
     })
 
+# Enforce that test targets and their source files are named with a '_test' suffix
+def _check_test_naming(name, srcs):
+    if not name.endswith("_test"):
+        fail("Test target '{}' must be named with a '_test' suffix".format(name))
+
+    # srcs may be a select(), in which case the individual files can't be inspected
+    if type(srcs) != "list":
+        return
+
+    for src in srcs:
+        # Labels refer to other targets, not files owned by this test
+        if type(src) != "string" or src.startswith(":") or src.startswith("//") or src.startswith("@"):
+            continue
+        basename = src.rsplit("/", 1)[-1]
+        stem, _, ext = basename.rpartition(".")
+        if ext not in ["c", "cc", "cpp", "cxx"]:
+            continue
+        if not stem.endswith("_test"):
+            fail("Test source '{}' of '{}' must be named with a '_test' suffix".format(src, name))
+
 def _create_srcs(**kwargs):
     native.filegroup(
         name = kwargs.get("name") + ".srcs",
@@ -678,6 +698,9 @@ def swift_c_test(name, type, **kwargs):
     This rule creates a test target along with a target that contains the sources
     of the test. The name of the sources is created with the '.srcs' suffix.
 
+    The test target name and its C/C++ source files must end with a '_test'
+    suffix (e.g. `foo_test` built from `foo_test.cc`).
+
     Args:
         name: A unique name for this rule.
         type: Specifies whether the test is a unit or integration test.
@@ -698,6 +721,8 @@ def swift_c_test(name, type, **kwargs):
 
     srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
+
+    _check_test_naming(name, srcs)
 
     native.filegroup(
         name = srcs_name,
@@ -733,6 +758,9 @@ def swift_cc_test(name, type, **kwargs):
     This rule creates a test target along with a target that contains the sources
     of the test. The name of the sources is created with the '.srcs' suffix.
 
+    The test target name and its C/C++ source files must end with a '_test'
+    suffix (e.g. `foo_test` built from `foo_test.cc`).
+
     Args:
         name: A unique name for this rule.
         type: Specifies whether the test is a unit or integration test.
@@ -753,6 +781,8 @@ def swift_cc_test(name, type, **kwargs):
 
     srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
+
+    _check_test_naming(name, srcs)
 
     native.filegroup(
         name = srcs_name,
