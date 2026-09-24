@@ -13,7 +13,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//stamp:stamp_file.bzl", "stamp_file")
 load(":copts.bzl", "DEFAULT_COPTS", "GCC5_COPTS", "GCC6_COPTS")
-load(":utils.bzl", "construct_local_include")
+load(":utils.bzl", "construct_local_include", "test_naming_error")
 
 # Name for a unit test
 UNIT = "unit"
@@ -678,6 +678,10 @@ def swift_c_test(name, type, **kwargs):
     This rule creates a test target along with a target that contains the sources
     of the test. The name of the sources is created with the '.srcs' suffix.
 
+    The test target name and its C/C++ source files must end with a '_test'
+    suffix and must not start with a 'test_' prefix (e.g. `foo_test` built
+    from `foo_test.cc`, not `test_foo` or `test_foo_test.cc`).
+
     Args:
         name: A unique name for this rule.
         type: Specifies whether the test is a unit or integration test.
@@ -698,6 +702,10 @@ def swift_c_test(name, type, **kwargs):
 
     srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
+
+    naming_error = test_naming_error(name, srcs)
+    if naming_error:
+        fail(naming_error)
 
     native.filegroup(
         name = srcs_name,
@@ -733,6 +741,10 @@ def swift_cc_test(name, type, **kwargs):
     This rule creates a test target along with a target that contains the sources
     of the test. The name of the sources is created with the '.srcs' suffix.
 
+    The test target name and its C/C++ source files must end with a '_test'
+    suffix and must not start with a 'test_' prefix (e.g. `foo_test` built
+    from `foo_test.cc`, not `test_foo` or `test_foo_test.cc`).
+
     Args:
         name: A unique name for this rule.
         type: Specifies whether the test is a unit or integration test.
@@ -753,6 +765,10 @@ def swift_cc_test(name, type, **kwargs):
 
     srcs_name = name + ".srcs"
     srcs = kwargs.get("srcs", [])
+
+    naming_error = test_naming_error(name, srcs)
+    if naming_error:
+        fail(naming_error)
 
     native.filegroup(
         name = srcs_name,
