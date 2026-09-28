@@ -37,10 +37,10 @@ declare -a SUBMODULE_GROUPS=(
 )
 
 for group in "${{SUBMODULE_GROUPS[@]}}"; do
-  parent="${{group%%|*}}"
-  read -r -a paths <<<"${{group#*|}}"
-  git -C "${{parent}}" submodule update \\
-    --init --depth=1 --jobs "${{SUBMODULE_JOBS:-4}}" -- "${{paths[@]}}"
+    parent="${{group%%|*}}"
+    read -r -a paths <<<"${{group#*|}}"
+    git -C "${{parent}}" submodule update \\
+        --init --depth=1 --jobs "${{SUBMODULE_JOBS:-4}}" -- "${{paths[@]}}"
 done
 """
 
@@ -73,7 +73,7 @@ def format_groups(groups):
         return 0 if parent == "." else parent.count("/") + 1
 
     return "\n".join(
-        '  "{}|{}"'.format(parent, " ".join(sorted(groups[parent])))
+        '    "{}|{}"'.format(parent, " ".join(sorted(groups[parent])))
         for parent in sorted(groups, key=lambda parent: (depth(parent), parent))
     )
 
