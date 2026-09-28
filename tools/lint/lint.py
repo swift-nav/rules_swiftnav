@@ -9,8 +9,9 @@ machine reports, such as cppcheck's XML, get those merged into one file as well.
 
 Each linter names an aspect the consuming workspace defines in its own
 //tools/lint/linters.bzl, typically from the aspect_rules_lint factories
-(lint_clang_tidy_aspect, lint_cppcheck_aspect, lint_ty_aspect) or, for clippy,
-aspect_rules_lint_rules_rust's lint_clippy_aspect.
+(lint_clang_tidy_aspect, lint_cppcheck_aspect, lint_ty_aspect,
+lint_shellcheck_aspect) or, for clippy, aspect_rules_lint_rules_rust's
+lint_clippy_aspect.
 """
 
 import argparse
@@ -135,7 +136,15 @@ CLIPPY = Linter(
     output_groups=("rules_lint_machine",),
 )
 
-LINTERS = {linter.name: linter for linter in (CLANG_TIDY, CPPCHECK, TY, CLIPPY)}
+SHELLCHECK = Linter(
+    name="shellcheck",
+    aspects=("//tools/lint:linters.bzl%shellcheck",),
+    output_groups=("rules_lint_machine",),
+)
+
+LINTERS = {
+    linter.name: linter for linter in (CLANG_TIDY, CPPCHECK, TY, CLIPPY, SHELLCHECK)
+}
 
 DEFAULT_LINTERS = CLANG_TIDY.name
 

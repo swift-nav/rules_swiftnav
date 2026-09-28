@@ -13,6 +13,7 @@ from tools.lint.lint import (
     CLANG_TIDY,
     CLIPPY,
     CPPCHECK,
+    SHELLCHECK,
     TY,
     build_command,
     build_events_path,
@@ -115,6 +116,9 @@ class TestSelectLinters(unittest.TestCase):
         """ty can be requested alongside the C++ linters."""
         self.assertEqual(select_linters("ty"), [TY])
 
+    def test_shellcheck_is_selectable(self):
+        self.assertEqual(select_linters("shellcheck"), [SHELLCHECK])
+
     def test_default_excludes_ty(self):
         """Callers on C++-only workspaces do not get a ty run by default."""
         self.assertNotIn(TY, select_linters(parse_args([]).linters))
@@ -187,6 +191,7 @@ class TestBuildCommand(unittest.TestCase):
             CPPCHECK: "cppcheck",
             TY: "ty",
             CLIPPY: "clippy",
+            SHELLCHECK: "shellcheck",
         }
         for linter, own in aspects.items():
             command = build_command(linter, ["//a:b"], BEP, create_patches=False)
