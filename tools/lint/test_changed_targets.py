@@ -17,6 +17,7 @@ from tools.lint.changed_targets import (
     PYTHON,
     QUERY_PARTIAL_EXIT_CODE,
     RUST,
+    SHELL,
     Language,
     QueryError,
     bazel_query,
@@ -87,6 +88,12 @@ class TestSourceFiles(unittest.TestCase):
         files = ["a/b.py", "a/b.pyi", "a/b.rs", "a/BUILD.bazel", "pyproject.toml"]
         self.assertEqual(
             source_files(files, PYTHON.extensions, []), ["a/b.py", "a/b.pyi"]
+        )
+
+    def test_shell_extensions_keep_only_shell_sources(self):
+        files = ["a/b.sh", "a/b.bash", "a/b.py", "a/BUILD.bazel"]
+        self.assertEqual(
+            source_files(files, SHELL.extensions, []), ["a/b.sh", "a/b.bash"]
         )
 
     def test_drops_ignored_directories(self):
