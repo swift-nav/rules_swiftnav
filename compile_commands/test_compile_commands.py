@@ -16,6 +16,8 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 WRAPPER = HERE / "bazel_wrapper.sh"
+CHECK_SETUP = HERE / "check_setup.sh"
+BAZELCCRC = HERE / ".bazelccrc"
 
 REFRESH_LABEL = "@rules_swiftnav//compile_commands:refresh"
 
@@ -32,6 +34,8 @@ for arg in "$@"; do
 done
 exit "${{FAKE_BAZEL_EXIT:-0}}"
 """
+
+GITIGNORE = "/compile_commands.json\n/external\n/.cache/\n"
 
 
 def make_executable(path: Path) -> None:
@@ -151,6 +155,76 @@ class TestBazelWrapper(WorkspaceTestCase):
         self.assertTrue(self.wait_for(self.error_file.exists))
         self.assertEqual(result.stdout, "")
         self.assertEqual(result.stderr, "")
+
+
+class TestCheckSetup(WorkspaceTestCase):
+    def setUp(self):
+        super().setUp()
+        shutil.copy(BAZELCCRC, self.workspace / ".bazelccrc")
+        (self.workspace / ".gitignore").write_text(GITIGNORE)
+        subprocess.run(["git", "init", "--quiet", str(self.workspace)], check=True)
+
+    def run_check(self):
+        return subprocess.run(
+            [str(CHECK_SETUP), f"--wrapper={WRAPPER}"],
+            env={
+                "PATH": os.environ["PATH"],
+                "BUILD_WORKSPACE_DIRECTORY": str(self.workspace),
+            },
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+    def assert_fails_with(self, message):
+        result = self.run_check()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn(message, result.stderr)
+
+    def test_passes_on_a_complete_setup(self):
+        result = self.run_check()
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_fails_without_wrapper(self):
+        self.wrapper.unlink()
+        self.assert_fails_with("tools/bazel is missing")
+
+    def test_fails_on_outdated_wrapper(self):
+        self.wrapper.write_text(self.wrapper.read_text() + "# local change\n")
+        self.assert_fails_with("tools/bazel differs from")
+
+    def test_fails_on_non_executable_wrapper(self):
+        self.wrapper.chmod(0o644)
+        self.assert_fails_with("tools/bazel is not executable")
+
+    def test_fails_without_bazelccrc(self):
+        (self.workspace / ".bazelccrc").unlink()
+        self.assert_fails_with(".bazelccrc is missing")
+
+    def test_fails_when_generated_files_are_not_ignored(self):
+        for entry in ("compile_commands.json", "external", ".cache/"):
+            with self.subTest(entry=entry):
+                kept = [line for line in GITIGNORE.splitlines() if line != f"/{entry}"]
+                (self.workspace / ".gitignore").write_text("\n".join(kept) + "\n")
+                self.assert_fails_with(f"{entry} is not ignored by git")
+
+    def test_reports_every_problem_at_once(self):
+        self.wrapper.unlink()
+        (self.workspace / ".bazelccrc").unlink()
+        result = self.run_check()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("tools/bazel is missing", result.stderr)
+        self.assertIn(".bazelccrc is missing", result.stderr)
+
+    def test_requires_the_workspace_directory(self):
+        result = subprocess.run(
+            [str(CHECK_SETUP), f"--wrapper={WRAPPER}"],
+            env={"PATH": os.environ["PATH"]},
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        self.assertEqual(result.returncode, 2)
 
 
 if __name__ == "__main__":

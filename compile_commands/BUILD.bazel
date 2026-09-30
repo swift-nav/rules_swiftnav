@@ -34,11 +34,23 @@ sh_binary(
     visibility = ["//visibility:public"],
 )
 
+# Verifies the files a downstream repository copies from this package, see
+# compile_commands.md. Needs no bcc binary, so it also runs in CI.
+sh_binary(
+    name = "check_setup",
+    srcs = ["check_setup.sh"],
+    args = ["--wrapper=$(rootpath bazel_wrapper.sh)"],
+    data = ["bazel_wrapper.sh"],
+    visibility = ["//visibility:public"],
+)
+
 py_test(
     name = "test_compile_commands",
     srcs = ["test_compile_commands.py"],
     data = [
+        ".bazelccrc",
         "bazel_wrapper.sh",
+        "check_setup.sh",
     ],
     main = "test_compile_commands.py",
     tags = [UNIT],
