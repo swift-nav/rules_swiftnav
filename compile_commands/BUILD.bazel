@@ -1,5 +1,7 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@rules_python//python:py_test.bzl", "py_test")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
 
 exports_files([
     ".bazelccrc",
@@ -30,4 +32,26 @@ sh_binary(
     data = [":bcc"],
     tags = ["manual"],
     visibility = ["//visibility:public"],
+)
+
+# Verifies the files a downstream repository copies from this package, see
+# compile_commands.md. Needs no bcc binary, so it also runs in CI.
+sh_binary(
+    name = "check_setup",
+    srcs = ["check_setup.sh"],
+    args = ["--wrapper=$(rootpath bazel_wrapper.sh)"],
+    data = ["bazel_wrapper.sh"],
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "test_compile_commands",
+    srcs = ["test_compile_commands.py"],
+    data = [
+        ".bazelccrc",
+        "bazel_wrapper.sh",
+        "check_setup.sh",
+    ],
+    main = "test_compile_commands.py",
+    tags = [UNIT],
 )
