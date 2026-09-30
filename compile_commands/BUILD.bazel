@@ -1,5 +1,7 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@rules_python//python:py_test.bzl", "py_test")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
 
 exports_files([
     ".bazelccrc",
@@ -30,4 +32,14 @@ sh_binary(
     data = [":bcc"],
     tags = ["manual"],
     visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "test_compile_commands",
+    srcs = ["test_compile_commands.py"],
+    data = [
+        "bazel_wrapper.sh",
+    ],
+    main = "test_compile_commands.py",
+    tags = [UNIT],
 )

@@ -43,6 +43,8 @@ stamp="${cache_dir}/compile_commands.stamp"
 lock_file="${cache_dir}/compile_commands.lock"
 lock_timeout="${BCC_LOCK_TIMEOUT:-600}"
 log_file="${cache_dir}/compile_commands.log"
+# Written by the tools/bazel wrapper when a background refresh fails.
+error_file="${cache_dir}/compile_commands.error"
 tmp_output="${cache_dir}/compile_commands.json.tmp.$$"
 output="${workspace}/compile_commands.json"
 
@@ -183,6 +185,7 @@ fi
 
 hash="$(input_hash)"
 if [[ "${force}" -eq 0 && -f "${output}" && -f "${stamp}" && "$(cat "${stamp}")" == "${hash}" ]]; then
+    rm -f "${error_file}"
     log "up to date"
     exit 0
 fi
@@ -225,4 +228,5 @@ rm -f "${tmp_output}.bak"
 holds_lock || fail "lost ${lock_file} to pid $(lock_owner)"
 mv -f "${tmp_output}" "${output}"
 echo "${hash}" >"${stamp}"
+rm -f "${error_file}"
 log "done"
