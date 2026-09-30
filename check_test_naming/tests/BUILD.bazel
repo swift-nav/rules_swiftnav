@@ -1,0 +1,179 @@
+# Copyright (C) 2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+load("//check_test_naming:check_test_naming.bzl", "NO_TEST_NAMING_CHECK", "test_naming_test")
+load(":check_test_naming_test.bzl", "aspect_errors_test", "naming_errors_test", "test_naming_test_script_test")
+load(":fake_test.bzl", "fake_test")
+
+# Fixtures. They are 'manual' so that wildcards such as //... skip them, and
+# their source files don't exist since they are only ever analyzed.
+
+fake_test(
+    name = "good_test",
+    srcs = [
+        "data.json",
+        "good_test.py",
+        "helper.py",
+    ],
+    tags = ["manual"],
+)
+
+fake_test(
+    name = "bad_name",
+    srcs = ["bad_name_test.cc"],
+    tags = ["manual"],
+)
+
+fake_test(
+    name = "test_prefixed_test",
+    srcs = ["prefixed_test.cc"],
+    tags = ["manual"],
+)
+
+fake_test(
+    name = "prefixed_src_test",
+    srcs = [
+        "prefixed_src_test.py",
+        "test_prefixed_src.py",
+    ],
+    tags = ["manual"],
+)
+
+fake_test(
+    name = "no_test_src_test",
+    srcs = [
+        "helper.h",
+        "main.cc",
+    ],
+    tags = ["manual"],
+)
+
+fake_test(
+    name = "other_package_src_test",
+    srcs = ["//check_test_naming/tests/other:test_helper.cc"],
+    tags = ["manual"],
+)
+
+fake_test(
+    name = "opted_out",
+    srcs = ["test_opted_out.cc"],
+    tags = [
+        NO_TEST_NAMING_CHECK,
+        "manual",
+    ],
+)
+
+test_suite(
+    name = "suite",
+    tags = ["manual"],
+    tests = [
+        ":bad_name",
+        ":good_test",
+        ":test_prefixed_test",
+    ],
+)
+
+test_naming_test(
+    name = "failing_naming_test",
+    tags = ["manual"],
+    targets = [
+        ":bad_name",
+        ":good_test",
+    ],
+)
+
+# Tests
+
+naming_errors_test(name = "naming_errors_test")
+
+aspect_errors_test(
+    name = "good_errors_test",
+    expected = [],
+    target_under_test = ":good_test",
+)
+
+aspect_errors_test(
+    name = "bad_name_errors_test",
+    expected = ["//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test'"],
+    target_under_test = ":bad_name",
+)
+
+aspect_errors_test(
+    name = "prefixed_name_errors_test",
+    expected = ["//check_test_naming/tests:test_prefixed_test: target name 'test_prefixed_test' must not start with 'test_'"],
+    target_under_test = ":test_prefixed_test",
+)
+
+aspect_errors_test(
+    name = "prefixed_src_errors_test",
+    expected = ["//check_test_naming/tests:prefixed_src_test: source 'check_test_naming/tests/test_prefixed_src.py' must not start with 'test_'"],
+    target_under_test = ":prefixed_src_test",
+)
+
+aspect_errors_test(
+    name = "no_test_src_errors_test",
+    expected = ["//check_test_naming/tests:no_test_src_test: at least one source must end with '_test', got: check_test_naming/tests/main.cc"],
+    target_under_test = ":no_test_src_test",
+)
+
+aspect_errors_test(
+    name = "other_package_src_errors_test",
+    expected = [],
+    target_under_test = ":other_package_src_test",
+)
+
+aspect_errors_test(
+    name = "opted_out_errors_test",
+    expected = [],
+    target_under_test = ":opted_out",
+)
+
+aspect_errors_test(
+    name = "suite_errors_test",
+    expected = [
+        "//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test'",
+        "//check_test_naming/tests:test_prefixed_test: target name 'test_prefixed_test' must not start with 'test_'",
+    ],
+    target_under_test = ":suite",
+)
+
+test_naming_test_script_test(
+    name = "failing_naming_script_test",
+    expected = [
+        "//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test'",
+        "exit 1",
+    ],
+    target_under_test = ":failing_naming_test",
+)
+
+# Runs the check for real over this package's own tests and the good fixture
+test_naming_test(
+    name = "naming_test",
+    targets = [
+        ":check_test_naming_tests",
+        ":good_test",
+    ],
+)
+
+test_suite(
+    name = "check_test_naming_tests",
+    tests = [
+        ":bad_name_errors_test",
+        ":failing_naming_script_test",
+        ":good_errors_test",
+        ":naming_errors_test",
+        ":no_test_src_errors_test",
+        ":opted_out_errors_test",
+        ":other_package_src_errors_test",
+        ":prefixed_name_errors_test",
+        ":prefixed_src_errors_test",
+        ":suite_errors_test",
+    ],
+)
