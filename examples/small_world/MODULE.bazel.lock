@@ -696,6 +696,47 @@
         }
       }
     },
+    "@@rules_swiftnav+//compile_commands:extensions.bzl%bcc_extension": {
+      "general": {
+        "bzlTransitiveDigest": "Hyq+4nr5H4N437zJKPC/HfH28OurD4ik6lf9GMCda7s=",
+        "usagesDigest": "gxna8zxicxGUa7brSWqbWUSmvyb3c+Q/smFxUsrXjyQ=",
+        "recordedInputs": [
+          "REPO_MAPPING:rules_swiftnav+,bazel_tools bazel_tools"
+        ],
+        "generatedRepoSpecs": {
+          "bcc_linux_amd64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/kiron1/bazel-compile-commands/releases/download/bazel-compile-commands-v0.22.4/bazel-compile-commands_0.22.4-linux_amd64.zip"
+              ],
+              "integrity": "sha256-uxYq2u+ygqnk8POZ/mIj0dL+N0BRgUjByo9vgdtAA/Y=",
+              "build_file_content": "exports_files([\"usr/bin/bazel-compile-commands\"])"
+            }
+          },
+          "bcc_linux_arm64": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/kiron1/bazel-compile-commands/releases/download/bazel-compile-commands-v0.22.4/bazel-compile-commands_0.22.4-linux_arm64.zip"
+              ],
+              "integrity": "sha256-wa1aWhx6r3nY7+ViAe3gSxgLQDHuRMra/aE3O3UClJg=",
+              "build_file_content": "exports_files([\"usr/bin/bazel-compile-commands\"])"
+            }
+          },
+          "bcc_macos_universal": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/kiron1/bazel-compile-commands/releases/download/bazel-compile-commands-v0.22.4/bazel-compile-commands_0.22.4-macos_universal.zip"
+              ],
+              "integrity": "sha256-YYPLrsXZZn5N74WQ5FWKTo6xBto04s2KFnM/i+zxzk4=",
+              "build_file_content": "exports_files([\"usr/bin/bazel-compile-commands\"])"
+            }
+          }
+        }
+      }
+    },
     "@@rules_swiftnav+//doxygen:extensions.bzl%doxygen_extension": {
       "general": {
         "bzlTransitiveDigest": "FpPcFCi/TMdMIYzhkBJQDLoL6L4vfaGhOA4TTyqW2zA=",
