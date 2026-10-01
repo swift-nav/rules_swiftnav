@@ -32,6 +32,7 @@ jobs:
           # (github.event.before), which is robust to multi-commit pushes.
           fetch-depth: 0
           fetch-tags: true
+          persist-credentials: false
 
       - name: Detect version change and release
         env:
