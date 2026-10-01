@@ -23,6 +23,10 @@ jobs:
         run: |
           bazel run //tools/format:format.check 
 
+      - name: Run shellcheck
+        run: |
+          bazel run //tools/lint:lint -- --linters shellcheck --targets //...
+
       - name: Run tools tests
         run: |
           bazel test //tools/...

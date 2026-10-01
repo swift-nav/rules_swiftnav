@@ -57,11 +57,20 @@ PYTHON = LanguageConfig(
     own_kinds="^py_.* rule$",
 )
 
+SHELL = LanguageConfig(
+    label="Shell",
+    extensions=("sh", "bash"),
+    # The shellcheck aspect's default rule_kinds.
+    linted_kinds="^sh_(library|binary|test) rule$",
+    own_kinds="^sh_.* rule$",
+)
+
 
 class Language(str, Enum):
     CC = "cc"
     RUST = "rust"
     PYTHON = "python"
+    SHELL = "shell"
 
     # argparse shows choices with str(); the default would print "Language.CC".
     def __str__(self) -> str:
@@ -72,6 +81,7 @@ LANGUAGES: dict[Language, LanguageConfig] = {
     Language.CC: CC,
     Language.RUST: RUST,
     Language.PYTHON: PYTHON,
+    Language.SHELL: SHELL,
 }
 
 # bazel query --keep_going reports the errors it skipped and exits 3 rather than
