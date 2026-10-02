@@ -36,10 +36,19 @@ jobs:
         run: |
           bazel test //tools/...
 
+      - name: Run check_test_naming tests
+        run: |
+          bazel test //check_test_naming/...
+
       - name: Build and generate coverage
         run: |
           cd examples/small_world
           ./scripts/generate_coverage.sh
+
+      - name: Check test naming
+        run: |
+          cd examples/small_world
+          bazel build --aspects @rules_swiftnav//check_test_naming:check_test_naming.bzl%check_test_naming --output_groups=report //...
 
       - name: Run format
         run: |
