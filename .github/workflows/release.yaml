@@ -26,12 +26,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Full history so we can read MODULE.bazel at the previous main tip
           # (github.event.before), which is robust to multi-commit pushes.
           fetch-depth: 0
           fetch-tags: true
+          persist-credentials: false
 
       - name: Detect version change and release
         env:
