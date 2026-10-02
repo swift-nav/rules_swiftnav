@@ -10,6 +10,8 @@ The contents of this repository are subject to change frequently.
   `__attribute__` in C/C++ code in favour of guard macros in
   `libswiftnav/macros.h`.
 - [Releasing](docs/RELEASING.md) — how to cut a release.
+- [VS Code workspace generator](tools/vscode/README.md) — generates a
+  `.code-workspace` for a Bazel C++ repository.
 
 # LICENSE
 
