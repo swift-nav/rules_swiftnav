@@ -1,2 +1,7 @@
 cov.dat
 cov_html/
+
+# compile_commands, see @rules_swiftnav//compile_commands
+/compile_commands.json
+/external
+/.cache/

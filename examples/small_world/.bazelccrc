@@ -1,0 +1,7 @@
+# Defaults for bazel-compile-commands (@rules_swiftnav//compile_commands:bcc).
+# Copy to the workspace root.
+# No `config` entries: aquery must use the default build flags, otherwise it
+# discards Bazel's analysis cache of regular builds.
+output = %workspace%/compile_commands.json
+resolve = 1
+targets = //...

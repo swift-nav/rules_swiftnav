@@ -1,0 +1,33 @@
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
+exports_files([
+    ".bazelccrc",
+    "bazel_wrapper.sh",
+])
+
+# Host-only dev tool. `manual` keeps it out of `//...`, which may be built for
+# cross-compilation platforms that have no prebuilt bcc binary.
+native_binary(
+    name = "bcc",
+    src = select(
+        {
+            "@bazel_tools//src/conditions:darwin_arm64": "@bcc_macos_universal//:usr/bin/bazel-compile-commands",
+            "@bazel_tools//src/conditions:linux_x86_64": "@bcc_linux_amd64//:usr/bin/bazel-compile-commands",
+            "@bazel_tools//src/conditions:linux_aarch64": "@bcc_linux_arm64//:usr/bin/bazel-compile-commands",
+        },
+        no_match_error = "bazel-compile-commands: no prebuilt binary for this platform",
+    ),
+    out = "bazel-compile-commands",
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "refresh",
+    srcs = ["refresh.sh"],
+    args = ["--bcc=$(rootpath :bcc)"],
+    data = [":bcc"],
+    tags = ["manual"],
+    visibility = ["//visibility:public"],
+)

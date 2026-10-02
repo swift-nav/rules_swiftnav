@@ -9,6 +9,8 @@ The contents of this repository are subject to change frequently.
 - [check_attributes](check_attributes/README.md) — aspect that bans raw
   `__attribute__` in C/C++ code in favour of guard macros in
   `libswiftnav/macros.h`.
+- [compile_commands](compile_commands/compile_commands.md) — automatic
+  `compile_commands.json` generation for downstream repositories.
 - [Releasing](docs/RELEASING.md) — how to cut a release.
 
 # LICENSE
