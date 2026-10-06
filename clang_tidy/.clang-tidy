@@ -113,9 +113,13 @@ CheckOptions:
     value: lower_case
   - key: readability-identifier-naming.ClassMemberSuffix
     value: ""
-  - key: readability-identifier-naming.ConstantVariableCase
+  - key: readability-identifier-naming.ConstantCase
     value: CamelCase
-  - key: readability-identifier-naming.ConstantVariablePrefix
+  - key: readability-identifier-naming.ConstantPrefix
+    value: c
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantMemberPrefix
     value: c
   - key: readability-identifier-naming.ConstexprVariableCase
     value: CamelCase
@@ -132,10 +136,6 @@ CheckOptions:
   - key: readability-identifier-naming.GlobalConstantCase
     value: CamelCase
   - key: readability-identifier-naming.GlobalConstantPrefix
-    value: c
-  - key: readability-identifier-naming.MemberConstantCase
-    value: CamelCase
-  - key: readability-identifier-naming.MemberConstantPrefix
     value: c
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
@@ -159,8 +159,6 @@ CheckOptions:
     value: "_t"
   - key: readability-identifier-naming.VariableCase
     value: lower_case
-  - key: readability-identifier-naming.TemplateParameterIgnoredRegexp
-    value: "expr-type"
 
   # --- Modernization & Style Fine-tuning ---
   - key: readability-braces-around-statements.ShortStatementLines
