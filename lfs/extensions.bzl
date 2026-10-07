@@ -58,7 +58,10 @@ def _lfs_impl(mctx):
             aliases = {}
             for file in files:
                 oid = _oid(mctx, file)
+                rel = str(file)[len(str(root)) + 1:]
                 if not oid:
+                    # Plain or already smudged file: use the checked-out copy.
+                    aliases[rel] = "@@//:%s/%s" % (tag.path, rel)
                     continue
                 repo = "lfs_" + oid
                 if repo not in declared:
@@ -69,7 +72,6 @@ def _lfs_impl(mctx):
                         basename = file.basename,
                         lfs_url = tag.lfs_url,
                     )
-                rel = str(file)[len(str(root)) + 1:]
                 aliases[rel] = "@%s//file:%s" % (repo, declared[repo])
 
             _lfs_repo(name = tag.name, aliases = aliases)
