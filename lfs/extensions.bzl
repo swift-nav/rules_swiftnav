@@ -55,6 +55,9 @@ def _lfs_impl(mctx):
     declared = {}
     for module in mctx.modules:
         for tag in module.tags.dir:
+            if tag.package and not tag.path.startswith(tag.package + "/"):
+                fail("lfs: path %s is not below package %s" % (tag.path, tag.package))
+
             # walk below path for each file and then call lfs_file
             workspace = mctx.path(Label("@@//:MODULE.bazel")).dirname
             root = workspace.get_child(tag.path)
@@ -66,7 +69,7 @@ def _lfs_impl(mctx):
                 rel = str(file)[len(str(root)) + 1:]
                 if not oid:
                     # Plain or already smudged file: use the checked-out copy.
-                    aliases[rel] = "@@//:%s/%s" % (tag.path, rel)
+                    aliases[rel] = "@@//%s:%s/%s" % (tag.package, tag.path[len(tag.package):].lstrip("/"), rel)
                     continue
                 repo = "lfs_" + oid
                 if repo not in declared:
@@ -90,6 +93,7 @@ _dir_tag = tag_class(
         "name": attr.string(mandatory = True),
         "path": attr.string(mandatory = True),
         "lfs_url": attr.string(mandatory = True),
+        "package": attr.string(default = ""),
     },
 )
 
