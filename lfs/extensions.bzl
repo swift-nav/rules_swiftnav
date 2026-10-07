@@ -1,0 +1,94 @@
+load(":lfs.bzl", "lfs_file")
+
+def _lfs_repo_impl(rctx):
+    build = ""
+    for name, actual in sorted(rctx.attr.aliases.items()):
+        build += 'alias(name = "%s", actual = "%s", visibility = ["//visibility:public"])\n' % (name, actual)
+    rctx.file("BUILD.bazel", build)
+    return rctx.repo_metadata(
+        reproducible = True,
+    )
+
+_lfs_repo = repository_rule(
+    implementation = _lfs_repo_impl,
+    attrs = {
+        "aliases": attr.string_dict(mandatory = True),
+    },
+)
+
+def _walk_directory(root):
+    files = []
+    stack = [root]
+
+    # Starlark has no recursion or while loops, so walk with a bounded loop.
+    for _ in range(1000000):
+        if not stack:
+            break
+        directory = stack.pop()
+        for entry in directory.readdir():
+            if entry.is_dir:
+                stack.append(entry)
+            else:
+                files.append(entry)
+    if stack:
+        fail("lfs: too many directories below %s" % root)
+
+    return sorted(files, key = str)
+
+_SPEC = "version https://git-lfs.github.com/spec/v1"
+
+def _oid(mctx, file):
+    mctx.watch(file)
+    head = mctx.execute(["head", "-c", "100", str(file)]).stdout
+    if head.startswith(_SPEC):
+        for line in mctx.read(file).splitlines():
+            if line.startswith("oid sha256:"):
+                return line[len("oid sha256:"):]
+        fail("lfs: no oid found in %s" % file)
+    return None
+
+def _lfs_impl(mctx):
+    declared = {}
+    for module in mctx.modules:
+        for tag in module.tags.dir:
+            # walk below path for each file and then call lfs_file
+            workspace = mctx.path(Label("@@//:MODULE.bazel")).dirname
+            root = workspace.get_child(tag.path)
+            files = _walk_directory(root)
+            aliases = {}
+            for file in files:
+                oid = _oid(mctx, file)
+                if not oid:
+                    continue
+                repo = "lfs_" + oid
+                if repo not in declared:
+                    declared[repo] = file.basename
+                    lfs_file(
+                        name = repo,
+                        oid = oid,
+                        basename = file.basename,
+                        lfs_url = tag.lfs_url,
+                    )
+                rel = str(file)[len(str(root)) + 1:]
+                aliases[rel] = "@%s//file:%s" % (repo, declared[repo])
+
+            _lfs_repo(name = tag.name, aliases = aliases)
+
+    return mctx.extension_metadata(
+        reproducible = True,
+    )
+
+_dir_tag = tag_class(
+    attrs = {
+        "name": attr.string(mandatory = True),
+        "path": attr.string(mandatory = True),
+        "lfs_url": attr.string(mandatory = True),
+    },
+)
+
+lfs = module_extension(
+    implementation = _lfs_impl,
+    tag_classes = {
+        "dir": _dir_tag,
+    },
+)
