@@ -1,9 +1,11 @@
 load(":lfs.bzl", "lfs_file")
 
 def _lfs_repo_impl(rctx):
-    build = ""
+    build = 'load("@rules_swiftnav//lfs:lfs.bzl", "lfs_runfile")\n\n'
     for name, actual in sorted(rctx.attr.aliases.items()):
         build += 'alias(name = "%s", actual = "%s", visibility = ["//visibility:public"])\n' % (name, actual)
+    for name, src in sorted(rctx.attr.lfs_files.items()):
+        build += 'lfs_runfile(name = "%s", src = "%s", path = "%s/%s", visibility = ["//visibility:public"])\n' % (name, src, rctx.attr.path, name)
     rctx.file("BUILD.bazel", build)
     return rctx.repo_metadata(
         reproducible = True,
@@ -12,7 +14,9 @@ def _lfs_repo_impl(rctx):
 _lfs_repo = repository_rule(
     implementation = _lfs_repo_impl,
     attrs = {
-        "aliases": attr.string_dict(mandatory = True),
+        "path": attr.string(mandatory = True),
+        "aliases": attr.string_dict(),
+        "lfs_files": attr.string_dict(),
     },
 )
 
@@ -56,6 +60,7 @@ def _lfs_impl(mctx):
             root = workspace.get_child(tag.path)
             files = _walk_directory(root)
             aliases = {}
+            lfs_files = {}
             for file in files:
                 oid = _oid(mctx, file)
                 rel = str(file)[len(str(root)) + 1:]
@@ -72,9 +77,9 @@ def _lfs_impl(mctx):
                         basename = file.basename,
                         lfs_url = tag.lfs_url,
                     )
-                aliases[rel] = "@%s//file:%s" % (repo, declared[repo])
+                lfs_files[rel] = "@%s//file:%s" % (repo, declared[repo])
 
-            _lfs_repo(name = tag.name, aliases = aliases)
+            _lfs_repo(name = tag.name, path = tag.path, aliases = aliases, lfs_files = lfs_files)
 
     return mctx.extension_metadata(
         reproducible = True,
