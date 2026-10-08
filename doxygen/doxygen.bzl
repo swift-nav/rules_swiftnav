@@ -41,7 +41,7 @@ def _swift_doxygen_impl(ctx):
             DOXYGEN_DOT_PATH=$(which dot)
         fi
 
-        # Empty unless the jar exists, so Doxygen does not report a missing jar.
+        # Empty unless the jar exists, so Doxygen does not report a missing jar as an error
         PLANTUML_JAR_PATH=
         if [ -f /usr/local/bin/plantuml.jar ]
         then
