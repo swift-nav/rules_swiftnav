@@ -41,6 +41,13 @@ def _swift_doxygen_impl(ctx):
             DOXYGEN_DOT_PATH=$(which dot)
         fi
 
+        # Empty unless the jar exists, so Doxygen does not report a missing jar.
+        PLANTUML_JAR_PATH=
+        if [ -f /usr/local/bin/plantuml.jar ]
+        then
+            PLANTUML_JAR_PATH=/usr/local/bin/plantuml.jar
+        fi
+
         EXEC_ROOT=$(pwd)
 
         # Use the GIT TAG
@@ -50,14 +57,23 @@ def _swift_doxygen_impl(ctx):
         # this sandbox so all $EXEC_ROOT-expanded paths point to the correct location.
         sed "s|@DOXYGEN_DOT_FOUND@|$DOXYGEN_DOT_FOUND|g" {original_config} | \
         sed "s|@DOXYGEN_DOT_PATH@|$DOXYGEN_DOT_PATH|g" | \
-        sed "s|@PLANTUML_JAR_PATH@|/usr/local/bin/plantuml.jar|g" | \
+        sed "s|@PLANTUML_JAR_PATH@|$PLANTUML_JAR_PATH|g" | \
         sed "s|@INPUT_DIR@|$PROJECT_SOURCE_DIR|g" | \
         sed "s|@PROJECT_NAME@|$PROJECT_NAME|g" | \
         sed "s|@STABLE_GIT_TAG@|$STABLE_GIT_TAG|g" | \
         sed "s|@DOXYGEN_EXCLUDE@|$DOXYGEN_EXCLUDE|g" | \
         sed "s|@PROJECT_SOURCE_DIR@|$EXEC_ROOT|g" > _processed_Doxyfile
 
-        "$EXEC_ROOT/{doxygen_bin}" _processed_Doxyfile
+        # WARN_LOGFILE keeps warnings out of the console: show them on failure.
+        if ! "$EXEC_ROOT/{doxygen_bin}" _processed_Doxyfile
+        then
+            if [ -f doxygen_warnings.txt ]
+            then
+                echo "Doxygen failed; warnings (doxygen_warnings.txt):" >&2
+                sed "s|$EXEC_ROOT/||g" doxygen_warnings.txt >&2
+            fi
+            exit 1
+        fi
         """.format(
             original_config = config.path,
             info_file = info_file.path,
