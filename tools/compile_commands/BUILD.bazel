@@ -1,5 +1,14 @@
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+
 package(default_visibility = ["//visibility:public"])
 
+exports_files([
+    ".bazelccrc",
+    "bazel_wrapper.sh",
+])
+
+# Host-only dev tool. `manual` keeps it out of `//...`, which may be built for
+# cross-compilation platforms that have no prebuilt bcc binary.
 alias(
     name = "compile_commands",
     actual = select(
@@ -10,4 +19,13 @@ alias(
         no_match_error = "Hermetic BCC is only available on linux_x86_64 and darwin_arm64. " +
                          "darwin_x86_64 (Intel macOS) and other hosts are not supported.",
     ),
+    tags = ["manual"],
+)
+
+sh_binary(
+    name = "refresh",
+    srcs = ["refresh.sh"],
+    args = ["--bcc=$(rootpath :compile_commands)"],
+    data = [":compile_commands"],
+    tags = ["manual"],
 )
