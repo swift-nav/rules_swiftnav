@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "compile_commands",
+    actual = select(
+        {
+            "@bazel_tools//src/conditions:linux_x86_64": "@bcc_linux_x86_64//:bcc_bin",
+            "@bazel_tools//src/conditions:darwin_arm64": "@bcc_macos_arm64//:bcc_bin",
+        },
+        no_match_error = "Hermetic BCC is only available on linux_x86_64 and darwin_arm64. " +
+                         "darwin_x86_64 (Intel macOS) and other hosts are not supported.",
+    ),
+)
