@@ -1,0 +1,12 @@
+# Copyright (C) 2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+
+# Defaults for bazel-compile-commands (@rules_swiftnav//tools/compile_commands:compile_commands).
+# Copy to the workspace root.
+# No `config` entries: aquery must use the default build flags, otherwise it
+# discards Bazel's analysis cache of regular builds.
+resolve = 1
+targets = //...
