@@ -9,11 +9,10 @@ per-machine prerequisite is Bazelisk.
 Requirements: the workspace is inside a git repository and Bazel is invoked via
 Bazelisk.
 
-1. Copy [`.bazelccrc`](.bazelccrc) to the workspace root.
-2. Copy [`bazel_wrapper.sh`](bazel_wrapper.sh) to `tools/bazel` in the
-   workspace root and commit it with the executable bit set
+1. Copy [`bazel_wrapper.sh`](bazel_wrapper.sh) to `tools/bazel` in the workspace
+   root and commit it with the executable bit set
    (`git update-index --chmod=+x tools/bazel`).
-3. Add to `.gitignore`:
+2. Add to `.gitignore`:
 
    ```gitignore
    /compile_commands.json
@@ -31,10 +30,12 @@ bazel run @rules_swiftnav//tools/compile_commands:refresh -- --force
 
 ## How It Works
 
-Generation uses [kiron1/bazel-compile-commands](https://github.com/kiron1/bazel-compile-commands)
+Generation uses
+[kiron1/bazel-compile-commands](https://github.com/kiron1/bazel-compile-commands)
 (`bcc`). Bazelisk runs `tools/bazel` instead of Bazel; after a `build`, `test`
 or `run` without command line flags the wrapper starts
-`@rules_swiftnav//tools/compile_commands:refresh` in the background. The wrapper forwards output and exit code of Bazel unchanged.
+`@rules_swiftnav//tools/compile_commands:refresh` in the background. The wrapper
+forwards output and exit code of Bazel unchanged.
 
 ```mermaid
 flowchart TD
@@ -45,7 +46,7 @@ flowchart TD
     Manual["bazel run ... -- --force"] --> Refresh
     Refresh --> Stale{"build structure changed<br/>or --force?"}
     Stale -- no --> Done(["up to date"])
-    Stale -- yes --> BCC["bcc (reads .bazelccrc)"]
+    Stale -- yes --> BCC["bcc"]
     BCC -->|"aquery"| Bazel
     BCC --> Rewrite["rewrite paths, symlink external/"]
     Rewrite --> DB["compile_commands.json"]
@@ -55,7 +56,7 @@ flowchart TD
 `refresh` regenerates the database only if the build structure changed since the
 last run. It hashes the names and contents of `BUILD`, `BUILD.bazel`, `*.bzl`,
 `*.bazelrc`, `toolchains/**`, `.bazelrc`, `.bazeliskrc`, `.bazelversion`,
-`.bazelccrc`, `MODULE.bazel`, `MODULE.bazel.lock` and `.bazelrc.user`, plus the names (not
+`MODULE.bazel`, `MODULE.bazel.lock` and `.bazelrc.user`, plus the names (not
 contents) of C/C++ sources and headers. Concurrent runs are serialized through a
 lock in `.cache/`; background output goes to `.cache/compile_commands.log`.
 
@@ -68,10 +69,9 @@ external headers stay reachable for clangd.
 - The wrapper does nothing if `CI` is set. `BAZELISK_SKIP_WRAPPER=1` bypasses it
   entirely.
 - The wrapper skips the refresh after commands with command line flags, e.g.
-  `bazel build --config=X`. `.bazelccrc` deliberately has no `config` entries
-  and `refresh` always runs with default flags: `aquery` with other flags
-  discards Bazel's analysis cache of the preceding build. Run `refresh --
-  --force` manually when needed.
+  `bazel build --config=X`.`refresh` always runs with default flags: `aquery`
+  with other flags discards Bazel's analysis cache of the preceding build. Run
+  `refresh -- --force` manually when needed.
 - The refresh runs in the background but occupies the Bazel server, so a Bazel
   command started meanwhile waits for it.
 - The `compile_commands` and `refresh` targets are tagged `manual` so that

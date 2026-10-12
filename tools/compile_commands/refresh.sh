@@ -61,7 +61,6 @@ structure_pathspecs=(
     '.bazelrc'
     '.bazeliskrc'
     '.bazelversion'
-    '.bazelccrc'
     'MODULE.bazel'
     'MODULE.bazel.lock'
 )
@@ -203,7 +202,7 @@ log "regenerating ${output}"
 # bcc calls bazel for `info` and `aquery`.
 export BCC_REFRESH=1
 bazel_command="${BAZEL_REAL:-bazel}"
-bcc_args=(--output "${tmp_output}")
+bcc_args=(--output "${tmp_output}" --resolve)
 if [[ -n "${BAZEL_REAL:-}" ]]; then
     bcc_args+=(--bazel-command "${BAZEL_REAL}")
 fi
@@ -222,7 +221,6 @@ output_base="$("${bazel_command}" info output_base 2>/dev/null)" || fail "bazel 
 # bcc emits paths relative to the execroot, whose external/ symlink forest only
 # holds the repos of the last build. Resolving relative to the workspace with
 # external/ pointing at the output base keeps all external headers reachable.
-# `resolve` in .bazelccrc only rewrites the `file` entries, not the arguments.
 ln -sfn "${output_base}/external" "${workspace}/external"
 escape_sed_pattern() {
     printf '%s' "$1" | sed -e 's/[][\\.*^$|]/\\&/g'
