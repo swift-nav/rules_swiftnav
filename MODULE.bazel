@@ -71,3 +71,6 @@ bazel_dep(
 )
 bazel_dep(name = "rules_go", version = "0.60.0", dev_dependency = True, repo_name = "")
 bazel_dep(name = "aspect_rules_lint", version = "2.7.2", dev_dependency = True)
+
+bcc_ext = use_extension("@rules_swiftnav//tools/compile_commands:extensions.bzl", "bcc_extension")
+use_repo(bcc_ext, "bcc_linux_x86_64", "bcc_macos_arm64")
