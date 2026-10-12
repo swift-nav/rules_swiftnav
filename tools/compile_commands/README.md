@@ -30,12 +30,10 @@ bazel run @rules_swiftnav//tools/compile_commands:refresh -- --force
 
 ## How It Works
 
-Generation uses
-[kiron1/bazel-compile-commands](https://github.com/kiron1/bazel-compile-commands)
+Generation uses [kiron1/bazel-compile-commands](https://github.com/kiron1/bazel-compile-commands)
 (`bcc`). Bazelisk runs `tools/bazel` instead of Bazel; after a `build`, `test`
 or `run` without command line flags the wrapper starts
-`@rules_swiftnav//tools/compile_commands:refresh` in the background. The wrapper
-forwards output and exit code of Bazel unchanged.
+`@rules_swiftnav//tools/compile_commands:refresh` in the background. The wrapper forwards output and exit code of Bazel unchanged.
 
 ```mermaid
 flowchart TD
@@ -56,9 +54,10 @@ flowchart TD
 `refresh` regenerates the database only if the build structure changed since the
 last run. It hashes the names and contents of `BUILD`, `BUILD.bazel`, `*.bzl`,
 `*.bazelrc`, `toolchains/**`, `.bazelrc`, `.bazeliskrc`, `.bazelversion`,
-`MODULE.bazel`, `MODULE.bazel.lock` and `.bazelrc.user`, plus the names (not
-contents) of C/C++ sources and headers. Concurrent runs are serialized through a
-lock in `.cache/`; background output goes to `.cache/compile_commands.log`.
+`MODULE.bazel` (also nested), `*.MODULE.bazel`, `MODULE.bazel.lock` and
+`.bazelrc.user`, plus the names (not contents) of C/C++ sources and headers.
+Concurrent runs are serialized through a lock in `.cache/`; background output
+goes to `.cache/compile_commands.log`.
 
 `bcc` emits paths relative to the execution root. `refresh` rewrites them to the
 workspace and symlinks `<workspace>/external` to `<output_base>/external`, so
@@ -69,7 +68,7 @@ external headers stay reachable for clangd.
 - The wrapper does nothing if `CI` is set. `BAZELISK_SKIP_WRAPPER=1` bypasses it
   entirely.
 - The wrapper skips the refresh after commands with command line flags, e.g.
-  `bazel build --config=X`.`refresh` always runs with default flags: `aquery`
+  `bazel build --config=X`. `refresh` always runs with default flags: `aquery`
   with other flags discards Bazel's analysis cache of the preceding build. Run
   `refresh -- --force` manually when needed.
 - The refresh runs in the background but occupies the Bazel server, so a Bazel

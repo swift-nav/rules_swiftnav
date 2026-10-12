@@ -57,6 +57,7 @@ structure_pathspecs=(
     ':(glob)**/BUILD.bazel'
     ':(glob)**/*.bzl'
     ':(glob)**/*.bazelrc'
+    ':(glob)**/MODULE.bazel'
     ':(glob)**/*.MODULE.bazel'
     ':(glob)toolchains/**'
     '.bazelrc'
@@ -64,7 +65,6 @@ structure_pathspecs=(
     '.bazelversion'
     'MODULE.bazel'
     'MODULE.bazel.lock'
-    'tools/preset/preset.bazelrc'
 )
 
 source_pathspecs=(
