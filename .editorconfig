@@ -2,3 +2,9 @@
 indent_style = space
 indent_size = 4
 switch_case_indent = true
+
+# For scripts without file suffix, only supported by shfmt
+[[shell]]
+indent_style = space
+indent_size = 4
+switch_case_indent = true
