@@ -30,7 +30,7 @@ TestNamingInfo = provider(
 )
 
 def _is_checked_test(ctx):
-    # Bazel requires every test rule's name to end with '_test'
+    # Bazel requires test rule kinds, and only them, to end with '_test'
     return ctx.rule.kind.endswith("_test") and NO_TEST_NAMING_CHECK not in ctx.rule.attr.tags
 
 def _own_srcs(ctx):

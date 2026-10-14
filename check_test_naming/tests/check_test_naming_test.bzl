@@ -44,6 +44,22 @@ def _naming_errors_test_impl(ctx):
     )
     asserts.equals(
         env,
+        ["target name 'test_test' must not start with 'test_'"],
+        test_naming_errors("test_test", []),
+    )
+    asserts.equals(env, [], test_naming_errors("sub/foo_test", []))
+    asserts.equals(
+        env,
+        ["target name 'sub/test_foo' must end with '_test' and must not start with 'test_', rename it to 'sub/foo_test'"],
+        test_naming_errors("sub/test_foo", []),
+    )
+    asserts.equals(
+        env,
+        ["target name 'test_dir/foo' must end with '_test', rename it to 'test_dir/foo_test'"],
+        test_naming_errors("test_dir/foo", []),
+    )
+    asserts.equals(
+        env,
         ["source 'pkg/test_foo_test.rs' must not start with 'test_'"],
         test_naming_errors("foo_test", ["pkg/test_foo_test.rs"]),
     )

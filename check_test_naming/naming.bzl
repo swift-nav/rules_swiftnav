@@ -21,24 +21,29 @@ def _stem(path):
 
 def _suggested_name(name):
     """Returns `name` with the 'test_' prefix moved to a '_test' suffix, or None."""
-    stem = name.removeprefix("test_").removesuffix("_test")
-    if not stem or stem.startswith("test_"):
+    suggestion = name.removeprefix("test_").removesuffix("_test") + "_test"
+
+    # Names such as 'test_test' or 'test_test_foo' have no valid rename
+    if suggestion == "_test" or suggestion.startswith("test_"):
         return None
-    return stem + "_test"
+    return suggestion
 
 def _name_error(name):
+    # Target names may contain '/', only the last component is checked
+    directory, _, basename = name.rpartition("/")
+
     problems = []
-    if not name.endswith("_test"):
+    if not basename.endswith("_test"):
         problems.append("must end with '_test'")
-    if name.startswith("test_"):
+    if basename.startswith("test_"):
         problems.append("must not start with 'test_'")
     if not problems:
         return None
 
     error = "target name '{}' {}".format(name, " and ".join(problems))
-    suggestion = _suggested_name(name)
+    suggestion = _suggested_name(basename)
     if suggestion:
-        error += ", rename it to '{}'".format(suggestion)
+        error += ", rename it to '{}{}'".format(directory + "/" if directory else "", suggestion)
     return error
 
 def test_naming_errors(name, srcs):
