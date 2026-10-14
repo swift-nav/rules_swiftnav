@@ -12,6 +12,8 @@ The contents of this repository are subject to change frequently.
 - [compile_commands](tools/compile_commands/README.md) — automatic
   `compile_commands.json` generation for downstream repositories.
 - [Releasing](docs/RELEASING.md) — how to cut a release.
+- [VS Code workspace generator](tools/vscode/README.md) — generates a
+  `.code-workspace` for a Bazel C++ repository.
 
 # LICENSE
 

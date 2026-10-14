@@ -1,0 +1,49 @@
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_library.bzl", "py_library")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+
+# Importable as tools.vscode.workspace from the repository root, whether
+# rules_swiftnav is the main repository or a dependency of one.
+py_library(
+    name = "workspace",
+    srcs = ["workspace.py"],
+    imports = ["../.."],
+)
+
+py_test(
+    name = "test_workspace",
+    srcs = ["test_workspace.py"],
+    main = "test_workspace.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":workspace"],
+)
+
+py_binary(
+    name = "generate_workspace",
+    srcs = ["generate_workspace.py"],
+    main = "generate_workspace.py",
+    visibility = ["//visibility:public"],
+    deps = [":workspace"],
+)
+
+py_test(
+    name = "test_generate_workspace",
+    srcs = [
+        "generate_workspace.py",
+        "test_generate_workspace.py",
+    ],
+    main = "test_generate_workspace.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":workspace"],
+)
