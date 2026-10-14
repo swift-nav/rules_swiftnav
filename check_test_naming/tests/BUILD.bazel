@@ -101,13 +101,13 @@ aspect_errors_test(
 
 aspect_errors_test(
     name = "bad_name_errors_test",
-    expected = ["//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test'"],
+    expected = ["//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test', rename it to 'bad_name_test'"],
     target_under_test = ":bad_name",
 )
 
 aspect_errors_test(
     name = "prefixed_name_errors_test",
-    expected = ["//check_test_naming/tests:test_prefixed_test: target name 'test_prefixed_test' must not start with 'test_'"],
+    expected = ["//check_test_naming/tests:test_prefixed_test: target name 'test_prefixed_test' must not start with 'test_', rename it to 'prefixed_test'"],
     target_under_test = ":test_prefixed_test",
 )
 
@@ -138,16 +138,22 @@ aspect_errors_test(
 aspect_errors_test(
     name = "suite_errors_test",
     expected = [
-        "//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test'",
-        "//check_test_naming/tests:test_prefixed_test: target name 'test_prefixed_test' must not start with 'test_'",
+        "//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test', rename it to 'bad_name_test'",
+        "//check_test_naming/tests:test_prefixed_test: target name 'test_prefixed_test' must not start with 'test_', rename it to 'prefixed_test'",
     ],
     target_under_test = ":suite",
+)
+
+aspect_errors_test(
+    name = "implicit_suite_errors_test",
+    expected = ["//check_test_naming/tests/implicit:test_bad: target name 'test_bad' must end with '_test' and must not start with 'test_', rename it to 'bad_test'"],
+    target_under_test = "//check_test_naming/tests/implicit:suite",
 )
 
 test_naming_test_script_test(
     name = "failing_naming_script_test",
     expected = [
-        "//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test'",
+        "//check_test_naming/tests:bad_name: target name 'bad_name' must end with '_test', rename it to 'bad_name_test'",
         "exit 1",
     ],
     target_under_test = ":failing_naming_test",
@@ -168,6 +174,7 @@ test_suite(
         ":bad_name_errors_test",
         ":failing_naming_script_test",
         ":good_errors_test",
+        ":implicit_suite_errors_test",
         ":naming_errors_test",
         ":no_test_src_errors_test",
         ":opted_out_errors_test",

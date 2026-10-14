@@ -19,6 +19,28 @@ SOURCE_EXTENSIONS = ["c", "cc", "cpp", "cxx", "go", "py", "rs", "sh"]
 def _stem(path):
     return paths.split_extension(paths.basename(path))[0]
 
+def _suggested_name(name):
+    """Returns `name` with the 'test_' prefix moved to a '_test' suffix, or None."""
+    stem = name.removeprefix("test_").removesuffix("_test")
+    if not stem or stem.startswith("test_"):
+        return None
+    return stem + "_test"
+
+def _name_error(name):
+    problems = []
+    if not name.endswith("_test"):
+        problems.append("must end with '_test'")
+    if name.startswith("test_"):
+        problems.append("must not start with 'test_'")
+    if not problems:
+        return None
+
+    error = "target name '{}' {}".format(name, " and ".join(problems))
+    suggestion = _suggested_name(name)
+    if suggestion:
+        error += ", rename it to '{}'".format(suggestion)
+    return error
+
 def test_naming_errors(name, srcs):
     """Checks a test target against the test naming convention.
 
@@ -38,10 +60,9 @@ def test_naming_errors(name, srcs):
     """
     errors = []
 
-    if not name.endswith("_test"):
-        errors.append("target name '{}' must end with '_test'".format(name))
-    if name.startswith("test_"):
-        errors.append("target name '{}' must not start with 'test_'".format(name))
+    name_error = _name_error(name)
+    if name_error:
+        errors.append(name_error)
 
     checked = [src for src in srcs if paths.split_extension(src)[1][1:] in SOURCE_EXTENSIONS]
 

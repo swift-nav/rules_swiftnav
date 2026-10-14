@@ -24,13 +24,23 @@ def _naming_errors_test_impl(ctx):
 
     asserts.equals(
         env,
-        ["target name 'foo' must end with '_test'"],
+        ["target name 'foo' must end with '_test', rename it to 'foo_test'"],
         test_naming_errors("foo", ["foo_test.cc"]),
     )
     asserts.equals(
         env,
-        ["target name 'test_foo_test' must not start with 'test_'"],
+        ["target name 'test_foo_test' must not start with 'test_', rename it to 'foo_test'"],
         test_naming_errors("test_foo_test", ["foo_test.cc"]),
+    )
+    asserts.equals(
+        env,
+        ["target name 'test_foo' must end with '_test' and must not start with 'test_', rename it to 'foo_test'"],
+        test_naming_errors("test_foo", ["foo_test.cc"]),
+    )
+    asserts.equals(
+        env,
+        ["target name 'test_test_foo' must end with '_test' and must not start with 'test_'"],
+        test_naming_errors("test_test_foo", ["foo_test.cc"]),
     )
     asserts.equals(
         env,

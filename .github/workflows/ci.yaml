@@ -32,13 +32,9 @@ jobs:
         run: |
           bazel run //tools/lint:lint -- --linters shellcheck --targets //...
 
-      - name: Run tools tests
+      - name: Run tools and check_test_naming tests
         run: |
-          bazel test //tools/...
-
-      - name: Run check_test_naming tests
-        run: |
-          bazel test //check_test_naming/...
+          bazel test //tools/... //check_test_naming/...
 
       - name: Build and generate coverage
         run: |
@@ -48,7 +44,7 @@ jobs:
       - name: Check test naming
         run: |
           cd examples/small_world
-          bazel build --aspects @rules_swiftnav//check_test_naming:check_test_naming.bzl%check_test_naming --output_groups=report //...
+          bazel build --aspects @rules_swiftnav//check_test_naming:check_test_naming.bzl%check_test_naming --output_groups=report --keep_going //...
 
       - name: Run format
         run: |

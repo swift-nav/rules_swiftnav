@@ -15,6 +15,9 @@ load(":naming.bzl", "test_naming_errors")
 # Tag that exempts a test target from the naming check
 NO_TEST_NAMING_CHECK = "no-test-naming-check"
 
+# Tag that test_naming_test adds to itself, for test_suites to exclude it
+TEST_NAMING_TAG = "test_naming"
+
 # test_suite attributes that hold its tests
 _SUITE_ATTRS = ["tests", "_implicit_tests"]
 
@@ -46,14 +49,11 @@ def _display_label(label):
     return "{}//{}:{}".format(repo, label.package, label.name)
 
 def _report(ctx, errors):
-    errors_file = ctx.actions.declare_file(ctx.label.name + ".test_naming_errors.txt")
-    ctx.actions.write(errors_file, "\n".join(errors) + "\n")
-
     report = ctx.actions.declare_file(ctx.label.name + ".test_naming.txt")
     ctx.actions.run_shell(
-        inputs = [errors_file],
         outputs = [report],
-        command = "cat {} >&2; exit 1".format(errors_file.path),
+        arguments = errors,
+        command = 'printf "%s\\n" "$@" >&2; exit 1',
         mnemonic = "CheckTestNaming",
         progress_message = "Checking test naming of %{label}",
     )
@@ -68,13 +68,14 @@ def _check_test_naming_impl(_target, ctx):
         ]
 
     # A test_suite aggregates the violations of its tests, which are held in
-    # '_implicit_tests' when 'tests' is empty
+    # '_implicit_tests' when 'tests' is empty. Other rules may have a 'tests'
+    # attribute the aspect propagates along, but it doesn't hold their tests.
     suite_tests = [
         t[TestNamingInfo]
         for attr in _SUITE_ATTRS
         for t in getattr(ctx.rule.attr, attr, [])
         if TestNamingInfo in t
-    ]
+    ] if ctx.rule.kind == "test_suite" else []
 
     reports = depset(
         [_report(ctx, errors)] if errors else [],
@@ -112,7 +113,7 @@ def _test_naming_test_impl(ctx):
 
     return [DefaultInfo(executable = script)]
 
-test_naming_test = rule(
+_test_naming_test = rule(
     implementation = _test_naming_test_impl,
     test = True,
     attrs = {
@@ -123,3 +124,24 @@ test_naming_test = rule(
     },
     doc = "Test that fails when any of `targets` violates the test naming convention.",
 )
+
+def test_naming_test(name, targets, tags = [], size = "small", **kwargs):
+    """Test that fails when any of `targets` violates the test naming convention.
+
+    The test is tagged TEST_NAMING_TAG so that an implicit test_suite of its
+    package can exclude it with '-test_naming', which avoids a dependency cycle.
+
+    Args:
+        name: The name of the test.
+        targets: Test targets or test_suites to check.
+        tags: Tags of the test, in addition to TEST_NAMING_TAG.
+        size: Size of the test.
+        **kwargs: Common attributes passed to the test rule.
+    """
+    _test_naming_test(
+        name = name,
+        targets = targets,
+        tags = tags + [TEST_NAMING_TAG],
+        size = size,
+        **kwargs
+    )

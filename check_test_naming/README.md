@@ -50,8 +50,7 @@ bazel build \
 ```
 
 ```
-//tools/lint:test_lint: target name 'test_lint' must end with '_test'
-//tools/lint:test_lint: target name 'test_lint' must not start with 'test_'
+//tools/lint:test_lint: target name 'test_lint' must end with '_test' and must not start with 'test_', rename it to 'lint_test'
 //tools/lint:test_lint: source 'tools/lint/test_lint.py' must not start with 'test_'
 ```
 
@@ -74,7 +73,8 @@ flags. It follows `test_suite`s, including ones without `tests`, which cover
 every non-manual test of their package.
 
 An implicit `test_suite` in the same package would include the
-`test_naming_test` itself, which is a dependency cycle, so exclude it by tag:
+`test_naming_test` itself, which is a dependency cycle. `test_naming_test` tags
+itself `test_naming`, so exclude it by tag:
 
 ```python
 load("@rules_swiftnav//check_test_naming:check_test_naming.bzl", "test_naming_test")
@@ -87,7 +87,6 @@ test_suite(
 
 test_naming_test(
     name = "naming_test",
-    tags = ["test_naming"],
     targets = [":tests"],
 )
 ```
