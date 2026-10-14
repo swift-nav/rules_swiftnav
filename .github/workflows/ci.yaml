@@ -37,18 +37,18 @@ jobs:
           bazel test //tools/... //check_test_naming/...
 
       - name: Build and generate coverage
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           ./scripts/generate_coverage.sh
 
       - name: Check test naming
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           bazel build --aspects @rules_swiftnav//check_test_naming:check_test_naming.bzl%check_test_naming --output_groups=report --keep_going //...
 
       - name: Run format
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           bazel run //tools/buildifier:buildifier
           git diff --exit-code
 
@@ -78,6 +78,6 @@ jobs:
           repository-cache: true
 
       - name: Build and test strip and static library examples
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           bazel test //src/strip_tool/... //src/static_library/...
