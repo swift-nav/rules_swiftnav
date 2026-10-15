@@ -6,12 +6,10 @@ build --@rules_swiftnav//cc:global_cxx_standard=17
 build --features=external_include_paths
 
 coverage --experimental_generate_llvm_lcov
+coverage --experimental_use_llvm_covmap
 coverage --combined_report=lcov
 
-# Work around for Mac: https://github.com/bazelbuild/bazel/issues/14970.
-# bazel coverage --config=cov_mac //...
-build:cov_mac --repo_env=GCOV=/Library/Developer/CommandLineTools/usr/bin/llvm-profdata
-build:cov_mac --test_env=LLVM_COV=/Library/Developer/CommandLineTools/usr/bin/llvm-cov
-build:cov_mac --copt=-ffile-compilation-dir=.
-
 build:system-gcc --platforms=@rules_swiftnav//platforms:x86_64_linux_gcc11_system
+# The hermetic llvm toolchains only constrain os and cpu, so they also match this
+# platform; without this they would win resolution by registration order.
+build:system-gcc --extra_toolchains=@rules_swiftnav//cc/toolchains/system_gcc/gcc11_x86_64-linux:system-cc-toolchain-x86_64-linux
