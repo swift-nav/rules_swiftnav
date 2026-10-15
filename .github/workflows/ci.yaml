@@ -32,15 +32,14 @@ jobs:
         run: |
           bazel run //tools/lint:lint -- --linters shellcheck --targets //...
 
-      - name: Run tools and check_test_naming tests
+      # .bazelrc applies the test naming check to every build
+      - name: Build
         run: |
-          bazel test //tools/... //check_test_naming/...
+          bazel build --keep_going //...
 
-      # check_test_naming/tests/implicit holds a deliberately misnamed fixture
-      # that can't be 'manual', so //... would otherwise flag it
-      - name: Check test naming
+      - name: Test
         run: |
-          bazel build --aspects //check_test_naming:check_test_naming.bzl%check_test_naming --output_groups=report --keep_going -- //... -//check_test_naming/tests/implicit/...
+          bazel test //...
 
       - name: Build and generate coverage
         working-directory: examples/small_world
