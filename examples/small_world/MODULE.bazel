@@ -9,26 +9,70 @@ local_path_override(
     path = "../..",
 )
 
-swift_cc_toolchain_ext = use_extension("@rules_swiftnav//cc:extensions.bzl", "swift_cc_toolchain_extension")
-use_repo(
-    swift_cc_toolchain_ext,
-    "aarch64-darwin-llvm20",
-    "aarch64-linux-llvm20",
-    "aarch64-sysroot",
-    "x86_64-darwin-llvm20",
-    "x86_64-linux-llvm20",
-    "x86_64-sysroot",
-)
-
 register_toolchains(
-    # llvm20
-    "@rules_swiftnav//cc/toolchains/llvm20/aarch64-darwin:cc-toolchain-aarch64-darwin",
-    "@rules_swiftnav//cc/toolchains/llvm20/x86_64-darwin:cc-toolchain-x86_64-darwin",
-    "@rules_swiftnav//cc/toolchains/llvm20/aarch64-linux:cc-toolchain-aarch64-linux",
-    "@rules_swiftnav//cc/toolchains/llvm20/x86_64-linux:cc-toolchain-x86_64-linux",
-    # system gcc
     "@rules_swiftnav//cc/toolchains/system_gcc/gcc11_x86_64-linux:system-cc-toolchain-x86_64-linux",
 )
+
+# Hermetic clang, with a pinned macOS SDK so that builds don't depend on the
+# SDK installed on the machine
+bazel_dep(name = "llvm", version = "0.8.23")
+
+register_toolchains("@llvm//toolchain:all")
+
+llvm = use_extension("@llvm//extensions:llvm.bzl", "llvm")
+llvm.version(llvm_version = "22.1.8")
+use_repo(llvm, "llvm-project")
+
+osx = use_extension("@llvm//extensions:osx.bzl", "osx")
+osx.from_archive(
+    sha256 = "5f044578cd78a3a9b9c965a42d56bad609ee5d252e1d4e6aa7c42fc3f35fee7b",
+    strip_prefix = "Payload/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+    type = "pkg",
+    urls = [
+        "https://swcdn.apple.com/content/downloads/09/08/047-91568-A_Y1CFZWQCD4/4xekpyz43i26dbp4enxfro8eb1q7wiujh5/CLTools_macOSNMOS_SDK.pkg",
+        "https://web.archive.org/web/20260512015547id_/https://swcdn.apple.com/content/downloads/09/08/047-91568-A_Y1CFZWQCD4/4xekpyz43i26dbp4enxfro8eb1q7wiujh5/CLTools_macOSNMOS_SDK.pkg",
+    ],
+)
+osx.frameworks(names = [
+    "Accelerate",
+    "ApplicationServices",
+    "AppKit",
+    "ColorSync",
+    "CoreFoundation",
+    "CoreGraphics",
+    "CoreImage",
+    "CoreMedia",
+    "CoreMIDI",
+    "CoreServices",
+    "CoreText",
+    "CoreVideo",
+    "DiskArbitration",
+    "AudioToolbox",
+    "AVFoundation",
+    "AVFAudio",
+    "AVRouting",
+    "CFNetwork",
+    "FontServices",
+    "AudioUnit",
+    "CoreAudio",
+    "CoreAudioTypes",
+    "Foundation",
+    "ImageIO",
+    "IOSurface",
+    "IOKit",
+    "Kernel",
+    "Metal",
+    "MetalKit",
+    "OpenGL",
+    "OSLog",
+    "QuartzCore",
+    "ScreenCaptureKit",
+    "Security",
+    "SystemConfiguration",
+    "UniformTypeIdentifiers",
+    "VideoToolbox",
+])
+use_repo(osx, "macos_sdk")
 
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", dev_dependency = True)
 bazel_dep(name = "lcov", version = "2.3.2", dev_dependency = True)

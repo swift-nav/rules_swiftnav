@@ -3,8 +3,8 @@ load("@rules_cc//cc:cc_static_library.bzl", "cc_static_library")
 load("@rules_swiftnav//cc:defs.bzl", "UNIT", "swift_cc_test")
 
 # Guards the toolchains, not the rule. cc_static_library comes from rules_cc,
-# but the archiver it runs comes from whichever toolchain is registered, and
-# the llvm20 toolchains here point ar_executable at an llvm-ar wrapper.
+# but the archiver it runs, llvm-ar here, comes from whichever toolchain is
+# registered.
 #
 # llvm-ar is unforgiving about how it is invoked: `llvm-ar rc out.a a.a b.a`
 # nests the input archives as members rather than merging their objects, and
