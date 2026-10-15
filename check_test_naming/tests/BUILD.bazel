@@ -8,9 +8,9 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
+load("@check_test_naming_fixtures//:fake_test.bzl", "fake_test")
 load("//check_test_naming:check_test_naming.bzl", "NO_TEST_NAMING_CHECK", "test_naming_test")
 load(":check_test_naming_test.bzl", "aspect_errors_test", "naming_errors_test", "test_naming_test_script_test")
-load(":fake_test.bzl", "fake_test")
 
 # Fixtures. They are 'manual' so that wildcards such as //... skip them, and
 # their source files don't exist since they are only ever analyzed.
@@ -146,8 +146,8 @@ aspect_errors_test(
 
 aspect_errors_test(
     name = "implicit_suite_errors_test",
-    expected = ["//check_test_naming/tests/implicit:test_bad: target name 'test_bad' must end with '_test' and must not start with 'test_', rename it to 'bad_test'"],
-    target_under_test = "//check_test_naming/tests/implicit:suite",
+    expected = ["@check_test_naming_fixtures+//implicit:test_bad: target name 'test_bad' must end with '_test' and must not start with 'test_', rename it to 'bad_test'"],
+    target_under_test = "@check_test_naming_fixtures//implicit:suite",
 )
 
 test_naming_test_script_test(

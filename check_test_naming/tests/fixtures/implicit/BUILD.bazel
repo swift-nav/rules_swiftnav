@@ -8,11 +8,11 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("//check_test_naming/tests:fake_test.bzl", "fake_test")
+load("//:fake_test.bzl", "fake_test")
 
 # Fixtures for a test_suite without 'tests', which holds every non-manual test
 # of its package in '_implicit_tests'. The fixtures can't be 'manual' for that
-# reason, so wildcards such as //... run them; they always pass.
+# reason, so they live in this separate module, out of rules_swiftnav's //...
 
 fake_test(
     name = "good_test",
@@ -27,5 +27,5 @@ fake_test(
 test_suite(
     name = "suite",
     tags = ["manual"],
-    visibility = ["//check_test_naming/tests:__pkg__"],
+    visibility = ["//visibility:public"],
 )
