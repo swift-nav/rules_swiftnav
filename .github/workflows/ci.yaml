@@ -32,9 +32,14 @@ jobs:
         run: |
           bazel run //tools/lint:lint -- --linters shellcheck --targets //...
 
-      - name: Run tools and check_test_naming tests
+      # .bazelrc applies the test naming check to every build
+      - name: Build
         run: |
-          bazel test //tools/... //check_test_naming/...
+          bazel build --keep_going //...
+
+      - name: Test
+        run: |
+          bazel test //...
 
       - name: Build and generate coverage
         working-directory: examples/small_world
