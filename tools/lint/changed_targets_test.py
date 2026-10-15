@@ -2,7 +2,7 @@
 """Tests for changed_targets.py
 
 Run with Bazel:
-    bazel test //tools/lint:test_changed_targets
+    bazel test //tools/lint:changed_targets_test
 """
 
 import io

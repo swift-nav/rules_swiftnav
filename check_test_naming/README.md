@@ -50,8 +50,8 @@ bazel build \
 ```
 
 ```
-//tools/lint:test_lint: target name 'test_lint' must end with '_test' and must not start with 'test_', rename it to 'lint_test'
-//tools/lint:test_lint: source 'tools/lint/test_lint.py' must not start with 'test_'
+//pkg:test_foo: target name 'test_foo' must end with '_test' and must not start with 'test_', rename it to 'foo_test'
+//pkg:test_foo: source 'pkg/test_foo.py' must not start with 'test_'
 ```
 
 Or add a config to `.bazelrc`:
