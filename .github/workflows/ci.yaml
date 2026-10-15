@@ -33,10 +33,6 @@ jobs:
           bazel run //tools/lint:lint -- --linters shellcheck --targets //...
 
       # .bazelrc applies the test naming check to every build
-      - name: Build
-        run: |
-          bazel build --keep_going //...
-
       - name: Test
         run: |
           bazel test //...
