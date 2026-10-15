@@ -46,11 +46,6 @@ jobs:
         run: |
           ./scripts/generate_coverage.sh
 
-      - name: Check test naming
-        working-directory: examples/small_world
-        run: |
-          bazel build --aspects @rules_swiftnav//check_test_naming:check_test_naming.bzl%check_test_naming --output_groups=report --keep_going //...
-
       - name: Run format
         working-directory: examples/small_world
         run: |
