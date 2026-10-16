@@ -72,5 +72,12 @@ bazel_dep(
 bazel_dep(name = "rules_go", version = "0.60.0", dev_dependency = True, repo_name = "")
 bazel_dep(name = "aspect_rules_lint", version = "2.7.2", dev_dependency = True)
 
+# Test fixtures of check_test_naming that must stay out of //...
+bazel_dep(name = "check_test_naming_fixtures", dev_dependency = True)
+local_path_override(
+    module_name = "check_test_naming_fixtures",
+    path = "check_test_naming/tests/fixtures",
+)
+
 bcc_ext = use_extension("@rules_swiftnav//tools/compile_commands:extensions.bzl", "bcc_extension")
 use_repo(bcc_ext, "bcc_linux_x86_64", "bcc_macos_arm64")
