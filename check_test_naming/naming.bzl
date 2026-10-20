@@ -16,6 +16,14 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 # name files in snake_case are listed; headers and data files are ignored.
 SOURCE_EXTENSIONS = ["c", "cc", "cpp", "cxx", "go", "py", "rs", "sh"]
 
+# Extensions exempt from requiring a '*_test' source. Rust integration tests
+# follow Cargo's tests/<name>.rs layout, and rust_test_suite already appends
+# '_test' to the target it generates for each file.
+NO_TEST_SUFFIX_EXTENSIONS = ["rs"]
+
+def _extension(path):
+    return paths.split_extension(path)[1][1:]
+
 def _stem(path):
     return paths.split_extension(paths.basename(path))[0]
 
@@ -53,7 +61,7 @@ def test_naming_errors(name, srcs):
       * the target name ends with '_test' and does not start with 'test_',
       * no source file name starts with 'test_',
       * at least one source file name ends with '_test' (when the target has
-        source files at all).
+        source files at all, not counting NO_TEST_SUFFIX_EXTENSIONS ones).
 
     Args:
         name: The name of the test target.
@@ -69,13 +77,14 @@ def test_naming_errors(name, srcs):
     if name_error:
         errors.append(name_error)
 
-    checked = [src for src in srcs if paths.split_extension(src)[1][1:] in SOURCE_EXTENSIONS]
+    checked = [src for src in srcs if _extension(src) in SOURCE_EXTENSIONS]
 
     for src in checked:
         if _stem(src).startswith("test_"):
             errors.append("source '{}' must not start with 'test_'".format(src))
 
-    if checked and not [src for src in checked if _stem(src).endswith("_test")]:
-        errors.append("at least one source must end with '_test', got: {}".format(", ".join(checked)))
+    needs_test_suffix = [src for src in checked if _extension(src) not in NO_TEST_SUFFIX_EXTENSIONS]
+    if needs_test_suffix and not [src for src in needs_test_suffix if _stem(src).endswith("_test")]:
+        errors.append("at least one source must end with '_test', got: {}".format(", ".join(needs_test_suffix)))
 
     return errors

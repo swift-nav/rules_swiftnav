@@ -15,11 +15,15 @@ For every target whose rule kind ends with `_test` (`cc_test`, `py_test`,
 - the target name does not start with `test_`,
 - no source file name starts with `test_`,
 - at least one source file name ends with `_test`, if the target has any.
+  Rust sources are exempt from this rule: integration tests follow Cargo's
+  `tests/<name>.rs` layout, and `rust_test_suite` already names the target it
+  generates for each file `..._<name>_test`.
 
 ```python
 # OK
 cc_test(name = "fibonacci_test", srcs = ["fibonacci_test.cc"])
 py_test(name = "release_test", srcs = ["release.py", "release_test.py"])
+rust_test(name = "archiver_test", srcs = ["tests/archiver.rs"])
 
 # Rejected
 cc_test(name = "fibonacci", srcs = ["fibonacci_test.cc"])           # name lacks '_test'

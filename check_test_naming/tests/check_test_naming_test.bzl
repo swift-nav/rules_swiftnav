@@ -69,6 +69,19 @@ def _naming_errors_test_impl(ctx):
         test_naming_errors("foo_test", ["main.go", "helper.go", "helper.h"]),
     )
 
+    # Rust sources don't need a '_test' suffix, but can't have a 'test_' prefix
+    asserts.equals(env, [], test_naming_errors("foo_test", ["tests/foo.rs", "tests/common/mod.rs"]))
+    asserts.equals(
+        env,
+        ["source 'tests/test_foo.rs' must not start with 'test_'"],
+        test_naming_errors("foo_test", ["tests/test_foo.rs"]),
+    )
+    asserts.equals(
+        env,
+        ["at least one source must end with '_test', got: main.cc"],
+        test_naming_errors("foo_test", ["lib.rs", "main.cc"]),
+    )
+
     return unittest.end(env)
 
 naming_errors_test = unittest.make(_naming_errors_test_impl)
