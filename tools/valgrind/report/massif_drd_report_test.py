@@ -240,12 +240,12 @@ class RunTest(unittest.TestCase):
         self.assertEqual(report["status"], STATUS_OVER_LIMIT)
         self.assertEqual(report["metrics"][0]["max"], 8)
 
-    def test_stale_baseline_warns_but_succeeds(self) -> None:
+    def test_fails_on_a_stale_baseline(self) -> None:
         baseline = """
             {"memory_heap_mb": 40, "memory_heap_extra_mb": 2,
              "memory_stack_mb": 3, "memory_total_mb": 15}
         """
-        self.assertEqual(self._run(baseline), 0)
+        self.assertEqual(self._run(baseline), 1)
         self.assertEqual(self._report()["status"], STATUS_STALE_BASELINE)
 
     def test_fails_on_a_baseline_missing_a_metric(self) -> None:

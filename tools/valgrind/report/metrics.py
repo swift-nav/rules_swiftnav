@@ -229,8 +229,8 @@ def print_summary(report: Report) -> int:
 
     Shared by every measuring tool, so a regression reads the same whichever
     profiler found it and a new profiler needs no reporting logic of its own.
-    Failures go to stderr; a stale baseline is a warning on stdout because it
-    must not fail the test.
+    Failures go to stderr. A stale baseline fails too, since a baseline far
+    above the measured value lets a later regression through unnoticed.
     """
     width = max((len(metric["name"]) for metric in report["metrics"]), default=0)
     for metric in report["metrics"]:
@@ -280,17 +280,24 @@ def print_summary(report: Report) -> int:
         )
         return 1
 
-    # A large improvement means the baseline no longer guards this target, so
-    # say so loudly without failing the test.
     print(
-        "\nWarning: measured well below the baseline, which no longer guards this target."
+        "\nError: measured well below the baseline, which no longer guards this target.",
+        file=sys.stderr,
     )
     for metric in at_fault:
-        print(f"  {metric['name']} is {-metric['delta_pct']:.2f}% below the baseline")
+        print(
+            f"  {metric['name']} is {-metric['delta_pct']:.2f}% below the baseline",
+            file=sys.stderr,
+        )
     print(
-        _refresh_hint("Consider refreshing it with:", at_fault, report["baseline_file"])
+        _refresh_hint(
+            "If the improvement is expected, refresh the baseline with:",
+            at_fault,
+            report["baseline_file"],
+        ),
+        file=sys.stderr,
     )
-    return 0
+    return 1
 
 
 def write_report(report: Report, path: Path) -> None:

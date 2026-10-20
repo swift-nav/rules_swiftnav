@@ -228,12 +228,12 @@ class PrintSummaryTest(unittest.TestCase):
         # A ceiling is not fixed by moving the baseline, so do not suggest it.
         self.assertNotIn("refresh", err)
 
-    def test_a_stale_baseline_warns_on_stdout_without_failing(self) -> None:
-        code, out, err = self._run([_metric(10, 100)])
+    def test_a_stale_baseline_fails_and_suggests_a_refresh(self) -> None:
+        code, _, err = self._run([_metric(10, 100)])
 
-        self.assertEqual(code, 0)
-        self.assertIn("Consider refreshing it with:", out)
-        self.assertEqual(err, "")
+        self.assertEqual(code, 1)
+        self.assertIn("If the improvement is expected, refresh the baseline with:", err)
+        self.assertIn('set "cpu_instructions": 10', err)
 
     def test_only_the_metrics_at_fault_are_named(self) -> None:
         _, _, err = self._run(
