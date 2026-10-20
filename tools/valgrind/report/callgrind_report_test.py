@@ -134,8 +134,8 @@ class RunTest(unittest.TestCase):
         self.assertEqual(self._run('{"cpu_instructions": 900000}'), 1)
         self.assertEqual(self._report()["status"], STATUS_REGRESSION)
 
-    def test_stale_baseline_warns_but_succeeds(self) -> None:
-        self.assertEqual(self._run('{"cpu_instructions": 2000000}'), 0)
+    def test_fails_on_a_stale_baseline(self) -> None:
+        self.assertEqual(self._run('{"cpu_instructions": 2000000}'), 1)
         self.assertEqual(self._report()["status"], STATUS_STALE_BASELINE)
 
     def test_fails_on_an_unusable_baseline(self) -> None:

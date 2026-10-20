@@ -61,7 +61,7 @@ METRIC_HEADER = "\n".join(
 _STATUS_EMOJI = {
     STATUS_PASS: "✅",
     STATUS_REGRESSION: "❌",
-    STATUS_STALE_BASELINE: "⚠️",
+    STATUS_STALE_BASELINE: "❌",
     STATUS_OVER_LIMIT: "🚫",
 }
 

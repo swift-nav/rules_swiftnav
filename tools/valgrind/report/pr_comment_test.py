@@ -99,7 +99,7 @@ class FormatCommentTest(unittest.TestCase):
         )
 
         self.assertIn(
-            "⚠️ <code>run_replay</code> — CPU instructions baseline stale", comment
+            "❌ <code>run_replay</code> — CPU instructions baseline stale", comment
         )
 
     def test_several_metrics_become_several_rows(self) -> None:
