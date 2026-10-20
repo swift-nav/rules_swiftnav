@@ -13,3 +13,7 @@ build:system-gcc --platforms=@rules_swiftnav//platforms:x86_64_linux_gcc11_syste
 # The hermetic llvm toolchains only constrain os and cpu, so they also match this
 # platform; without this they would win resolution by registration order.
 build:system-gcc --extra_toolchains=@rules_swiftnav//cc/toolchains/system_gcc/gcc11_x86_64-linux:system-cc-toolchain-x86_64-linux
+
+# Fail the build on test naming violations
+build --aspects=@rules_swiftnav//check_test_naming:check_test_naming.bzl%check_test_naming
+build --output_groups=+report

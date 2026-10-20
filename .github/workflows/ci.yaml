@@ -32,18 +32,19 @@ jobs:
         run: |
           bazel run //tools/lint:lint -- --linters shellcheck --targets //...
 
-      - name: Run tools tests
+      # .bazelrc applies the test naming check to every build
+      - name: Test
         run: |
-          bazel test //tools/...
+          bazel test //...
 
       - name: Build and generate coverage
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           ./scripts/generate_coverage.sh
 
       - name: Run format
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           bazel run //tools/buildifier:buildifier
           git diff --exit-code
 
@@ -73,6 +74,6 @@ jobs:
           repository-cache: true
 
       - name: Build and test strip and static library examples
+        working-directory: examples/small_world
         run: |
-          cd examples/small_world
           bazel test //src/strip_tool/... //src/static_library/...
