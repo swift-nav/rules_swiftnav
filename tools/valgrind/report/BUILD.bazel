@@ -81,7 +81,10 @@ py_binary(
     srcs = ["pr_comment.py"],
     main = "pr_comment.py",
     visibility = ["//visibility:public"],
-    deps = [":metrics"],
+    deps = [
+        ":metrics",
+        ":update_baselines",
+    ],
 )
 
 py_test(
@@ -92,5 +95,26 @@ py_test(
     deps = [
         ":metrics",
         ":pr_comment",
+    ],
+)
+
+# Rewrites baseline files to the measured values of signed-off reports. Public
+# so CI can `bazel run` it when a reviewer ticks the PR comment's checkbox.
+py_binary(
+    name = "update_baselines",
+    srcs = ["update_baselines.py"],
+    main = "update_baselines.py",
+    visibility = ["//visibility:public"],
+    deps = [":metrics"],
+)
+
+py_test(
+    name = "update_baselines_test",
+    srcs = ["update_baselines_test.py"],
+    main = "update_baselines_test.py",
+    tags = [UNIT],
+    deps = [
+        ":metrics",
+        ":update_baselines",
     ],
 )

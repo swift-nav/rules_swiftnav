@@ -208,7 +208,7 @@ def format_limit(metric: Metric) -> str:
     return format_number(limit, metric["unit"]) if limit is not None else "—"
 
 
-def _baseline_literal(metric: Metric) -> str:
+def baseline_literal(metric: Metric) -> str:
     """Render a measured value as it should be typed into the baseline json."""
     return f"{metric['value']:.3f}" if metric["unit"] else f"{metric['value']:.0f}"
 
@@ -218,7 +218,7 @@ def _refresh_hint(lead: str, metrics: list[Metric], baseline_file: str) -> str:
     return "\n".join(
         [lead]
         + [
-            f'  set "{metric["key"]}": {_baseline_literal(metric)} in {baseline_file}'
+            f'  set "{metric["key"]}": {baseline_literal(metric)} in {baseline_file}'
             for metric in metrics
         ]
     )

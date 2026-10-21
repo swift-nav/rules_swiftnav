@@ -1,0 +1,139 @@
+name: Valgrind baseline sign-off
+description: >-
+  Rewrites the baselines of a PR to the values its CI measured, once a reviewer
+  ticks the sign-off checkbox of the valgrind PR comment (pr_comment --sign-off),
+  and pushes the result to the PR branch.
+  Call it from an `issue_comment: edited` workflow, gated on the checkbox going
+  from unticked to ticked. Never checks out or runs code from the PR: it only
+  reads the report json of the PR's CI run and edits the files they name.
+  Needs gh, jq and Python 3.10+ on the runner, as on ubuntu-latest.
+
+inputs:
+  token:
+    description: >-
+      Token that can read the repo, its Actions artifacts and push to the PR
+      branch. Not GITHUB_TOKEN: its pushes do not trigger CI on the new commit.
+    required: true
+  workflow:
+    description: Workflow file whose run uploaded the reports, e.g. build.yml
+    required: true
+  artifact-name:
+    description: Name of the artifact holding the valgrind-*.report.json files
+    required: true
+  commit-message:
+    description: First line of the commit that updates the baselines
+    required: false
+    default: Update valgrind baselines to the measured values
+
+runs:
+  using: composite
+  steps:
+    - name: Check the sign-off
+      id: check
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO: ${{ github.repository }}
+        PR: ${{ github.event.issue.number }}
+        SENDER: ${{ github.event.sender.login }}
+        BODY: ${{ github.event.comment.body }}
+      run: |
+        permission=$(gh api "repos/$REPO/collaborators/$SENDER/permission" --jq .permission)
+        case "$permission" in
+          admin | maintain | write) ;;
+          *) echo "::error::$SENDER cannot sign off: $permission access"; exit 1 ;;
+        esac
+
+        pr=$(gh pr view "$PR" --repo "$REPO" \
+          --json headRefName,headRefOid,headRepositoryOwner,isCrossRepository)
+        if [ "$(jq -r .isCrossRepository <<< "$pr")" = true ]; then
+          echo "::error::Sign-off cannot push to a fork's branch"; exit 1
+        fi
+        head_sha=$(jq -r .headRefOid <<< "$pr")
+
+        # The ticked numbers must be the ones measured on the current head.
+        comment_sha=$(grep -oP '^Commit: `\K[0-9a-f]+(?=`)' <<< "$BODY" || true)
+        if [ "$comment_sha" != "$head_sha" ]; then
+          echo "::error::The comment is for ${comment_sha:-an unknown commit}, the PR head is $head_sha"
+          exit 1
+        fi
+
+        {
+          echo "branch=$(jq -r .headRefName <<< "$pr")"
+          echo "head-sha=$head_sha"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Download the reports
+      id: reports
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO: ${{ github.repository }}
+        WORKFLOW: ${{ inputs.workflow }}
+        ARTIFACT: ${{ inputs.artifact-name }}
+        HEAD_SHA: ${{ steps.check.outputs.head-sha }}
+      run: |
+        run_id=$(gh run list --repo "$REPO" --workflow "$WORKFLOW" --commit "$HEAD_SHA" \
+          --status completed --limit 1 --json databaseId --jq '.[0].databaseId')
+        if [ -z "$run_id" ]; then
+          echo "::error::No $WORKFLOW run for $HEAD_SHA"; exit 1
+        fi
+
+        dir="$RUNNER_TEMP/valgrind-sign-off-reports"
+        rm -rf "$dir"
+        gh run download "$run_id" --repo "$REPO" --name "$ARTIFACT" --dir "$dir"
+        echo "dir=$dir" >> "$GITHUB_OUTPUT"
+
+    - name: Check out the PR branch
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ steps.check.outputs.branch }}
+        token: ${{ inputs.token }}
+        path: valgrind-sign-off-pr
+        submodules: false
+        lfs: false
+
+    - name: Update the baselines
+      shell: bash
+      env:
+        REPORTS_DIR: ${{ steps.reports.outputs.dir }}
+        HEAD_SHA: ${{ steps.check.outputs.head-sha }}
+        PR_DIR: ${{ github.workspace }}/valgrind-sign-off-pr
+      run: |
+        # The branch moving after the check would sign off numbers nobody saw.
+        if [ "$(git -C "$PR_DIR" rev-parse HEAD)" != "$HEAD_SHA" ]; then
+          echo "::error::The PR branch moved past $HEAD_SHA"; exit 1
+        fi
+
+        mapfile -t reports < <(find "$REPORTS_DIR" -name 'valgrind-*.report.json')
+        if [ ${#reports[@]} -eq 0 ]; then
+          echo "::error::No valgrind reports in the artifact"; exit 1
+        fi
+        cd "$GITHUB_ACTION_PATH/../../.."
+        python3 -m tools.valgrind.report.update_baselines \
+          --workspace "$PR_DIR" "${reports[@]}" | tee "$RUNNER_TEMP/valgrind-sign-off-changes.txt"
+
+    - name: Push the update
+      shell: bash
+      env:
+        PR_DIR: ${{ github.workspace }}/valgrind-sign-off-pr
+        SENDER: ${{ github.event.sender.login }}
+        COMMENT_URL: ${{ github.event.comment.html_url }}
+        MESSAGE: ${{ inputs.commit-message }}
+      run: |
+        cd "$PR_DIR"
+        if git diff --quiet; then
+          echo "No baseline changed; nothing to push."
+          exit 0
+        fi
+
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git commit -a -F - <<EOF
+        $MESSAGE
+
+        $(cat "$RUNNER_TEMP/valgrind-sign-off-changes.txt")
+
+        Signed off by @$SENDER in $COMMENT_URL
+        EOF
+        git push origin HEAD

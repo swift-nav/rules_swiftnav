@@ -20,6 +20,7 @@ from tools.valgrind.report.metrics import (
 from tools.valgrind.report.pr_comment import (
     DEFAULT_MARKER,
     METRIC_HEADER,
+    SIGN_OFF_CHECKBOX,
     convert_metric,
     convert_report,
     format_comment,
@@ -163,6 +164,40 @@ class FormatCommentTest(unittest.TestCase):
         )
 
         self.assertIn("tolerance per metric", comment)
+
+
+class SignOffTest(unittest.TestCase):
+    def test_a_failing_baseline_gets_the_checkbox(self) -> None:
+        for value in (2000, 500):
+            with self.subTest(value=value):
+                comment = format_comment(
+                    [_report("run_replay", value, 1000)],
+                    DEFAULT_MARKER,
+                    "Title",
+                    None,
+                    sign_off=True,
+                )
+                self.assertIn(SIGN_OFF_CHECKBOX, comment)
+
+    def test_no_checkbox_unless_asked_for(self) -> None:
+        comment = format_comment(
+            [_report("run_replay", 2000, 1000)], DEFAULT_MARKER, "Title", None
+        )
+
+        self.assertNotIn(SIGN_OFF_CHECKBOX, comment)
+
+    def test_no_checkbox_when_nothing_to_sign_off(self) -> None:
+        over_limit = build_metric(
+            "peak_heap_mb", "Peak memory (heap)", "MB", 60.0, 60.0, 5.0, 50.0
+        )
+        reports = [
+            _report("passing", 1000, 1000),
+            build_report("limited", "limited/baseline.txt", [over_limit]),
+        ]
+
+        comment = format_comment(reports, DEFAULT_MARKER, "Title", None, sign_off=True)
+
+        self.assertNotIn(SIGN_OFF_CHECKBOX, comment)
 
 
 class ConvertUnitTest(unittest.TestCase):
