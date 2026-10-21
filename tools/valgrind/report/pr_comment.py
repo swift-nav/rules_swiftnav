@@ -17,6 +17,8 @@ Requirements:
   - Byte quantities can be rendered in a unit of the reader's choosing, for a
     target whose figures are far from the one they were measured in: a decoder
     peaking at 215 bytes of heap extra is "0.000 MB" but "0.210 KB".
+  - Optionally, a checkbox that a CI workflow watches to sign off a failing
+    baseline, rewriting it to the measured values (see update_baselines).
 
 Run with Bazel:
     bazel run //tools/valgrind/report:pr_comment -- --commit abc1234 \\
@@ -42,9 +44,14 @@ from tools.valgrind.report.metrics import (
     format_value,
     read_report,
 )
+from tools.valgrind.report.update_baselines import SIGNED_OFF_STATUSES
 
 DEFAULT_MARKER = "<!-- valgrind-callgrind-regression -->"
 DEFAULT_TITLE = "Valgrind analysis"
+
+# CI matches this text in the edited comment, ticked and unticked.
+SIGN_OFF_LABEL = "Sign off: update the failing baselines to the measured values"
+SIGN_OFF_CHECKBOX = f"- [ ] {SIGN_OFF_LABEL}"
 
 # A metric measured in one of these converts to any other by ratio. Everything
 # else — an instruction count, whose unit is empty — is left as measured.
@@ -192,9 +199,16 @@ def format_details(report: Report) -> str:
 
 
 def format_comment(
-    reports: list[Report], marker: str, title: str, commit: str | None
+    reports: list[Report],
+    marker: str,
+    title: str,
+    commit: str | None,
+    sign_off: bool = False,
 ) -> str:
-    """Render every report as a single markdown comment."""
+    """Render every report as a single markdown comment.
+
+    With sign_off, a failing baseline that a refresh would fix gets a checkbox.
+    """
     # Stable ordering, so an updated comment does not reshuffle its rows when
     # the tests happen to finish in a different order.
     reports = sorted(reports, key=lambda r: r["label"])
@@ -207,6 +221,16 @@ def format_comment(
 
     if commit:
         lines.append(f"Commit: `{commit}`")
+        lines.append("")
+
+    # By metric: a target over its limit can still carry a regression to sign off.
+    signable = any(
+        metric["status"] in SIGNED_OFF_STATUSES
+        for report in reports
+        for metric in report["metrics"]
+    )
+    if sign_off and signable:
+        lines.append(SIGN_OFF_CHECKBOX)
         lines.append("")
 
     return "\n".join(lines)
@@ -233,6 +257,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Render byte quantities in this unit instead of the one they were "
         "measured in. Leave unset to keep the measured unit",
     )
+    parser.add_argument(
+        "--sign-off",
+        action="store_true",
+        help="Offer a checkbox to sign off failing baselines, for a CI workflow "
+        "that acts on it",
+    )
     args = parser.parse_args(argv)
 
     try:
@@ -243,7 +273,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Error: could not read a valgrind report: {err}", file=sys.stderr)
         return 1
 
-    print(format_comment(reports, args.marker, args.title, args.commit))
+    print(format_comment(reports, args.marker, args.title, args.commit, args.sign_off))
     return 0
 
 
