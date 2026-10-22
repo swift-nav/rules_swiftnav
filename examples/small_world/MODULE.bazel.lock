@@ -1,5 +1,5 @@
 {
-  "lockFileVersion": 26,
+  "lockFileVersion": 28,
   "registryFileHashes": {
     "https://bcr.bazel.build/bazel_registry.json": "8a28e4aff06ee60aed2a8c281907fb8bcbf3b753c91fb5a5c57da3215d5b3497",
     "https://bcr.bazel.build/modules/abseil-cpp/20210324.2/MODULE.bazel": "7cd0312e064fde87c8d1cd79ba06c876bd23630c83466e9500321be55c96ace2",
@@ -19,7 +19,7 @@
     "https://bcr.bazel.build/modules/apple_support/1.21.0/MODULE.bazel": "ac1824ed5edf17dee2fdd4927ada30c9f8c3b520be1b5fd02a5da15bc10bff3e",
     "https://bcr.bazel.build/modules/apple_support/1.21.1/MODULE.bazel": "5809fa3efab15d1f3c3c635af6974044bac8a4919c62238cce06acee8a8c11f1",
     "https://bcr.bazel.build/modules/apple_support/1.22.1/MODULE.bazel": "90bd1a660590f3ceffbdf524e37483094b29352d85317060b2327fff8f3f4458",
-    "https://bcr.bazel.build/modules/apple_support/1.24.2/MODULE.bazel": "0e62471818affb9f0b26f128831d5c40b074d32e6dda5a0d3852847215a41ca4",
+    "https://bcr.bazel.build/modules/apple_support/2.5.2/MODULE.bazel": "bb1b7081e390a8d3885f642cb0073dfcf8e7a36525e079fa8f5835af7079c0fe",
     "https://bcr.bazel.build/modules/apple_support/2.8.0/MODULE.bazel": "c45f5176057092afba0be6c48a9ea02101666802f8be536947e099e94757f8ed",
     "https://bcr.bazel.build/modules/apple_support/2.8.0/source.json": "b7f6d87669c206adaa7d82cc44733349c63e341b80a0e049496ebd91d78c3472",
     "https://bcr.bazel.build/modules/aspect_bazel_lib/2.14.0/MODULE.bazel": "2b31ffcc9bdc8295b2167e07a757dbbc9ac8906e7028e5170a3708cecaac119f",
@@ -159,6 +159,7 @@
     "https://bcr.bazel.build/modules/rules_cc/0.1.5/MODULE.bazel": "88dfc9361e8b5ae1008ac38f7cdfd45ad738e4fa676a3ad67d19204f045a1fd8",
     "https://bcr.bazel.build/modules/rules_cc/0.2.0/MODULE.bazel": "b5c17f90458caae90d2ccd114c81970062946f49f355610ed89bebf954f5783c",
     "https://bcr.bazel.build/modules/rules_cc/0.2.13/MODULE.bazel": "eecdd666eda6be16a8d9dc15e44b5c75133405e820f620a234acc4b1fdc5aa37",
+    "https://bcr.bazel.build/modules/rules_cc/0.2.15/MODULE.bazel": "6a0a4a75a57aa6dc888300d848053a58c6b12a29f89d4304e1c41448514ec6e8",
     "https://bcr.bazel.build/modules/rules_cc/0.2.17/MODULE.bazel": "1849602c86cb60da8613d2de887f9566a6d354a6df6d7009f9d04a14402f9a84",
     "https://bcr.bazel.build/modules/rules_cc/0.2.20/MODULE.bazel": "f5c07bce5ddcb99be21a0812ff5aadb439e688b7449c6542152363b2fd859c1a",
     "https://bcr.bazel.build/modules/rules_cc/0.2.25/MODULE.bazel": "4a3d4f3606d3b3190be495dbc497acca552807d1d5540661ef0d1658472882e3",
@@ -278,63 +279,9 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "@@hedron_compile_commands+//:workspace_setup.bzl%hedron_compile_commands_extension": {
-      "general": {
-        "bzlTransitiveDigest": "xfHREXIOWIcGVzoG9cUsecfHYTs1FeQNomBubjpqjW0=",
-        "usagesDigest": "CbJ2MjubH36j9xaONhhASfhodhpi5fzvuyg/IW2f7Ds=",
-        "recordedInputs": [
-          "REPO_MAPPING:hedron_compile_commands+,bazel_tools bazel_tools"
-        ],
-        "generatedRepoSpecs": {}
-      }
-    },
-    "@@hedron_compile_commands+//:workspace_setup_transitive.bzl%hedron_compile_commands_extension": {
-      "general": {
-        "bzlTransitiveDigest": "IfDf0vEa2jjQ11RNpUM0u4xftPXIs+pyM8IMVkRqVMk=",
-        "usagesDigest": "yxZQbFglJyjpn7JZ9mhIc3EhLzZivlbs6wiHWOKJ/UA=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {}
-      }
-    },
-    "@@hedron_compile_commands+//:workspace_setup_transitive_transitive.bzl%hedron_compile_commands_extension": {
-      "general": {
-        "bzlTransitiveDigest": "1p58k3o2Jgjt/pBE7cb8WmmkplrSguIKma/h32x7X10=",
-        "usagesDigest": "GkOuy/k8wz0dbKMeEJFKEJB3CWkMZt3DYcPgj4lALkI=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {}
-      }
-    },
-    "@@hedron_compile_commands+//:workspace_setup_transitive_transitive_transitive.bzl%hedron_compile_commands_extension": {
-      "general": {
-        "bzlTransitiveDigest": "arNWX4EleUjJxqkM5nCRTj+ce05Zz1gSdGH1DCKOoLs=",
-        "usagesDigest": "WZExKK/BI4lqpUZfPpv4YARDE1Y7igQB+wYGKvNoCKs=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {}
-      }
-    },
-    "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
-      "general": {
-        "bzlTransitiveDigest": "Ilz4hu4VWEbx3OM4ZIpgYmYXuPq6ewOVgzv5F0ziWS8=",
-        "usagesDigest": "tVQNvLoXMWAbiK39am3yovKGpwINdftfn7RpDyN+JZc=",
-        "recordedInputs": [
-          "REPO_MAPPING:pybind11_bazel+,bazel_tools bazel_tools"
-        ],
-        "generatedRepoSpecs": {
-          "pybind11": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@pybind11_bazel+//:pybind11-BUILD.bazel",
-              "strip_prefix": "pybind11-2.13.6",
-              "url": "https://github.com/pybind/pybind11/archive/refs/tags/v2.13.6.tar.gz",
-              "integrity": "sha256-4Iy4f0dz2pf6e18DXeh2OrxlbYfVdz5i9toFh9Hw7CA="
-            }
-          }
-        }
-      }
-    },
     "@@rules_kotlin+//src/main/starlark/core/repositories:bzlmod_setup.bzl%rules_kotlin_extensions": {
       "general": {
-        "bzlTransitiveDigest": "Ga4z8lQy1YQ5rAMy+dOl0dqcCEBnYNCXku8x3YQmDZI=",
+        "bzlTransitiveDigest": "WDuVCwqV73DvcHB5Of+02lhUZgPxr9MqtpvMRyUi0eQ=",
         "usagesDigest": "QI2z8ZUR+mqtbwsf2fLqYdJAkPOHdOV+tF2yVAUgRzw=",
         "recordedInputs": [
           "REPO_MAPPING:rules_kotlin+,bazel_tools bazel_tools"
@@ -391,7 +338,7 @@
     },
     "@@rules_python+//python/extensions:config.bzl%config": {
       "general": {
-        "bzlTransitiveDigest": "vr9ddlKwZY5E9diixm5DtS4qbXGoYSdvchYrfpG6MdQ=",
+        "bzlTransitiveDigest": "sJuhZihyVty+0xOVsXH1eSSGv2ufRPo9x8QCFFNs90s=",
         "usagesDigest": "EocbSr4I3/Shk4QaFool8b8navUiUFqgzF9bOaaYfFk=",
         "recordedInputs": [
           "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
@@ -559,7 +506,7 @@
     },
     "@@rules_python+//python/uv:uv.bzl%uv": {
       "general": {
-        "bzlTransitiveDigest": "ijW9KS7qsIY+yBVvJ+Nr1mzwQox09j13DnE3iIwaeTM=",
+        "bzlTransitiveDigest": "IgkgxNrtlAec7OnaFrWoCC5NQhHcY/aIz4jsqcNMm8Y=",
         "usagesDigest": "yXvWfXAzpBeW71mWgwU3AqAzXX/dFACnx12eYvBsJ8w=",
         "recordedInputs": [
           "REPO_MAPPING:rules_python+,bazel_tools bazel_tools",
@@ -586,180 +533,8 @@
           }
         }
       }
-    },
-    "@@rules_swiftnav+//cc:extensions.bzl%swift_cc_toolchain_extension": {
-      "general": {
-        "bzlTransitiveDigest": "PfHBW3b77D/I6D3fVyfQxbocDafeQhCpaMQ6foZ9NwM=",
-        "usagesDigest": "V7twTZd7bHps49nbRv5hPEHxBLHEeagNlOdqMSZUwzE=",
-        "recordedInputs": [
-          "REPO_MAPPING:rules_swiftnav+,bazel_tools bazel_tools",
-          "REPO_MAPPING:rules_swiftnav+,rules_swiftnav rules_swiftnav+"
-        ],
-        "generatedRepoSpecs": {
-          "aarch64-darwin-llvm20": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm20:llvm.BUILD.bzl",
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-ARM64.tar.xz",
-              "strip_prefix": "LLVM-20.1.7-macOS-ARM64",
-              "sha256": "6aa75de00575ad0663183b00f00f39992ded611b5136e57649ace1e6a53c0d16"
-            }
-          },
-          "x86_64-darwin-llvm20": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm20:llvm.BUILD.bzl",
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-macOS-X64.tar.xz",
-              "strip_prefix": "LLVM-20.1.7-macOS-X64",
-              "sha256": "ccf82ffe7e136ee49659cb57157856a7963d0950fac3d05aabba0db75bfba26f"
-            }
-          },
-          "aarch64-linux-llvm20": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm20:llvm.BUILD.bzl",
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-ARM64.tar.xz",
-              "strip_prefix": "LLVM-20.1.7-Linux-ARM64",
-              "sha256": "832f2802a29457dc758f56e26e98558c6cd0e45fcd07186f540cb6e7f4e59385"
-            }
-          },
-          "x86_64-linux-llvm20": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm20:llvm.BUILD.bzl",
-              "url": "https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.7/LLVM-20.1.7-Linux-X64.tar.xz",
-              "strip_prefix": "LLVM-20.1.7-Linux-X64",
-              "sha256": "8494c98a774051a40bfe1187a2d6442f4bc107598998bbe1673d9bb1572cfd6f"
-            }
-          },
-          "aarch64-sysroot": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "sha256": "edb3599237a755287a3ca3c94bdd64eb7552b768e927a9d125473d0b846f91f4",
-              "build_file_content": "\nfilegroup(\n    name = \"aarch64-sysroot\",\n    srcs = glob([\"*/**\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_aarch64_sysroot.tar.xz"
-            }
-          },
-          "llvm_mingw_toolchain": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/llvm_x86_64_windows:toolchain.BUILD",
-              "sha256": "21458febf5d2c918df922dd0da60137a8787e5e6b427925a1977c882fc79b550",
-              "strip_prefix": "llvm-mingw-20241203-ucrt-ubuntu-20.04-x86_64",
-              "url": "https://github.com/mstorsjo/llvm-mingw/releases/download/20241203/llvm-mingw-20241203-ucrt-ubuntu-20.04-x86_64.tar.xz"
-            }
-          },
-          "x86_64-sysroot": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "sha256": "4235d41632c677d0c71e8e3b40abcf2b67e991e6b66a08cdf9d1e54a54de8869",
-              "build_file_content": "\nfilegroup(\n    name = \"x86_64-sysroot\",\n    srcs = glob([\"*/**\"]),\n    visibility = [\"//visibility:public\"],\n)\n    ",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/bullseye-sysroot-v4/debian_bullseye_x86_64_sysroot.tar.xz"
-            }
-          },
-          "aarch64-linux-musl": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/musl/aarch64:musl.BUILD.bzl",
-              "sha256": "a6650541dcc778b79add1dd7369869d5d38ddefa9362b7e32d4cc1267fa7977e",
-              "strip_prefix": "output",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/aarch64-linux-musl-cross.tar.gz"
-            }
-          },
-          "arm-linux-musleabihf": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/musl/armhf:musl.BUILD.bzl",
-              "sha256": "7b310a8bf70500a4072f87c3292321fc4f7b91cc67a85a31e7cf13508fa24a3c",
-              "strip_prefix": "output",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/arm-linux-musleabihf-cross.tar.gz"
-            }
-          },
-          "x86_64-linux-musl": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/musl/x86_64:musl.BUILD.bzl",
-              "sha256": "594395e60bc93acd7eb049f6d8c28a9c5ad5b6060b230e94f19cd8c005cd3a91",
-              "strip_prefix": "output",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/musl-cross-11.2.0/x86_64-linux-musl-cross.tar.gz"
-            }
-          },
-          "gcc_arm_gnu_8_3_toolchain": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/gcc_arm_gnu_8_3:toolchain.BUILD",
-              "sha256": "8ce3e7688a47d8cd2d8e8323f147104ae1c8139520eca50ccf8a7fa933002731",
-              "strip_prefix": "gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-gnu-8.3/gcc-arm-8.3-2019.03-x86_64-aarch64-linux-gnu.tar.xz"
-            }
-          },
-          "x86_64_linux_gcc_arm_embedded_toolchain": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
-              "sha256": "97dbb4f019ad1650b732faffcc881689cedc14e2b7ee863d390e0a41ef16c9a3",
-              "strip_prefix": "gcc-arm-none-eabi-10.3-2021.10",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
-            }
-          },
-          "darwin_gcc_arm_embedded_toolchain": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "build_file": "@@rules_swiftnav+//cc/toolchains/gcc_arm_embedded:toolchain.BUILD",
-              "sha256": "fb613dacb25149f140f73fe9ff6c380bb43328e6bf813473986e9127e2bc283b",
-              "strip_prefix": "gcc-arm-none-eabi-10.3-2021.10",
-              "url": "https://github.com/swift-nav/swift-toolchains/releases/download/gcc-arm-none-eabi-10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2"
-            }
-          }
-        }
-      }
-    },
-    "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
-      "general": {
-        "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "QcC3ycY8CPhyxMP6ZzIIJiNVjVF5FPQXB6ExocWPqH0=",
-        "recordedInputs": [],
-        "generatedRepoSpecs": {
-          "yocto_generic": {
-            "repoRuleId": "@@rules_swiftnav+//cc/toolchains/yocto_generic:yocto_generic.bzl%yocto_generic",
-            "attributes": {}
-          }
-        }
-      }
-    },
-    "@@rules_swiftnav+//doxygen:extensions.bzl%doxygen_extension": {
-      "general": {
-        "bzlTransitiveDigest": "FpPcFCi/TMdMIYzhkBJQDLoL6L4vfaGhOA4TTyqW2zA=",
-        "usagesDigest": "mT61Q0RKiXj/TRY1Qc9AwavVMIZPHKED5lr64353LLs=",
-        "recordedInputs": [
-          "REPO_MAPPING:rules_swiftnav+,bazel_tools bazel_tools"
-        ],
-        "generatedRepoSpecs": {
-          "doxygen_linux_x86_64": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "urls": [
-                "https://github.com/doxygen/doxygen/releases/download/Release_1_17_0/doxygen-1.17.0.linux.bin.tar.gz"
-              ],
-              "sha256": "75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2",
-              "strip_prefix": "doxygen-1.17.0",
-              "build_file": "@@rules_swiftnav+//doxygen:doxygen_linux.BUILD"
-            }
-          },
-          "doxygen_macos_arm64": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "urls": [
-                "https://github.com/doxygen/doxygen/releases/download/Release_1_17_0/doxygen-1.17.0-mac-arm.zip"
-              ],
-              "sha256": "e05a7f647f894d2d82ef26a1d231cda079d2d1d85cf1e1c6fd8072430d80d614",
-              "strip_prefix": "doxygen-1.17.0",
-              "build_file": "@@rules_swiftnav+//doxygen:doxygen_macos.BUILD"
-            }
-          }
-        }
-      }
     }
   },
-  "facts": {}
+  "facts": {},
+  "factsVersions": {}
 }
