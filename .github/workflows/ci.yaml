@@ -22,7 +22,9 @@ jobs:
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
-          repository-cache: true
+          repository-cache: |
+            - MODULE.bazel
+            - .bazeliskrc
 
       - name: Run format
         run: |
@@ -71,7 +73,9 @@ jobs:
         with:
           bazelisk-cache: true
           disk-cache: ${{ github.workflow }}
-          repository-cache: true
+          repository-cache: |
+            - MODULE.bazel
+            - .bazeliskrc
 
       - name: Build and test strip and static library examples
         working-directory: examples/small_world
