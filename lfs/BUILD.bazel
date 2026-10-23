@@ -1,0 +1,39 @@
+# Copyright (C) 2022-2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+load(":defs.bzl", "lfs_lockfile")
+
+py_binary(
+    name = "generate_lockfile",
+    srcs = ["generate_lockfile.py"],
+    main = "generate_lockfile.py",
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "generate_lockfile_test",
+    srcs = [
+        "generate_lockfile.py",
+        "generate_lockfile_test.py",
+    ],
+    main = "generate_lockfile_test.py",
+    tags = [UNIT],
+)
+
+lfs_lockfile(
+    name = "testdata_lockfile",
+    srcs = glob(["testdata/*"]),
+    gitattributes = "testdata/gitattributes",
+    lockfile = "testdata/lfs.lock.json",
+    tags = [UNIT],
+)
