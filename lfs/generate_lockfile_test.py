@@ -98,7 +98,10 @@ class GenerateTest(unittest.TestCase):
         b = self.write("b", _CONTENT)
         a = self.write("a", _POINTER)
         outputs = []
-        for order in (["--file", b, "z.bin", "--file", a, "a.bin"], ["--file", a, "a.bin", "--file", b, "z.bin"]):
+        for order in (
+            ["--file", b, "z.bin", "--file", a, "a.bin"],
+            ["--file", a, "a.bin", "--file", b, "z.bin"],
+        ):
             out = os.path.join(self.tmp.name, "out.json")
             argv = ["prog", "--gitattributes", attrs, "--output", out, *order]
             with mock.patch.object(sys, "argv", argv):
@@ -106,7 +109,9 @@ class GenerateTest(unittest.TestCase):
             with open(out, encoding="utf-8") as f:
                 outputs.append(f.read())
         self.assertEqual(outputs[0], outputs[1])
-        self.assertEqual(outputs[0], f'{{\n  "a.bin": "{_OID}",\n  "z.bin": "{_OID}"\n}}\n')
+        self.assertEqual(
+            outputs[0], f'{{\n  "a.bin": "{_OID}",\n  "z.bin": "{_OID}"\n}}\n'
+        )
 
 
 if __name__ == "__main__":
