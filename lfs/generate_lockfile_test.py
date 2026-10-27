@@ -72,7 +72,9 @@ class PatternTest(unittest.TestCase):
 
     def test_unsupported_syntax_fails_loudly(self):
         for pattern in (r"a\*.bin", "[[:alpha:]].bin"):
-            with self.assertRaisesRegex(ValueError, "unsupported gitattributes pattern"):
+            with self.assertRaisesRegex(
+                ValueError, "unsupported gitattributes pattern"
+            ):
                 parse_gitattributes(pattern + " filter=lfs")
 
 
