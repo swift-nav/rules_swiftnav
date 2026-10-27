@@ -39,7 +39,7 @@ generate_lockfile = rule(
         "gitattributes": attr.label(
             allow_single_file = True,
             mandatory = True,
-            doc = "Root .gitattributes that marks files as LFS-tracked.",
+            doc = "Root .gitattributes that marks files as LFS-tracked. Nested .gitattributes files are not read.",
         ),
         "out": attr.output(mandatory = True),
         "srcs": attr.label_list(
@@ -68,7 +68,7 @@ def lfs_lockfile(name, lockfile, srcs, gitattributes = "//:.gitattributes", **kw
         name: Base target name.
         lockfile: Label of the checked-in JSON lockfile, an exported source file.
         srcs: Candidate files, e.g. filegroups or exported files from several packages.
-        gitattributes: Label of the root .gitattributes.
+        gitattributes: Label of the root .gitattributes. Nested .gitattributes files are not read.
         **kwargs: Passed to the test target.
     """
     update = "{}.update".format(name)

@@ -63,7 +63,11 @@ def pattern_to_regex(pattern):
 
 
 def parse_gitattributes(text):
-    """Returns [(regex, is_lfs)] for every line that sets or unsets `filter`."""
+    """Returns [(regex, is_lfs)] for every line that sets or unsets `filter`.
+
+    shortcut: reads one root .gitattributes; nested ones in subdirectories are
+    ignored. Support them when a consumer repo has any.
+    """
     rules = []
     for line in text.splitlines():
         # shortcut: quoted patterns and macro attributes are not supported; orion uses neither.
