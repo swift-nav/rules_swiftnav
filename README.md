@@ -14,6 +14,8 @@ The contents of this repository are subject to change frequently.
   their source files, for any language.
 - [compile_commands](tools/compile_commands/README.md) — automatic
   `compile_commands.json` generation for downstream repositories.
+- [lfs](lfs/README.md) — fetches Git LFS objects through Bazel from a
+  checked-in lockfile instead of `git lfs pull`.
 - [Releasing](docs/RELEASING.md) — how to cut a release.
 
 # LICENSE

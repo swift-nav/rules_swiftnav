@@ -1,0 +1,1 @@
+lfs/testdata/*.bin filter=lfs -text
