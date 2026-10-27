@@ -8,7 +8,6 @@
 # EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 
-load("@rules_pkg//pkg:pkg.bzl", "pkg_zip")
 load("//tools:configure_file.bzl", "configure_file_impl")
 
 def _swift_doxygen_impl(ctx):
@@ -65,7 +64,12 @@ def _swift_doxygen_impl(ctx):
         ),
     )
 
-    return [DefaultInfo(files = depset([doxygen_out, config]))]
+    # The generated Doxyfile is only exposed via an output group, so that it
+    # does not end up in packaged documentation
+    return [
+        DefaultInfo(files = depset([doxygen_out])),
+        OutputGroupInfo(doxyfile = depset([config])),
+    ]
 
 _swift_doxygen = rule(
     implementation = _swift_doxygen_impl,
@@ -104,11 +108,75 @@ _filter_html = rule(
     },
 )
 
-def swift_doxygen(**kwargs):
+def _doc_zip_impl(ctx):
+    html_dir = ctx.file.html
+    zipper = ctx.executable._zipper
+    info_file = ctx.info_file
+
+    ctx.actions.run_shell(
+        inputs = [html_dir, info_file],
+        tools = [zipper],
+        outputs = [ctx.outputs.out],
+        command = """
+        set -euo pipefail
+
+        # ctx.info_file is bazel-out/stable-status.txt, populated by
+        # --workspace_status_command when --stamp is enabled
+        VERSION=$(grep -m1 '^STABLE_GIT_VERSION ' {info_file} | cut -d' ' -f2- || true)
+        PREFIX="${{VERSION:-unversioned}}-{package_name}"
+
+        ARGS=$(mktemp)
+        find -L {html_dir} -type f | LC_ALL=C sort | while IFS= read -r FILE; do
+            echo "$PREFIX/html/${{FILE#{html_dir}/}}=$FILE"
+        done > "$ARGS"
+
+        {zipper} cC {out} "@$ARGS"
+        rm -f "$ARGS"
+        """.format(
+            info_file = info_file.path,
+            package_name = ctx.attr.package_name,
+            html_dir = html_dir.path,
+            zipper = zipper.path,
+            out = ctx.outputs.out.path,
+        ),
+    )
+
+    return DefaultInfo(files = depset([ctx.outputs.out]))
+
+_doc_zip = rule(
+    implementation = _doc_zip_impl,
+    attrs = {
+        "html": attr.label(
+            allow_single_file = True,
+            mandatory = True,
+        ),
+        "package_name": attr.string(mandatory = True),
+        "out": attr.output(mandatory = True),
+        "_zipper": attr.label(
+            default = "@bazel_tools//tools/zip:zipper",
+            executable = True,
+            cfg = "exec",
+        ),
+    },
+)
+
+def swift_doxygen(package_name = None, **kwargs):
+    """Generates Doxygen HTML documentation and a zip package of it.
+
+    The zip package contains a single top-level folder
+    `<version>-<package_name>/html/`, where `<version>` is STABLE_GIT_VERSION
+    (or `unversioned` when not stamping), so that multiple packages and
+    versions can be extracted side by side.
+
+    Args:
+        package_name: name of the documentation package, defaults to `name`
+        **kwargs: arguments passed on to the Doxygen rule
+    """
     tags = ["manual"] + kwargs.get("tags", [])
     name = kwargs["name"]
     name_html = name + "_html"
     name_zip = name + "_zip"
+    package_name = package_name or name
 
     kwargs["tags"] = tags
 
@@ -121,11 +189,10 @@ def swift_doxygen(**kwargs):
         html_path = name + "_doxygen/html",
     )
 
-    # We zip the full Doxygen output (all formats), not only the HTML
-    pkg_zip(
+    _doc_zip(
         name = name_zip,
-        srcs = [name],
         tags = tags,
-        package_file_name = name + ".zip",
-        strip_prefix = name,
+        html = name_html,
+        package_name = package_name,
+        out = package_name + ".zip",
     )
