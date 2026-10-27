@@ -14,6 +14,8 @@
 #                 BCC_LOCK_TIMEOUT seconds (default 600) for a running refresh
 #   --background  write generator output to .cache/compile_commands.log
 #   --bcc=PATH    bazel-compile-commands binary, set by the refresh target
+#   --resolve-virtual-includes=PATH
+#                 resolve_virtual_includes binary, set by the refresh target
 
 set -euo pipefail
 
@@ -25,21 +27,24 @@ usage() {
 force=0
 background=0
 bcc=""
+resolve_virtual_includes=""
 for arg in "$@"; do
     case "${arg}" in
         --force) force=1 ;;
         --background) background=1 ;;
         --bcc=*) bcc="${arg#--bcc=}" ;;
+        --resolve-virtual-includes=*) resolve_virtual_includes="${arg#--resolve-virtual-includes=}" ;;
         *) usage ;;
     esac
 done
 
-if [[ -z "${BUILD_WORKSPACE_DIRECTORY:-}" || -z "${bcc}" ]]; then
+if [[ -z "${BUILD_WORKSPACE_DIRECTORY:-}" || -z "${bcc}" || -z "${resolve_virtual_includes}" ]]; then
     usage
 fi
 
 # Runfiles paths are relative to the initial working directory.
 bcc="$(cd "$(dirname "${bcc}")" && pwd)/$(basename "${bcc}")"
+resolve_virtual_includes="$(cd "$(dirname "${resolve_virtual_includes}")" && pwd)/$(basename "${resolve_virtual_includes}")"
 
 workspace="${BUILD_WORKSPACE_DIRECTORY}"
 cd "${workspace}"
@@ -233,6 +238,7 @@ escape_sed_replacement() {
 sed -i.bak "s|\"directory\":\"$(escape_sed_pattern "${execution_root}")\"|\"directory\":\"$(escape_sed_replacement "${workspace}")\"|g" "${tmp_output}" ||
     fail "rewriting directory failed"
 rm -f "${tmp_output}.bak"
+"${resolve_virtual_includes}" "${tmp_output}" || fail "resolving _virtual_includes failed"
 
 holds_lock || fail "lost ${lock_file} to pid $(lock_owner)"
 mv -f "${tmp_output}" "${output}"

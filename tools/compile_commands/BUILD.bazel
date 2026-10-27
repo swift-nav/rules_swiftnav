@@ -1,3 +1,4 @@
+load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 
 package(default_visibility = ["//visibility:public"])
@@ -21,10 +22,21 @@ alias(
     tags = ["manual"],
 )
 
+py_binary(
+    name = "resolve_virtual_includes",
+    srcs = ["resolve_virtual_includes.py"],
+)
+
 sh_binary(
     name = "refresh",
     srcs = ["refresh.sh"],
-    args = ["--bcc=$(rootpath :compile_commands)"],
-    data = [":compile_commands"],
+    args = [
+        "--bcc=$(rootpath :compile_commands)",
+        "--resolve-virtual-includes=$(rootpath :resolve_virtual_includes)",
+    ],
+    data = [
+        ":compile_commands",
+        ":resolve_virtual_includes",
+    ],
     tags = ["manual"],
 )
