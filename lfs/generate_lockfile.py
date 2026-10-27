@@ -25,6 +25,11 @@ _OID = re.compile(rb"^oid sha256:([0-9a-f]{64})$", re.MULTILINE)
 
 def pattern_to_regex(pattern):
     """Translates a gitattributes pattern to a regex matching workspace paths."""
+    # shortcut: subset of git's wildmatch; port https://github.com/git-lfs/wildmatch when a repo needs more.
+    if "\\" in pattern or "[:" in pattern:
+        raise ValueError(
+            f"unsupported gitattributes pattern {pattern!r}: escapes and [[:class:]] are not implemented"
+        )
     anchored = "/" in pattern
     pattern = pattern.removeprefix("/")
     out = []

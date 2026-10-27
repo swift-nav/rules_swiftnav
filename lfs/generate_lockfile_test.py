@@ -70,6 +70,11 @@ class PatternTest(unittest.TestCase):
         self.assertFalse(is_lfs(self.rules, "docs/a.bin"))
         self.assertTrue(is_lfs(self.rules, "docs/x/a.bin"))
 
+    def test_unsupported_syntax_fails_loudly(self):
+        for pattern in (r"a\*.bin", "[[:alpha:]].bin"):
+            with self.assertRaisesRegex(ValueError, "unsupported gitattributes pattern"):
+                parse_gitattributes(pattern + " filter=lfs")
+
 
 class GenerateTest(unittest.TestCase):
     def setUp(self):
