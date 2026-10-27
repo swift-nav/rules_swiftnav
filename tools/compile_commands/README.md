@@ -61,7 +61,10 @@ goes to `.cache/compile_commands.log`.
 
 `bcc` emits paths relative to the execution root. `refresh` rewrites them to the
 workspace and symlinks `<workspace>/external` to `<output_base>/external`, so
-external headers stay reachable for clangd.
+external headers stay reachable for clangd. It also replaces each
+`_virtual_includes/<lib>` include dir with the source dir its header symlinks
+point to, so go-to-definition opens the sources instead of `bazel-out` copies.
+Generated headers keep their `bazel-out` paths.
 
 ## Notes
 
