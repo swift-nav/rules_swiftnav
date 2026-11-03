@@ -11,6 +11,7 @@ Checks: >
   cert-*,
   -cert-msc50-cpp,
   -cert-dcl50-cpp,
+  -cert-msc30-c,
   concurrency-*,
   portability-*,
   modernize-use-emplace,
@@ -95,13 +96,15 @@ WarningsAsErrors: >
   misc-uniqueptr-reset-release
 
 HeaderFilterRegex: .*
-ExcludeHeaderFilterRegex: .*\.pb\.h
+ExcludeHeaderFilterRegex: (^|/)external/|\.pb\.h$
 
 CheckOptions:
   - key: performance-for-range-copy.WarnOnAllAutoCopies
     value: "true"
   - key: bugprone-argument-comment.StrictMode
     value: "true"
+  - key: misc-use-internal-linkage.FixMode
+    value: None
 
   # --- Complexity & Size Limits ---
   - key: readability-function-cognitive-complexity.Threshold
@@ -114,8 +117,6 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.ClassMemberCase
     value: lower_case
-  - key: readability-identifier-naming.ClassMemberSuffix
-    value: ""
   - key: readability-identifier-naming.ClassConstantCase
     value: CamelCase
   - key: readability-identifier-naming.ClassConstantPrefix
@@ -124,8 +125,6 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.ConstantMemberPrefix
     value: c
-  - key: readability-identifier-naming.ConstantParameterCase
-    value: lower_case
   - key: readability-identifier-naming.EnumCase
     value: CamelCase
   - key: readability-identifier-naming.EnumConstantCase
@@ -138,20 +137,22 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.GlobalConstantPrefix
     value: c
-  - key: readability-identifier-naming.LocalConstantCase
-    value: lower_case
   - key: readability-identifier-naming.LocalVariableCase
     value: lower_case
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
   - key: readability-identifier-naming.ParameterCase
     value: lower_case
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: lower_case
   - key: readability-identifier-naming.PrivateMemberSuffix
     value: "_"
-  - key: readability-identifier-naming.ProtectedMemberSuffix
-    value: ""
-  - key: readability-identifier-naming.PublicMemberSuffix
-    value: ""
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.PublicMemberCase
+    value: lower_case
   - key: readability-identifier-naming.StaticConstantCase
     value: CamelCase
   - key: readability-identifier-naming.StaticConstantPrefix
@@ -160,15 +161,17 @@ CheckOptions:
     value: CamelCase
   - key: readability-identifier-naming.TemplateParameterCase
     value: CamelCase
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
   - key: readability-identifier-naming.TypedefCase
     value: lower_case
   - key: readability-identifier-naming.TypedefSuffix
     value: "_t"
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
   - key: readability-identifier-naming.VariableCase
     value: lower_case
 
   # --- Modernization & Style Fine-tuning ---
   - key: readability-braces-around-statements.ShortStatementLines
     value: "1"
-  - key: modernize-use-auto.MinTypeNameLength
-    value: "5"
