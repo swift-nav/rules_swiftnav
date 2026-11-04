@@ -46,6 +46,7 @@ SOURCE_HEADERS = [
 
 VIRTUAL_A = f"{FASTBUILD}/pkg_a/_virtual_includes/a"
 LINK_A = ("pkg_a/include/a/a.h", f"{VIRTUAL_A}/a/a.h")
+VIRTUAL_M = f"{FASTBUILD}/pkg_m/_virtual_includes/m"
 
 
 def symlink_aquery(links: list[tuple[str, str]]) -> dict:
@@ -127,6 +128,13 @@ class WorkspaceTestCase(unittest.TestCase):
 class TestVirtualIncludeReplacements(WorkspaceTestCase):
     """Mapping _virtual_includes dirs to source dirs from aquery Symlink actions."""
 
+    def assert_not_mapped(self, links: list[tuple[str, str]]) -> None:
+        """Make sure that links get no replacement and that LINK_A gets one."""
+        aquery = symlink_aquery([LINK_A, *links])
+        self.assertEqual(
+            self.replacements(aquery), {VIRTUAL_A: [self.source_dir("pkg_a/include")]}
+        )
+
     def test_strip_include_prefix_maps_to_source_dir_in_every_config(self):
         """A strip_include_prefix lib maps to its source dir in each config."""
         replacements = self.fixture_replacements()
@@ -157,10 +165,9 @@ class TestVirtualIncludeReplacements(WorkspaceTestCase):
 
     def test_mixed_headers_keep_virtual_dir_after_source_dir(self):
         """A lib with mixed headers maps to its source dir, then to its virtual dir."""
-        virtual_dir = f"{FASTBUILD}/pkg_m/_virtual_includes/m"
         self.assertEqual(
-            self.fixture_replacements()[virtual_dir],
-            [self.source_dir("pkg_m/include"), virtual_dir],
+            self.fixture_replacements()[VIRTUAL_M],
+            [self.source_dir("pkg_m/include"), VIRTUAL_M],
         )
 
     def test_main_repo_package_and_local_module_map_into_workspace(self):
@@ -179,17 +186,13 @@ class TestVirtualIncludeReplacements(WorkspaceTestCase):
     def test_external_repo_outside_workspace_is_not_mapped(self):
         """A lib of an external repo outside the workspace is not mapped."""
         self.make_file(self.external / "far+" / "include" / "far" / "far.h")
-        aquery = symlink_aquery(
+        self.assert_not_mapped(
             [
-                LINK_A,
                 (
                     "external/far+/include/far/far.h",
                     f"{FASTBUILD}/external/far+/_virtual_includes/far/far/far.h",
                 ),
             ]
-        )
-        self.assertEqual(
-            self.replacements(aquery), {VIRTUAL_A: [self.source_dir("pkg_a/include")]}
         )
 
     def test_source_headers_with_different_roots_are_not_mapped(self):
@@ -197,15 +200,11 @@ class TestVirtualIncludeReplacements(WorkspaceTestCase):
         self.make_file(self.workspace / "pkg_x" / "include" / "x" / "x.h")
         self.make_file(self.workspace / "pkg_x" / "other" / "x" / "y.h")
         virtual_x = f"{FASTBUILD}/pkg_x/_virtual_includes/x"
-        aquery = symlink_aquery(
+        self.assert_not_mapped(
             [
-                LINK_A,
                 ("pkg_x/include/x/x.h", f"{virtual_x}/x/x.h"),
                 ("pkg_x/other/x/y.h", f"{virtual_x}/x/y.h"),
             ]
-        )
-        self.assertEqual(
-            self.replacements(aquery), {VIRTUAL_A: [self.source_dir("pkg_a/include")]}
         )
 
     def test_empty_aquery_gives_empty_mapping(self):
@@ -219,7 +218,6 @@ class TestVirtualIncludeReplacements(WorkspaceTestCase):
 
 
 SOURCE_A = "/workspace/pkg_a/include"
-VIRTUAL_M = f"{FASTBUILD}/pkg_m/_virtual_includes/m"
 SOURCE_M = "/workspace/pkg_m/include"
 REPLACEMENTS = {VIRTUAL_A: [SOURCE_A], VIRTUAL_M: [SOURCE_M, VIRTUAL_M]}
 

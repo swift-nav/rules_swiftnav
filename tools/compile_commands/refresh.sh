@@ -240,8 +240,8 @@ sed -i.bak "s|\"directory\":\"$(escape_sed_pattern "${execution_root}")\"|\"dire
     fail "rewriting directory failed"
 rm -f "${tmp_output}.bak"
 
-# The same default flags and target pattern as the aquery of bcc, so that Bazel
-# reuses its analysis cache.
+# Use the default flags and the target pattern of the bcc aquery, so that Bazel
+# keeps its analysis cache.
 "${bazel_command}" aquery --noshow_progress --output=jsonproto \
     'outputs(".*/_virtual_includes/.*", mnemonic("Symlink", deps(//...)))' >"${aquery_output}" ||
     fail "querying _virtual_includes symlinks failed"

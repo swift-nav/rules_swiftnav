@@ -40,7 +40,6 @@ py_binary(
     name = "resolve_virtual_includes",
     srcs = ["resolve_virtual_includes.py"],
     tags = ["manual"],
-    deps = [":resolve_virtual_includes_lib"],
 )
 
 py_test(

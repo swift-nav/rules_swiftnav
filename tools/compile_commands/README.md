@@ -67,8 +67,10 @@ external headers stay reachable for clangd. It also replaces each
 go-to-definition opens the sources instead of `bazel-out` copies. The source
 dirs come from the Symlink actions of `bazel aquery`, so this works before a
 build. A lib that also has generated headers keeps its `_virtual_includes` dir
-after the source dir. A lib with `include_prefix`, and a lib with only generated
-headers, keep their `bazel-out` paths.
+after the source dir. A lib with only generated headers keeps its `bazel-out`
+path. So does a lib without a single source dir in the workspace, for example a
+lib with `include_prefix` or a lib of an external repository outside the
+workspace.
 
 ## Notes
 

@@ -78,7 +78,7 @@ def symlinks(aquery: dict) -> Iterator[tuple[str, str]]:
 
 
 def source_root(input_path: str, include_path: str) -> str | None:
-    """The dir that a source header is in when it is included as include_path.
+    """The dir from which include_path reaches the source header at input_path.
 
     Returns "" for the execution root, and None if input_path does not end in
     include_path.
