@@ -49,10 +49,14 @@ SOURCE_HEADERS = [
 
 VIRTUAL_A = f"{FASTBUILD}/pkg_a/_virtual_includes/a"
 LINK_A = ("pkg_a/include/a/a.h", f"{VIRTUAL_A}/a/a.h")
-VIRTUAL_M = f"{FASTBUILD}/pkg_m/_virtual_includes/m"
 VIRTUAL_B = f"{FASTBUILD}/pkg_b/_virtual_includes/b"
 VIRTUAL_C = f"{FASTBUILD}/pkg_c/_virtual_includes/c"
 VIRTUAL_G = f"{FASTBUILD}/pkg_g/_virtual_includes/g"
+VIRTUAL_M = f"{FASTBUILD}/pkg_m/_virtual_includes/m"
+
+
+def fixture_aquery() -> dict:
+    return json.loads(AQUERY_FIXTURE.read_text())
 
 
 def symlink_aquery(links: list[tuple[str, str]]) -> dict:
@@ -120,19 +124,24 @@ class WorkspaceTestCase(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.touch()
 
-    def source_dir(self, path: str) -> str:
-        """The real path of a dir in the workspace."""
-        return os.path.realpath(self.workspace / path)
-
-    def source_file(self, path: str) -> str:
-        """The real path of a file in the workspace."""
+    def real_path(self, path: str) -> str:
+        """The real path of a dir or file in the workspace."""
         return os.path.realpath(self.workspace / path)
 
     def replacements(self, aquery: dict) -> dict[str, list[str]]:
         return virtual_include_replacements(aquery, str(self.workspace))
 
     def fixture_replacements(self) -> dict[str, list[str]]:
-        return self.replacements(json.loads(AQUERY_FIXTURE.read_text()))
+        return self.replacements(fixture_aquery())
+
+    def run_main(self, entries: list[dict], *flags: str) -> list[dict]:
+        """Run main from the workspace and return the rewritten compile commands."""
+        compile_commands = self.workspace / "compile_commands.json"
+        compile_commands.write_text(json.dumps(entries))
+        self.addCleanup(os.chdir, os.getcwd())
+        os.chdir(self.workspace)
+        main([f"--aquery={AQUERY_FIXTURE}", *flags, str(compile_commands)])
+        return json.loads(compile_commands.read_text())
 
 
 class TestVirtualIncludeReplacements(WorkspaceTestCase):
@@ -142,21 +151,21 @@ class TestVirtualIncludeReplacements(WorkspaceTestCase):
         """Make sure that links get no replacement and that LINK_A gets one."""
         aquery = symlink_aquery([LINK_A, *links])
         self.assertEqual(
-            self.replacements(aquery), {VIRTUAL_A: [self.source_dir("pkg_a/include")]}
+            self.replacements(aquery), {VIRTUAL_A: [self.real_path("pkg_a/include")]}
         )
 
     def test_strip_include_prefix_maps_to_source_dir_in_every_config(self):
         """A strip_include_prefix lib maps to its source dir in each config."""
         replacements = self.fixture_replacements()
-        expected = [self.source_dir("pkg_a/include")]
+        expected = [self.real_path("pkg_a/include")]
         self.assertEqual(replacements[VIRTUAL_A], expected)
         self.assertEqual(replacements[f"{EXEC}/pkg_a/_virtual_includes/a"], expected)
 
     def test_include_prefix_is_not_mapped(self):
         """A lib with include_prefix is not mapped, also with strip_include_prefix."""
         replacements = self.fixture_replacements()
-        self.assertNotIn(f"{FASTBUILD}/pkg_b/_virtual_includes/b", replacements)
-        self.assertNotIn(f"{FASTBUILD}/pkg_c/_virtual_includes/c", replacements)
+        self.assertNotIn(VIRTUAL_B, replacements)
+        self.assertNotIn(VIRTUAL_C, replacements)
 
     def test_strip_include_prefix_slash_maps_to_workspace_root(self):
         """A lib with strip_include_prefix "/" maps to the workspace root."""
@@ -169,21 +178,19 @@ class TestVirtualIncludeReplacements(WorkspaceTestCase):
 
     def test_generated_headers_only_is_not_mapped(self):
         """A lib with only generated headers is not mapped."""
-        self.assertNotIn(
-            f"{FASTBUILD}/pkg_g/_virtual_includes/g", self.fixture_replacements()
-        )
+        self.assertNotIn(VIRTUAL_G, self.fixture_replacements())
 
     def test_mixed_headers_keep_virtual_dir_after_source_dir(self):
         """A lib with mixed headers maps to its source dir, then to its virtual dir."""
         self.assertEqual(
             self.fixture_replacements()[VIRTUAL_M],
-            [self.source_dir("pkg_m/include"), VIRTUAL_M],
+            [self.real_path("pkg_m/include"), VIRTUAL_M],
         )
 
     def test_main_repo_package_and_local_module_map_into_workspace(self):
         """A nested package and an in-workspace module map to the same source dir."""
         replacements = self.fixture_replacements()
-        expected = [self.source_dir("third_party/inner/include")]
+        expected = [self.real_path("third_party/inner/include")]
         self.assertEqual(
             replacements[f"{FASTBUILD}/third_party/inner/_virtual_includes/inner"],
             expected,
@@ -304,24 +311,16 @@ class TestMain(WorkspaceTestCase):
             "output": output,
             "arguments": ["clang", f"-I{VIRTUAL_A}", "-c", "pkg_a/a.cc", "-o", output],
         }
-        compile_commands = self.workspace / "compile_commands.json"
-        compile_commands.write_text(json.dumps([entry]))
-        self.addCleanup(os.chdir, os.getcwd())
-        os.chdir(self.workspace)
-
-        main([f"--aquery={AQUERY_FIXTURE}", str(compile_commands)])
-
         rewritten_arguments = [
             "clang",
-            f"-I{self.source_dir('pkg_a/include')}",
+            f"-I{self.real_path('pkg_a/include')}",
             "-c",
             "pkg_a/a.cc",
             "-o",
             output,
         ]
         self.assertEqual(
-            json.loads(compile_commands.read_text()),
-            [{**entry, "arguments": rewritten_arguments}],
+            self.run_main([entry]), [{**entry, "arguments": rewritten_arguments}]
         )
 
 
@@ -338,16 +337,16 @@ class TestOverlayHeaders(WorkspaceTestCase):
     def fixture_headers(
         self, replacements: dict[str, list[str]] | None = None
     ) -> dict[str, dict[str, str]]:
-        return self.headers(json.loads(AQUERY_FIXTURE.read_text()), replacements)
+        return self.headers(fixture_aquery(), replacements)
 
     def test_include_prefix_libs_map_include_paths_to_source_files(self):
         """Libs with include_prefix, also with strip_include_prefix, map to sources."""
         headers = self.fixture_headers()
         self.assertEqual(
-            headers[VIRTUAL_B], {"vendor_b/b.h": self.source_file("pkg_b/b.h")}
+            headers[VIRTUAL_B], {"vendor_b/b.h": self.real_path("pkg_b/b.h")}
         )
         self.assertEqual(
-            headers[VIRTUAL_C], {"cpref/c.h": self.source_file("pkg_c/src/c.h")}
+            headers[VIRTUAL_C], {"cpref/c.h": self.real_path("pkg_c/src/c.h")}
         )
 
     def test_libs_with_replacement_are_not_in_overlay(self):
@@ -363,7 +362,7 @@ class TestOverlayHeaders(WorkspaceTestCase):
         """A lib with mixed headers and no replacement has only its source headers."""
         self.assertEqual(
             self.fixture_headers(replacements={})[VIRTUAL_M],
-            {"m/m.h": self.source_file("pkg_m/include/m/m.h")},
+            {"m/m.h": self.real_path("pkg_m/include/m/m.h")},
         )
 
     def test_source_headers_with_different_roots_are_in_overlay(self):
@@ -381,8 +380,8 @@ class TestOverlayHeaders(WorkspaceTestCase):
             self.headers(aquery),
             {
                 virtual_x: {
-                    "x/x.h": self.source_file("pkg_x/include/x/x.h"),
-                    "x/y.h": self.source_file("pkg_x/other/x/y.h"),
+                    "x/x.h": self.real_path("pkg_x/include/x/x.h"),
+                    "x/y.h": self.real_path("pkg_x/other/x/y.h"),
                 }
             },
         )
@@ -413,7 +412,7 @@ class TestOverlayHeaders(WorkspaceTestCase):
             self.headers(aquery),
             {
                 virtual_inner: {
-                    "prefix/inner.h": self.source_file(
+                    "prefix/inner.h": self.real_path(
                         "third_party/inner/include/inner/inner.h"
                     )
                 }
@@ -424,12 +423,12 @@ class TestOverlayHeaders(WorkspaceTestCase):
 DIRECTORY = "/workspace"
 
 
-def overlay_dir(name: str, *contents: dict) -> dict:
+def dir_entry(name: str, *contents: dict) -> dict:
     """A directory entry of a virtual file system (VFS) overlay."""
     return {"type": "directory", "name": name, "contents": list(contents)}
 
 
-def overlay_file(name: str, source_file: str) -> dict:
+def file_entry(name: str, source_file: str) -> dict:
     """A file entry of a VFS overlay that maps to a source file."""
     return {"type": "file", "name": name, "external-contents": source_file}
 
@@ -448,11 +447,11 @@ class TestVfsOverlay(unittest.TestCase):
                 "version": 0,
                 "use-external-names": True,
                 "roots": [
-                    overlay_dir(
+                    dir_entry(
                         os.path.join(DIRECTORY, VIRTUAL_B),
-                        overlay_dir(
+                        dir_entry(
                             "vendor_b",
-                            overlay_dir("detail", overlay_file("b.h", "/src/b.h")),
+                            dir_entry("detail", file_entry("b.h", "/src/b.h")),
                         ),
                     )
                 ],
@@ -468,12 +467,12 @@ class TestVfsOverlay(unittest.TestCase):
         self.assertEqual(
             overlay["roots"],
             [
-                overlay_dir(
+                dir_entry(
                     os.path.join(DIRECTORY, VIRTUAL_B),
-                    overlay_dir(
+                    dir_entry(
                         "vendor_b",
-                        overlay_file("a.h", "/src/a.h"),
-                        overlay_file("b.h", "/src/b.h"),
+                        file_entry("a.h", "/src/a.h"),
+                        file_entry("b.h", "/src/b.h"),
                     ),
                 )
             ],
@@ -495,18 +494,18 @@ class TestVfsOverlay(unittest.TestCase):
         self.assertEqual(
             overlay["roots"],
             [
-                overlay_dir(
+                dir_entry(
                     os.path.join(DIRECTORY, VIRTUAL_B),
-                    overlay_dir("other", overlay_file("o.h", "/src/o.h")),
-                    overlay_dir(
+                    dir_entry("other", file_entry("o.h", "/src/o.h")),
+                    dir_entry(
                         "vendor_b",
-                        overlay_file("x.h", "/src/x.h"),
-                        overlay_file("y.h", "/src/y.h"),
+                        file_entry("x.h", "/src/x.h"),
+                        file_entry("y.h", "/src/y.h"),
                     ),
                 ),
-                overlay_dir(
+                dir_entry(
                     os.path.join(DIRECTORY, VIRTUAL_C),
-                    overlay_dir("cpref", overlay_file("c.h", "/src/c.h")),
+                    dir_entry("cpref", file_entry("c.h", "/src/c.h")),
                 ),
             ],
         )
@@ -568,30 +567,11 @@ class TestMainWithOverlay(WorkspaceTestCase):
     def setUp(self):
         super().setUp()
         self.overlay = self.workspace / "vfs_overlay.json"
-        compile_commands = self.workspace / "compile_commands.json"
-        compile_commands.write_text(
-            json.dumps(
-                [
-                    self.entry("pkg_b/b.cc", VIRTUAL_B),
-                    self.entry("pkg_a/a.cc", VIRTUAL_A),
-                ]
-            )
+        entries = self.run_main(
+            [self.entry("pkg_b/b.cc", VIRTUAL_B), self.entry("pkg_a/a.cc", VIRTUAL_A)],
+            f"--overlay={self.overlay}",
         )
-        self.addCleanup(os.chdir, os.getcwd())
-        os.chdir(self.workspace)
-
-        main(
-            [
-                f"--aquery={AQUERY_FIXTURE}",
-                f"--overlay={self.overlay}",
-                str(compile_commands),
-            ]
-        )
-
-        self.arguments = {
-            entry["file"]: entry["arguments"]
-            for entry in json.loads(compile_commands.read_text())
-        }
+        self.arguments = {entry["file"]: entry["arguments"] for entry in entries}
 
     def entry(self, file: str, include_dir: str) -> dict:
         return {
@@ -602,9 +582,9 @@ class TestMainWithOverlay(WorkspaceTestCase):
 
     def test_writes_overlay_with_include_prefix_lib(self):
         """main writes a JSON overlay with a root for the include_prefix lib."""
-        root_b = overlay_dir(
+        root_b = dir_entry(
             os.path.join(self.workspace, VIRTUAL_B),
-            overlay_dir("vendor_b", overlay_file("b.h", self.source_file("pkg_b/b.h"))),
+            dir_entry("vendor_b", file_entry("b.h", self.real_path("pkg_b/b.h"))),
         )
         self.assertIn(root_b, json.loads(self.overlay.read_text())["roots"])
 
@@ -626,7 +606,7 @@ class TestMainWithOverlay(WorkspaceTestCase):
         """An entry that names no overlay dir gets only its include rewrite."""
         self.assertEqual(
             self.arguments["pkg_a/a.cc"],
-            ["clang", f"-I{self.source_dir('pkg_a/include')}", "-c", "pkg_a/a.cc"],
+            ["clang", f"-I{self.real_path('pkg_a/include')}", "-c", "pkg_a/a.cc"],
         )
 
 

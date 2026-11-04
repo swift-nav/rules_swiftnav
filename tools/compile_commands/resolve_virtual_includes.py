@@ -20,9 +20,9 @@ becomes unreachable.
 
 A _virtual_includes dir without a single source dir in the workspace keeps its
 include flag. For these dirs, --overlay writes a clang virtual file system (VFS)
-overlay that maps each header path in the dir to its source file, and adds the
-overlay to the compile commands that use the dir. Only clang-based tools read
-the overlay.
+overlay that maps the path of each source header in the dir to the source file,
+and adds the overlay to the compile commands that use the dir. Only clang-based
+tools read the overlay.
 
 Must run from the workspace root, which the paths in compile_commands.json are
 relative to.
@@ -158,10 +158,9 @@ def source_file(input_path: str, workspace: str, real_workspace: str) -> str:
 
     Else the path through the workspace, for example through <workspace>/external.
     """
-    real_path = os.path.realpath(os.path.join(workspace, input_path))
-    if is_in_dir(real_path, real_workspace):
-        return real_path
-    return os.path.join(workspace, input_path)
+    path = os.path.join(workspace, input_path)
+    real_path = os.path.realpath(path)
+    return real_path if is_in_dir(real_path, real_workspace) else path
 
 
 def overlay_headers(
@@ -279,6 +278,11 @@ def add_overlay_flag(
     return [arguments[0], "-ivfsoverlay", overlay_file, *arguments[1:]]
 
 
+def shared_directory(entries: list[dict]) -> str:
+    """The directory that all compile commands share, or "" if there are none."""
+    return entries[0]["directory"] if entries else ""
+
+
 def write_json_atomically(path: str, value: object) -> None:
     tmp_path = Path(f"{path}.tmp")
     tmp_path.write_text(json.dumps(value))
@@ -308,10 +312,9 @@ def main(argv: list[str] | None = None) -> None:
         entry["arguments"] = rewrite_include_flags(entry["arguments"], replacements)
 
     if args.overlay is not None:
-        # The virtual dirs are relative to the directory that all entries share.
         headers = overlay_headers(aquery, workspace, replacements) if entries else {}
-        directory = entries[0]["directory"] if entries else ""
-        write_json_atomically(args.overlay, vfs_overlay(headers, directory))
+        overlay = vfs_overlay(headers, shared_directory(entries))
+        write_json_atomically(args.overlay, overlay)
         for entry in entries:
             entry["arguments"] = add_overlay_flag(
                 entry["arguments"], headers.keys(), args.overlay

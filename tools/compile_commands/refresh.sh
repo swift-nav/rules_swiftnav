@@ -56,7 +56,8 @@ lock_timeout="${BCC_LOCK_TIMEOUT:-600}"
 log_file="${cache_dir}/compile_commands.log"
 tmp_output="${cache_dir}/compile_commands.json.tmp.$$"
 aquery_output="${cache_dir}/virtual_includes.aquery.json.tmp.$$"
-# compile_commands.json refers to the overlay, so it is written to its final path.
+# compile_commands.json refers to the overlay by its final path.
+# resolve_virtual_includes writes it to ${vfs_overlay}.tmp, then moves it there.
 vfs_overlay="${cache_dir}/virtual_includes.vfsoverlay.yaml"
 output="${workspace}/compile_commands.json"
 
@@ -137,7 +138,7 @@ reclaim_stale_lock() {
 }
 
 release_lock() {
-    rm -f "${tmp_output}" "${tmp_output}.bak" "${aquery_output}"
+    rm -f "${tmp_output}" "${tmp_output}.bak" "${aquery_output}" "${vfs_overlay}.tmp"
     if holds_lock; then
         rm -f "${lock_file}"
     fi

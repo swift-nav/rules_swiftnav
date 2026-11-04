@@ -71,9 +71,10 @@ after the source dir. A lib with only generated headers keeps its `bazel-out`
 path. So does a lib without a single source dir in the workspace, for example a
 lib with `include_prefix` or a lib of an external repository outside the
 workspace. For such a lib, `refresh` writes a clang virtual file system overlay
-to `.cache/virtual_includes.vfsoverlay.yaml` that maps each of its source
-headers, and adds `-ivfsoverlay` to the compile commands that use it. Only
-clang-based tools (clangd, clang-tidy) read the overlay.
+to `.cache/virtual_includes.vfsoverlay.yaml` that maps the `_virtual_includes`
+path of each of its source headers to the source file, and adds `-ivfsoverlay`
+to the compile commands that use it. Only clang-based tools (clangd,
+clang-tidy) read the overlay.
 
 ## Notes
 
