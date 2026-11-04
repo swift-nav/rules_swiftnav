@@ -55,6 +55,7 @@ lock_file="${cache_dir}/compile_commands.lock"
 lock_timeout="${BCC_LOCK_TIMEOUT:-600}"
 log_file="${cache_dir}/compile_commands.log"
 tmp_output="${cache_dir}/compile_commands.json.tmp.$$"
+aquery_output="${cache_dir}/virtual_includes.aquery.json.tmp.$$"
 output="${workspace}/compile_commands.json"
 
 structure_pathspecs=(
@@ -134,7 +135,7 @@ reclaim_stale_lock() {
 }
 
 release_lock() {
-    rm -f "${tmp_output}" "${tmp_output}.bak"
+    rm -f "${tmp_output}" "${tmp_output}.bak" "${aquery_output}"
     if holds_lock; then
         rm -f "${lock_file}"
     fi
@@ -238,7 +239,14 @@ escape_sed_replacement() {
 sed -i.bak "s|\"directory\":\"$(escape_sed_pattern "${execution_root}")\"|\"directory\":\"$(escape_sed_replacement "${workspace}")\"|g" "${tmp_output}" ||
     fail "rewriting directory failed"
 rm -f "${tmp_output}.bak"
-"${resolve_virtual_includes}" "${tmp_output}" || fail "resolving _virtual_includes failed"
+
+# The same default flags and target pattern as the aquery of bcc, so that Bazel
+# reuses its analysis cache.
+"${bazel_command}" aquery --noshow_progress --output=jsonproto \
+    'outputs(".*/_virtual_includes/.*", mnemonic("Symlink", deps(//...)))' >"${aquery_output}" ||
+    fail "querying _virtual_includes symlinks failed"
+"${resolve_virtual_includes}" --aquery="${aquery_output}" "${tmp_output}" ||
+    fail "resolving _virtual_includes failed"
 
 holds_lock || fail "lost ${lock_file} to pid $(lock_owner)"
 mv -f "${tmp_output}" "${output}"

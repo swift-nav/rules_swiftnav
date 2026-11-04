@@ -46,7 +46,8 @@ flowchart TD
     Stale -- no --> Done(["up to date"])
     Stale -- yes --> BCC["bcc"]
     BCC -->|"aquery"| Bazel
-    BCC --> Rewrite["rewrite paths, symlink external/"]
+    BCC --> Rewrite["rewrite paths, symlink external/,<br/>resolve _virtual_includes"]
+    Rewrite -->|"aquery"| Bazel
     Rewrite --> DB["compile_commands.json"]
     Clangd["clangd / IDE"] -->|"reads"| DB
 ```
@@ -62,9 +63,12 @@ goes to `.cache/compile_commands.log`.
 `bcc` emits paths relative to the execution root. `refresh` rewrites them to the
 workspace and symlinks `<workspace>/external` to `<output_base>/external`, so
 external headers stay reachable for clangd. It also replaces each
-`_virtual_includes/<lib>` include dir with the source dir its header symlinks
-point to, so go-to-definition opens the sources instead of `bazel-out` copies.
-Generated headers keep their `bazel-out` paths.
+`_virtual_includes/<lib>` include dir with the source dir of its headers, so
+go-to-definition opens the sources instead of `bazel-out` copies. The source
+dirs come from the Symlink actions of `bazel aquery`, so this works before a
+build. A lib that also has generated headers keeps its `_virtual_includes` dir
+after the source dir. A lib with `include_prefix`, and a lib with only generated
+headers, keep their `bazel-out` paths.
 
 ## Notes
 
