@@ -18,6 +18,12 @@ the source dir of its headers. The mapping comes from the Symlink actions of
 headers keeps its _virtual_includes dir after the source dir, so that no header
 becomes unreachable.
 
+A _virtual_includes dir without a single source dir in the workspace keeps its
+include flag. For these dirs, --overlay writes a clang virtual file system (VFS)
+overlay that maps each header path in the dir to its source file, and adds the
+overlay to the compile commands that use the dir. Only clang-based tools read
+the overlay.
+
 Must run from the workspace root, which the paths in compile_commands.json are
 relative to.
 """
@@ -27,9 +33,10 @@ import json
 import os
 import re
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Container, Iterator
 from functools import cache
 from pathlib import Path
+from typing import NamedTuple
 
 INCLUDE_FLAGS = ("-I", "-iquote", "-isystem", "-idirafter")
 
@@ -77,6 +84,23 @@ def symlinks(aquery: dict) -> Iterator[tuple[str, str]]:
                 yield input_path, artifact_paths[output_id]
 
 
+def virtual_headers(aquery: dict) -> Iterator[tuple[str, str, str]]:
+    """Yield the (virtual dir, include path, input) of each _virtual_includes header."""
+    for input_path, output_path in symlinks(aquery):
+        match = VIRTUAL_HEADER.fullmatch(output_path)
+        if match is not None:
+            virtual_dir, include_path = match.groups()
+            yield virtual_dir, include_path, input_path
+
+
+def is_generated(input_path: str) -> bool:
+    return input_path.startswith("bazel-out/")
+
+
+def is_in_dir(path: str, directory: str) -> bool:
+    return os.path.commonpath([path, directory]) == directory
+
+
 def source_root(input_path: str, include_path: str) -> str | None:
     """The dir from which include_path reaches the source header at input_path.
 
@@ -98,7 +122,7 @@ def workspace_source_dir(roots: set[str | None], real_workspace: str) -> str | N
     if root is None:
         return None
     source_dir = os.path.realpath(os.path.join(real_workspace, root))
-    in_workspace = os.path.commonpath([source_dir, real_workspace]) == real_workspace
+    in_workspace = is_in_dir(source_dir, real_workspace)
     return source_dir if in_workspace and os.path.isdir(source_dir) else None
 
 
@@ -111,12 +135,8 @@ def virtual_include_replacements(aquery: dict, workspace: str) -> dict[str, list
     """
     source_roots: dict[str, set[str | None]] = defaultdict(set)
     with_generated_headers: set[str] = set()
-    for input_path, output_path in symlinks(aquery):
-        match = VIRTUAL_HEADER.fullmatch(output_path)
-        if match is None:
-            continue
-        virtual_dir, include_path = match.groups()
-        if input_path.startswith("bazel-out/"):
+    for virtual_dir, include_path, input_path in virtual_headers(aquery):
+        if is_generated(input_path):
             with_generated_headers.add(virtual_dir)
         else:
             source_roots[virtual_dir].add(source_root(input_path, include_path))
@@ -133,12 +153,103 @@ def virtual_include_replacements(aquery: dict, workspace: str) -> dict[str, list
     return replacements
 
 
-def split_joined_include_flag(arg: str) -> tuple[str, str] | None:
-    """Split an arg such as -I<dir> into the flag and the dir."""
+def source_file(input_path: str, workspace: str, real_workspace: str) -> str:
+    """The real path of a source header if it is in the workspace.
+
+    Else the path through the workspace, for example through <workspace>/external.
+    """
+    real_path = os.path.realpath(os.path.join(workspace, input_path))
+    if is_in_dir(real_path, real_workspace):
+        return real_path
+    return os.path.join(workspace, input_path)
+
+
+def overlay_headers(
+    aquery: dict, workspace: str, replacements: dict[str, list[str]]
+) -> dict[str, dict[str, str]]:
+    """Map each _virtual_includes dir without a replacement to its source headers.
+
+    The value maps the include path of each source header to its source file. A
+    dir without source headers is not in the result.
+    """
+    real_workspace = os.path.realpath(workspace)
+    headers: dict[str, dict[str, str]] = defaultdict(dict)
+    for virtual_dir, include_path, input_path in virtual_headers(aquery):
+        if virtual_dir not in replacements and not is_generated(input_path):
+            headers[virtual_dir][include_path] = source_file(
+                input_path, workspace, real_workspace
+            )
+    return dict(headers)
+
+
+def include_path_tree(include_paths: dict[str, str]) -> dict:
+    """Nest include paths by dir: a dir maps to a dict, a file to its source file."""
+    tree: dict = {}
+    for include_path, source in include_paths.items():
+        *dirs, name = include_path.split("/")
+        node = tree
+        for dir_name in dirs:
+            node = node.setdefault(dir_name, {})
+        node[name] = source
+    return tree
+
+
+def overlay_entries(tree: dict) -> list[dict]:
+    """The VFS overlay entries of an include path tree, sorted by name."""
+    entries: list[dict] = []
+    for name, value in sorted(tree.items()):
+        if isinstance(value, dict):
+            entries.append(
+                {"type": "directory", "name": name, "contents": overlay_entries(value)}
+            )
+        else:
+            entries.append({"type": "file", "name": name, "external-contents": value})
+    return entries
+
+
+def vfs_overlay(headers: dict[str, dict[str, str]], directory: str) -> dict:
+    """A clang VFS overlay that maps the headers of each virtual dir to sources.
+
+    The virtual dirs are relative to directory. With use-external-names, clang
+    reports the path of the source file instead of the virtual path.
+    """
+    roots = {
+        os.path.join(directory, virtual_dir): include_path_tree(include_paths)
+        for virtual_dir, include_paths in headers.items()
+    }
+    return {"version": 0, "use-external-names": True, "roots": overlay_entries(roots)}
+
+
+class IncludeFlag(NamedTuple):
+    """An include flag and its dir, joined (-I<dir>) or as two args (-I <dir>)."""
+
+    flag: str
+    directory: str
+    joined: bool
+
+    def args(self, directory: str) -> list[str]:
+        """The args of this flag, in the same form, for directory."""
+        return [self.flag + directory] if self.joined else [self.flag, directory]
+
+
+def joined_include_flag(arg: str) -> IncludeFlag | None:
     for flag in INCLUDE_FLAGS:
         if arg.startswith(flag):
-            return flag, arg[len(flag) :]
+            return IncludeFlag(flag, arg[len(flag) :], joined=True)
     return None
+
+
+def split_include_flags(arguments: list[str]) -> Iterator[str | IncludeFlag]:
+    """Yield each include flag with its dir as an IncludeFlag, and other args as is."""
+    index = 0
+    while index < len(arguments):
+        arg = arguments[index]
+        if arg in INCLUDE_FLAGS and index + 1 < len(arguments):
+            yield IncludeFlag(arg, arguments[index + 1], joined=False)
+            index += 2
+            continue
+        yield joined_include_flag(arg) or arg
+        index += 1
 
 
 def rewrite_include_flags(
@@ -146,23 +257,32 @@ def rewrite_include_flags(
 ) -> list[str]:
     """Replace each include flag for a mapped dir with one flag per replacement dir."""
     rewritten: list[str] = []
-    index = 0
-    while index < len(arguments):
-        arg = arguments[index]
-        next_arg = arguments[index + 1] if index + 1 < len(arguments) else ""
-        if arg in INCLUDE_FLAGS and next_arg in replacements:
-            for directory in replacements[next_arg]:
-                rewritten += [arg, directory]
-            index += 2
+    for part in split_include_flags(arguments):
+        if isinstance(part, str):
+            rewritten.append(part)
             continue
-        joined = split_joined_include_flag(arg)
-        if joined is not None and joined[1] in replacements:
-            flag, virtual_dir = joined
-            rewritten += [flag + directory for directory in replacements[virtual_dir]]
-        else:
-            rewritten.append(arg)
-        index += 1
+        for directory in replacements.get(part.directory, [part.directory]):
+            rewritten += part.args(directory)
     return rewritten
+
+
+def add_overlay_flag(
+    arguments: list[str], overlay_dirs: Container[str], overlay_file: str
+) -> list[str]:
+    """Add the overlay after the compiler if an include flag names an overlay dir."""
+    names_overlay_dir = any(
+        isinstance(part, IncludeFlag) and part.directory in overlay_dirs
+        for part in split_include_flags(arguments)
+    )
+    if not names_overlay_dir:
+        return arguments
+    return [arguments[0], "-ivfsoverlay", overlay_file, *arguments[1:]]
+
+
+def write_json_atomically(path: str, value: object) -> None:
+    tmp_path = Path(f"{path}.tmp")
+    tmp_path.write_text(json.dumps(value))
+    os.replace(tmp_path, path)
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -173,15 +293,29 @@ def main(argv: list[str] | None = None) -> None:
         required=True,
         help="Symlink actions from `bazel aquery --output=jsonproto`",
     )
+    parser.add_argument(
+        "--overlay",
+        help="Path of the VFS overlay file to write and to add to the compile commands",
+    )
     parser.add_argument("compile_commands", type=Path)
     args = parser.parse_args(argv)
 
-    replacements = virtual_include_replacements(
-        json.loads(args.aquery.read_text()), os.getcwd()
-    )
+    aquery = json.loads(args.aquery.read_text())
+    workspace = os.getcwd()
+    replacements = virtual_include_replacements(aquery, workspace)
     entries = json.loads(args.compile_commands.read_text())
     for entry in entries:
         entry["arguments"] = rewrite_include_flags(entry["arguments"], replacements)
+
+    if args.overlay is not None:
+        # The virtual dirs are relative to the directory that all entries share.
+        headers = overlay_headers(aquery, workspace, replacements) if entries else {}
+        directory = entries[0]["directory"] if entries else ""
+        write_json_atomically(args.overlay, vfs_overlay(headers, directory))
+        for entry in entries:
+            entry["arguments"] = add_overlay_flag(
+                entry["arguments"], headers.keys(), args.overlay
+            )
     args.compile_commands.write_text(json.dumps(entries))
 
 

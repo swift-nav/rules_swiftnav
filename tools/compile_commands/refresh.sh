@@ -56,6 +56,8 @@ lock_timeout="${BCC_LOCK_TIMEOUT:-600}"
 log_file="${cache_dir}/compile_commands.log"
 tmp_output="${cache_dir}/compile_commands.json.tmp.$$"
 aquery_output="${cache_dir}/virtual_includes.aquery.json.tmp.$$"
+# compile_commands.json refers to the overlay, so it is written to its final path.
+vfs_overlay="${cache_dir}/virtual_includes.vfsoverlay.yaml"
 output="${workspace}/compile_commands.json"
 
 structure_pathspecs=(
@@ -245,7 +247,7 @@ rm -f "${tmp_output}.bak"
 "${bazel_command}" aquery --noshow_progress --output=jsonproto \
     'outputs(".*/_virtual_includes/.*", mnemonic("Symlink", deps(//...)))' >"${aquery_output}" ||
     fail "querying _virtual_includes symlinks failed"
-"${resolve_virtual_includes}" --aquery="${aquery_output}" "${tmp_output}" ||
+"${resolve_virtual_includes}" --aquery="${aquery_output}" --overlay="${vfs_overlay}" "${tmp_output}" ||
     fail "resolving _virtual_includes failed"
 
 holds_lock || fail "lost ${lock_file} to pid $(lock_owner)"
