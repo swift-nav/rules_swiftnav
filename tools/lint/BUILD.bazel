@@ -32,6 +32,35 @@ py_test(
 )
 
 py_library(
+    name = "cppcheck_problems_lib",
+    srcs = ["cppcheck_problems.py"],
+    imports = ["../.."],
+)
+
+# Prints a merged cppcheck report as `file:line:column: [id] severity: message`
+# lines, for editor problem matchers.
+py_binary(
+    name = "cppcheck_problems",
+    srcs = ["cppcheck_problems.py"],
+    main = "cppcheck_problems.py",
+    visibility = ["//visibility:public"],
+    deps = [":cppcheck_problems_lib"],
+)
+
+py_test(
+    name = "test_cppcheck_problems",
+    srcs = ["test_cppcheck_problems.py"],
+    main = "test_cppcheck_problems.py",
+    tags = [UNIT],
+    target_compatible_with = select({
+        "@platforms//os:linux": ["@platforms//cpu:x86_64"],
+        "@platforms//os:macos": ["@platforms//cpu:aarch64"],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [":cppcheck_problems_lib"],
+)
+
+py_library(
     name = "merge_cppcheck_xml",
     srcs = ["merge_cppcheck_xml.py"],
     imports = ["../.."],

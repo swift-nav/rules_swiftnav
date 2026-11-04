@@ -17,6 +17,8 @@ The contents of this repository are subject to change frequently.
 - [lfs](lfs/README.md) — fetches Git LFS objects through Bazel from a
   checked-in lockfile instead of `git lfs pull`.
 - [Releasing](docs/RELEASING.md) — how to cut a release.
+- [VS Code workspace generator](tools/vscode/README.md) — generates a
+  `.code-workspace` for a Bazel C++ repository.
 
 # LICENSE
 
