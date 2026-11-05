@@ -280,6 +280,40 @@ class RunTest(unittest.TestCase):
         """
         self.assertEqual(self._run(baseline), 1)
 
+    def test_an_excluded_metric_is_left_out_and_cannot_fail(self) -> None:
+        # Heap extra is measured at 2 MB, but null takes it out of the gate.
+        baseline = """
+            {"memory_heap_mb": 10, "memory_heap_extra_mb": null,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 0)
+
+        self.assertEqual(
+            [metric["key"] for metric in self._report()["metrics"]],
+            ["memory_heap_mb", "memory_stack_mb", "memory_total_mb"],
+        )
+        # Still measured, for anyone who wants the figure.
+        self.assertIn(
+            "memory_heap_extra_mb 2.000\n",
+            (self.output_dir / METRICS_FILENAME).read_text(),
+        )
+
+    def test_the_other_metrics_stay_gated_beside_an_exclusion(self) -> None:
+        baseline = """
+            {"memory_heap_mb": 5, "memory_heap_extra_mb": null,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 1)
+        self.assertEqual(self._report()["status"], STATUS_REGRESSION)
+
+    def test_fails_on_an_exclusion_with_a_ceiling(self) -> None:
+        baseline = """
+            {"memory_heap_mb": 10, "memory_heap_extra_mb": null,
+             "memory_heap_extra_mb_max": 1,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 1)
+
     def test_fails_on_a_baseline_missing_a_metric(self) -> None:
         self.assertEqual(self._run('{"memory_heap_mb": 10}'), 1)
 

@@ -24,6 +24,7 @@ from tools.valgrind.report.metrics import (
     format_limit,
     format_number,
     format_value,
+    is_excluded,
     print_summary,
     read_baseline,
     read_limit,
@@ -144,6 +145,47 @@ class ReadBaselineTest(unittest.TestCase):
     def test_rejects_malformed_json(self) -> None:
         with tempfile.TemporaryDirectory() as tmp, self.assertRaises(ValueError):
             read_baseline(self._file(tmp, "not json"), "cpu_instructions")
+
+
+class IsExcludedTest(unittest.TestCase):
+    @staticmethod
+    def _file(tmp: str, content: str) -> Path:
+        path = Path(tmp) / "baseline.json"
+        path.write_text(content)
+        return path
+
+    def test_a_null_baseline_is_excluded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"memory_heap_extra_mb": null}')
+            self.assertTrue(is_excluded(path, "memory_heap_extra_mb"))
+
+    def test_a_number_is_not_excluded(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"memory_heap_extra_mb": 0.105}')
+            self.assertFalse(is_excluded(path, "memory_heap_extra_mb"))
+
+    def test_a_missing_entry_is_not_excluded(self) -> None:
+        # Left to read_baseline to reject, so a forgotten metric still fails.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"memory_heap_mb": 15.405}')
+            self.assertFalse(is_excluded(path, "memory_heap_extra_mb"))
+
+    def test_rejects_a_ceiling_or_override_beside_an_exclusion(self) -> None:
+        for content in (
+            '{"memory_heap_extra_mb": null, "memory_heap_extra_mb_max": 1}',
+            '{"memory_heap_extra_mb": null, "memory_heap_extra_mb_tolerance_pct": 20}',
+        ):
+            with (
+                self.subTest(content=content),
+                tempfile.TemporaryDirectory() as tmp,
+                self.assertRaises(ValueError),
+            ):
+                is_excluded(self._file(tmp, content), "memory_heap_extra_mb")
+
+    def test_read_baseline_still_rejects_null(self) -> None:
+        # Tools that do not check is_excluded keep failing on null.
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(ValueError):
+            read_baseline(self._file(tmp, '{"cpu_instructions": null}'), "cpu_instructions")
 
 
 class ReadLimitTest(unittest.TestCase):

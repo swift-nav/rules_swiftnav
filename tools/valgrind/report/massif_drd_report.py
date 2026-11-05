@@ -22,6 +22,10 @@ them::
     {"memory_heap_mb": 15.405, "memory_heap_mb_max": 50,
      "memory_heap_mb_tolerance_pct": 10}
 
+A metric whose baseline is null is excluded: it is still written to
+``valgrind-massif-drd.metrics``, but neither compared nor reported. A metric
+missing from the baseline is an error.
+
 Run with Bazel:
     bazel run //tools/valgrind/report:massif_drd_report -- --output-dir <dir>
 """
@@ -35,6 +39,7 @@ from pathlib import Path
 from tools.valgrind.report.metrics import (
     build_metric,
     build_report,
+    is_excluded,
     print_summary,
     read_baseline,
     read_limit,
@@ -182,7 +187,8 @@ def run(
     dump_dir defaults to output_dir, for a run that kept its dumps beside the
     reports. Returns the exit code: non-zero once a metric is more than its
     tolerance above its baseline, over its limit, or unreadable. A metric's
-    tolerance is tolerance_pct unless the baseline overrides it.
+    tolerance is tolerance_pct unless the baseline overrides it. A metric the
+    baseline excludes is left out of the report.
     """
     dumps = dump_dir or output_dir
     try:
@@ -216,6 +222,7 @@ def run(
                 read_limit(baseline, key),
             )
             for key, value in measured.items()
+            if not is_excluded(baseline, key)
         ]
     except OSError as err:
         print(
