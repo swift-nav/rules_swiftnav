@@ -34,6 +34,7 @@ _STATUS_PRECEDENCE = [
 ]
 
 LIMIT_SUFFIX = "_max"
+TOLERANCE_SUFFIX = "_tolerance_pct"
 
 
 class Metric(TypedDict):
@@ -157,6 +158,30 @@ def read_baseline(path: Path, key: str) -> float:
     return _positive_number(key, baselines[key])
 
 
+def is_excluded(path: Path, key: str) -> bool:
+    """Return whether a metric is excluded from a json baseline file.
+
+    A metric is excluded by setting its baseline to null, so it is measured
+    but neither compared nor reported::
+
+        {"memory_heap_mb": 15.405, "memory_heap_extra_mb": null}
+
+    A missing entry is not an exclusion: read_baseline still rejects it, so a
+    metric cannot drop out of the gate by being forgotten.
+
+    Raises:
+        ValueError: if the file is not valid json, or an excluded metric still
+            has a ceiling or tolerance override, which would have no effect.
+    """
+    baselines = _load_baselines(path)
+    if key not in baselines or baselines[key] is not None:
+        return False
+    for suffix in (LIMIT_SUFFIX, TOLERANCE_SUFFIX):
+        if key + suffix in baselines:
+            raise ValueError(f"{key + suffix!r} is set but {key!r} is excluded")
+    return True
+
+
 def read_limit(path: Path, key: str) -> float | None:
     """Read a metric's optional absolute ceiling, or None if it has none.
 
@@ -177,6 +202,31 @@ def read_limit(path: Path, key: str) -> float | None:
     if limit_key not in baselines:
         return None
     return _positive_number(limit_key, baselines[limit_key])
+
+
+def read_tolerance(path: Path, key: str, default: float) -> float:
+    """Read a metric's tolerance override, or default if it has none.
+
+    The override lives beside the baseline under the same key plus
+    ``TOLERANCE_SUFFIX``, and replaces the target-wide tolerance for that
+    metric only::
+
+        {"memory_heap_mb": 15.405, "memory_heap_mb_tolerance_pct": 20}
+
+    Like the target-wide tolerance, any number is accepted.
+
+    Raises:
+        ValueError: if the file is not valid json, or the entry is present but
+            not a number.
+    """
+    baselines = _load_baselines(path)
+    tolerance_key = key + TOLERANCE_SUFFIX
+    if tolerance_key not in baselines:
+        return default
+    value = baselines[tolerance_key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{tolerance_key!r} must be a number, got {value!r}")
+    return value
 
 
 def format_number(value: float, unit: str, signed: bool = False) -> str:
