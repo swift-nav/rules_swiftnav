@@ -185,7 +185,9 @@ class IsExcludedTest(unittest.TestCase):
     def test_read_baseline_still_rejects_null(self) -> None:
         # Tools that do not check is_excluded keep failing on null.
         with tempfile.TemporaryDirectory() as tmp, self.assertRaises(ValueError):
-            read_baseline(self._file(tmp, '{"cpu_instructions": null}'), "cpu_instructions")
+            read_baseline(
+                self._file(tmp, '{"cpu_instructions": null}'), "cpu_instructions"
+            )
 
 
 class ReadLimitTest(unittest.TestCase):
