@@ -248,6 +248,38 @@ class RunTest(unittest.TestCase):
         self.assertEqual(self._run(baseline), 1)
         self.assertEqual(self._report()["status"], STATUS_STALE_BASELINE)
 
+    def test_a_tolerance_override_applies_to_its_own_metric(self) -> None:
+        # Heap extra is 2 MB against 1.9, +5.26%: over the default 5%, within
+        # the 10% override.
+        baseline = """
+            {"memory_heap_mb": 10, "memory_heap_extra_mb": 1.9,
+             "memory_heap_extra_mb_tolerance_pct": 10,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 0)
+
+        metrics = self._report()["metrics"]
+        self.assertEqual(metrics[1]["status"], STATUS_PASS)
+        self.assertEqual(metrics[1]["tolerance_pct"], 10)
+        self.assertEqual(metrics[0]["tolerance_pct"], 5)
+
+    def test_a_tolerance_override_leaves_the_other_metrics_alone(self) -> None:
+        # Heap is 10 MB against 9.5, +5.26%, and only heap extra is overridden.
+        baseline = """
+            {"memory_heap_mb": 9.5, "memory_heap_extra_mb": 2,
+             "memory_heap_extra_mb_tolerance_pct": 10,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 1)
+        self.assertEqual(self._report()["metrics"][0]["status"], STATUS_REGRESSION)
+
+    def test_fails_on_an_unusable_tolerance_override(self) -> None:
+        baseline = """
+            {"memory_heap_mb": 10, "memory_heap_mb_tolerance_pct": "10",
+             "memory_heap_extra_mb": 2, "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 1)
+
     def test_fails_on_a_baseline_missing_a_metric(self) -> None:
         self.assertEqual(self._run('{"memory_heap_mb": 10}'), 1)
 

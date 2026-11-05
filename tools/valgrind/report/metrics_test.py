@@ -27,6 +27,7 @@ from tools.valgrind.report.metrics import (
     print_summary,
     read_baseline,
     read_limit,
+    read_tolerance,
     worst_status,
 )
 
@@ -168,6 +169,53 @@ class ReadLimitTest(unittest.TestCase):
     def test_rejects_a_present_but_unusable_ceiling(self) -> None:
         with tempfile.TemporaryDirectory() as tmp, self.assertRaises(ValueError):
             read_limit(self._file(tmp, '{"memory_heap_mb_max": 0}'), "memory_heap_mb")
+
+
+class ReadToleranceTest(unittest.TestCase):
+    @staticmethod
+    def _file(tmp: str, content: str) -> Path:
+        path = Path(tmp) / "baseline.json"
+        path.write_text(content)
+        return path
+
+    def test_reads_the_override_beside_the_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(
+                tmp,
+                '{"memory_heap_extra_mb": 0.105, "memory_heap_extra_mb_tolerance_pct": 20}',
+            )
+            self.assertEqual(read_tolerance(path, "memory_heap_extra_mb", 5.0), 20)
+
+    def test_a_missing_override_falls_back_to_the_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"memory_heap_extra_mb": 0.105}')
+            self.assertEqual(read_tolerance(path, "memory_heap_extra_mb", 5.0), 5.0)
+
+    def test_an_override_applies_to_its_own_metric_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(
+                tmp,
+                '{"memory_heap_mb": 15.405, "memory_heap_extra_mb_tolerance_pct": 20}',
+            )
+            self.assertEqual(read_tolerance(path, "memory_heap_mb", 5.0), 5.0)
+
+    def test_accepts_zero_like_the_target_wide_tolerance(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = self._file(tmp, '{"memory_heap_mb_tolerance_pct": 0}')
+            self.assertEqual(read_tolerance(path, "memory_heap_mb", 5.0), 0)
+
+    def test_rejects_anything_but_a_number(self) -> None:
+        for content in (
+            '{"memory_heap_mb_tolerance_pct": "20"}',
+            '{"memory_heap_mb_tolerance_pct": true}',
+            '{"memory_heap_mb_tolerance_pct": null}',
+        ):
+            with (
+                self.subTest(content=content),
+                tempfile.TemporaryDirectory() as tmp,
+                self.assertRaises(ValueError),
+            ):
+                read_tolerance(self._file(tmp, content), "memory_heap_mb", 5.0)
 
 
 class FormatNumberTest(unittest.TestCase):

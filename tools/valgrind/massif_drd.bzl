@@ -75,11 +75,13 @@ def swift_add_valgrind_massif_drd(
             or writes into the working directory. A $(location) elsewhere in
             program_args then needs "{RUNFILES}/" in front of it.
         baseline: Json file of expected values, e.g. {"memory_heap_mb": 15.405},
-            optionally with a "<key>_max" absolute ceiling beside any of them.
+            optionally with a "<key>_max" absolute ceiling or a
+            "<key>_tolerance_pct" tolerance override beside any of them.
             Setting it turns the target into a regression gate; without it, it
             only profiles.
         tolerance_pct: Percent either side of baseline before the test fails,
-            so an improvement past it also needs the baseline refreshed.
+            so an improvement past it also needs the baseline refreshed. A
+            "<key>_tolerance_pct" in the baseline replaces it for that metric.
         tags: Additional Bazel tags.
         data: Additional data dependencies.
         **kwargs: Forwarded to py_test (e.g. timeout, size, env).

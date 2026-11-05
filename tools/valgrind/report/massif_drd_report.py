@@ -16,9 +16,11 @@ shared report format, so pr_comment can merge it with the reports of other
 targets.
 
 The baseline is a json file mapping metric keys to their expected values, with
-an optional ``_max`` ceiling beside any of them::
+an optional ``_max`` ceiling and ``_tolerance_pct`` override beside any of
+them::
 
-    {"memory_heap_mb": 15.405, "memory_heap_mb_max": 50}
+    {"memory_heap_mb": 15.405, "memory_heap_mb_max": 50,
+     "memory_heap_mb_tolerance_pct": 10}
 
 Run with Bazel:
     bazel run //tools/valgrind/report:massif_drd_report -- --output-dir <dir>
@@ -36,6 +38,7 @@ from tools.valgrind.report.metrics import (
     print_summary,
     read_baseline,
     read_limit,
+    read_tolerance,
     write_report,
 )
 
@@ -177,8 +180,9 @@ def run(
     """Summarise a massif run, gating on the baselines when they are given.
 
     dump_dir defaults to output_dir, for a run that kept its dumps beside the
-    reports. Returns the exit code: non-zero once a metric is more than
-    tolerance_pct above its baseline, over its limit, or unreadable.
+    reports. Returns the exit code: non-zero once a metric is more than its
+    tolerance above its baseline, over its limit, or unreadable. A metric's
+    tolerance is tolerance_pct unless the baseline overrides it.
     """
     dumps = dump_dir or output_dir
     try:
@@ -208,7 +212,7 @@ def run(
                 UNIT,
                 value,
                 read_baseline(baseline, key),
-                tolerance_pct,
+                read_tolerance(baseline, key, tolerance_pct),
                 read_limit(baseline, key),
             )
             for key, value in measured.items()
@@ -263,7 +267,8 @@ def main(argv: list[str] | None = None) -> int:
         "--tolerance-pct",
         type=float,
         default=DEFAULT_TOLERANCE_PCT,
-        help="Allowed percentage increase over the baseline",
+        help="Allowed percentage increase over the baseline, unless the "
+        "baseline overrides it for a metric",
     )
     args = parser.parse_args(argv)
 
