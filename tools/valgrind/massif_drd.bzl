@@ -46,7 +46,8 @@ def swift_add_valgrind_massif_drd(
         valgrind-massif-drd.report.json   — baseline comparison, with baseline set
 
     Metric keys, which the baseline file must also carry: memory_heap_mb,
-    memory_heap_extra_mb, memory_stack_mb, memory_total_mb.
+    memory_stack_mb, memory_total_mb. The total also counts massif's heap
+    extra, which is not reported on its own.
 
     Args:
         binary: Label of the cc_binary (or swift_cc_test) to run under massif.

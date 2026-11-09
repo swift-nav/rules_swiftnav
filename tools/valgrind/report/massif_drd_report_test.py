@@ -144,7 +144,7 @@ class MeasureTest(unittest.TestCase):
             measured = measure(Path(tmp), Path(tmp))
 
             self.assertAlmostEqual(measured["memory_heap_mb"], 10.0)
-            self.assertAlmostEqual(measured["memory_heap_extra_mb"], 2.0)
+            self.assertNotIn("memory_heap_extra_mb", measured)
             self.assertAlmostEqual(measured["memory_stack_mb"], 1.0)
             self.assertAlmostEqual(measured["memory_total_mb"], 13.0)
 
@@ -163,10 +163,10 @@ class MeasureTest(unittest.TestCase):
 
 
 class RunTest(unittest.TestCase):
-    # Measured values are heap 10, extra 2, stacks 3, total 15 MB.
+    # Measured values are heap 10, stacks 3, total 15 MB, which counts 2 MB
+    # of heap extra.
     _ON_BASELINE = """
-        {"memory_heap_mb": 10, "memory_heap_extra_mb": 2,
-         "memory_stack_mb": 3, "memory_total_mb": 15}
+        {"memory_heap_mb": 10, "memory_stack_mb": 3, "memory_total_mb": 15}
     """
 
     def setUp(self) -> None:
@@ -190,7 +190,7 @@ class RunTest(unittest.TestCase):
 
         self.assertEqual(
             (self.output_dir / METRICS_FILENAME).read_text(),
-            "memory_heap_mb 10.000\nmemory_heap_extra_mb 2.000\nmemory_stack_mb 3.000\nmemory_total_mb 15.000\n",
+            "memory_heap_mb 10.000\nmemory_stack_mb 3.000\nmemory_total_mb 15.000\n",
         )
         self.assertFalse((self.output_dir / REPORT_JSON_FILENAME).exists())
 
@@ -209,7 +209,6 @@ class RunTest(unittest.TestCase):
             [metric["key"] for metric in report["metrics"]],
             [
                 "memory_heap_mb",
-                "memory_heap_extra_mb",
                 "memory_stack_mb",
                 "memory_total_mb",
             ],
@@ -218,8 +217,7 @@ class RunTest(unittest.TestCase):
 
     def test_fails_when_one_metric_regresses(self) -> None:
         baseline = """
-            {"memory_heap_mb": 5, "memory_heap_extra_mb": 2,
-             "memory_stack_mb": 3, "memory_total_mb": 15}
+            {"memory_heap_mb": 5, "memory_stack_mb": 3, "memory_total_mb": 15}
         """
         self.assertEqual(self._run(baseline), 1)
 
@@ -231,7 +229,7 @@ class RunTest(unittest.TestCase):
     def test_fails_when_a_metric_is_over_its_absolute_limit(self) -> None:
         # On baseline, so only the ceiling can fail it.
         baseline = """
-            {"memory_heap_mb": 10, "memory_heap_mb_max": 8, "memory_heap_extra_mb": 2,
+            {"memory_heap_mb": 10, "memory_heap_mb_max": 8,
              "memory_stack_mb": 3, "memory_total_mb": 15}
         """
         self.assertEqual(self._run(baseline), 1)
@@ -242,19 +240,17 @@ class RunTest(unittest.TestCase):
 
     def test_fails_on_a_stale_baseline(self) -> None:
         baseline = """
-            {"memory_heap_mb": 40, "memory_heap_extra_mb": 2,
-             "memory_stack_mb": 3, "memory_total_mb": 15}
+            {"memory_heap_mb": 40, "memory_stack_mb": 3, "memory_total_mb": 15}
         """
         self.assertEqual(self._run(baseline), 1)
         self.assertEqual(self._report()["status"], STATUS_STALE_BASELINE)
 
     def test_a_tolerance_override_applies_to_its_own_metric(self) -> None:
-        # Heap extra is 2 MB against 1.9, +5.26%: over the default 5%, within
+        # Stacks are 3 MB against 2.85, +5.26%: over the default 5%, within
         # the 10% override.
         baseline = """
-            {"memory_heap_mb": 10, "memory_heap_extra_mb": 1.9,
-             "memory_heap_extra_mb_tolerance_pct": 10,
-             "memory_stack_mb": 3, "memory_total_mb": 15}
+            {"memory_heap_mb": 10, "memory_stack_mb": 2.85,
+             "memory_stack_mb_tolerance_pct": 10, "memory_total_mb": 15}
         """
         self.assertEqual(self._run(baseline), 0)
 
@@ -264,11 +260,10 @@ class RunTest(unittest.TestCase):
         self.assertEqual(metrics[0]["tolerance_pct"], 5)
 
     def test_a_tolerance_override_leaves_the_other_metrics_alone(self) -> None:
-        # Heap is 10 MB against 9.5, +5.26%, and only heap extra is overridden.
+        # Heap is 10 MB against 9.5, +5.26%, and only stacks are overridden.
         baseline = """
-            {"memory_heap_mb": 9.5, "memory_heap_extra_mb": 2,
-             "memory_heap_extra_mb_tolerance_pct": 10,
-             "memory_stack_mb": 3, "memory_total_mb": 15}
+            {"memory_heap_mb": 9.5, "memory_stack_mb": 3,
+             "memory_stack_mb_tolerance_pct": 10, "memory_total_mb": 15}
         """
         self.assertEqual(self._run(baseline), 1)
         self.assertEqual(self._report()["metrics"][0]["status"], STATUS_REGRESSION)
@@ -276,9 +271,16 @@ class RunTest(unittest.TestCase):
     def test_fails_on_an_unusable_tolerance_override(self) -> None:
         baseline = """
             {"memory_heap_mb": 10, "memory_heap_mb_tolerance_pct": "10",
-             "memory_heap_extra_mb": 2, "memory_stack_mb": 3, "memory_total_mb": 15}
+             "memory_stack_mb": 3, "memory_total_mb": 15}
         """
         self.assertEqual(self._run(baseline), 1)
+
+    def test_ignores_a_heap_extra_entry_left_in_an_old_baseline(self) -> None:
+        baseline = """
+            {"memory_heap_mb": 10, "memory_heap_extra_mb": 2,
+             "memory_stack_mb": 3, "memory_total_mb": 15}
+        """
+        self.assertEqual(self._run(baseline), 0)
 
     def test_fails_on_a_baseline_missing_a_metric(self) -> None:
         self.assertEqual(self._run('{"memory_heap_mb": 10}'), 1)
