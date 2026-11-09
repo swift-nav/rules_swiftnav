@@ -1,0 +1,38 @@
+# Copyright (C) 2022-2026 Swift Navigation Inc.
+# Contact: Swift Navigation <dev@swift-nav.com>
+#
+# This source is subject to the license found in the file 'LICENSE' which must
+# be distributed together with this source. All other rights reserved.
+#
+# THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+# EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+
+load("@rules_python//python:py_library.bzl", "py_library")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_swiftnav//cc:defs.bzl", "UNIT")
+load(":defs.bzl", "s3_data_lockfile")
+
+# Importable as s3_data.s3_data whether rules_swiftnav is the main
+# repository or a dependency of one.
+py_library(
+    name = "s3_data_lib",
+    srcs = ["s3_data.py"],
+    imports = [".."],
+    visibility = ["//visibility:public"],
+)
+
+py_test(
+    name = "s3_data_test",
+    srcs = ["s3_data_test.py"],
+    main = "s3_data_test.py",
+    tags = [UNIT],
+    deps = [":s3_data_lib"],
+)
+
+# Exercises the macro at analysis time; the binaries are manual and need AWS access.
+s3_data_lockfile(
+    name = "example",
+    bucket = "example-bucket",
+    lockfile = "s3_data/testdata/s3_data.lock.json",
+)
