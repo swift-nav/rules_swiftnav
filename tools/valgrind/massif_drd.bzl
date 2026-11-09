@@ -45,8 +45,8 @@ def swift_add_valgrind_massif_drd(
         valgrind-massif-drd.metrics       — one "key value" line per figure, in MB
         valgrind-massif-drd.report.json   — baseline comparison, with baseline set
 
-    Metric keys, which the baseline file must also carry, if only as null:
-    memory_heap_mb, memory_heap_extra_mb, memory_stack_mb, memory_total_mb.
+    Metric keys, which the baseline file must also carry: memory_heap_mb,
+    memory_heap_extra_mb, memory_stack_mb, memory_total_mb.
 
     Args:
         binary: Label of the cc_binary (or swift_cc_test) to run under massif.
@@ -76,8 +76,7 @@ def swift_add_valgrind_massif_drd(
             program_args then needs "{RUNFILES}/" in front of it.
         baseline: Json file of expected values, e.g. {"memory_heap_mb": 15.405},
             optionally with a "<key>_max" absolute ceiling or a
-            "<key>_tolerance_pct" tolerance override beside any of them. A key
-            set to null is excluded from the comparison and the report.
+            "<key>_tolerance_pct" tolerance override beside any of them.
             Setting it turns the target into a regression gate; without it, it
             only profiles.
         tolerance_pct: Percent either side of baseline before the test fails,

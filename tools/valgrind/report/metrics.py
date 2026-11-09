@@ -158,30 +158,6 @@ def read_baseline(path: Path, key: str) -> float:
     return _positive_number(key, baselines[key])
 
 
-def is_excluded(path: Path, key: str) -> bool:
-    """Return whether a metric is excluded from a json baseline file.
-
-    A metric is excluded by setting its baseline to null, so it is measured
-    but neither compared nor reported::
-
-        {"memory_heap_mb": 15.405, "memory_heap_extra_mb": null}
-
-    A missing entry is not an exclusion: read_baseline still rejects it, so a
-    metric cannot drop out of the gate by being forgotten.
-
-    Raises:
-        ValueError: if the file is not valid json, or an excluded metric still
-            has a ceiling or tolerance override, which would have no effect.
-    """
-    baselines = _load_baselines(path)
-    if key not in baselines or baselines[key] is not None:
-        return False
-    for suffix in (LIMIT_SUFFIX, TOLERANCE_SUFFIX):
-        if key + suffix in baselines:
-            raise ValueError(f"{key + suffix!r} is set but {key!r} is excluded")
-    return True
-
-
 def read_limit(path: Path, key: str) -> float | None:
     """Read a metric's optional absolute ceiling, or None if it has none.
 
