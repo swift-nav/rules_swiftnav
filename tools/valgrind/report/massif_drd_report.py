@@ -2,11 +2,11 @@
 """Summarise massif and DRD output and optionally gate on memory baselines.
 
 Reads the ``valgrind-massif.<pid>`` dumps a massif run leaves behind, picks the
-single largest snapshot across all of them, and reports peak heap, heap extra,
-stacks and their sum. Under --trace-children=yes there is a dump per process,
-and the peak is the worst moment of the worst one. When the runner also made a
-DRD pass its ``valgrind-drd.stack_usage.txt`` supplies the stack figure
-instead of massif's own.
+single largest snapshot across all of them, and reports peak heap, stacks and
+the total, which also counts massif's heap extra. Under --trace-children=yes
+there is a dump per process, and the peak is the worst moment of the worst
+one. When the runner also made a DRD pass its ``valgrind-drd.stack_usage.txt``
+supplies the stack figure instead of massif's own.
 
 When a baseline is supplied every metric is compared against it and the tool
 exits non-zero on a regression larger than the tolerance, or on exceeding an
@@ -16,9 +16,11 @@ shared report format, so pr_comment can merge it with the reports of other
 targets.
 
 The baseline is a json file mapping metric keys to their expected values, with
-an optional ``_max`` ceiling beside any of them::
+an optional ``_max`` ceiling and ``_tolerance_pct`` override beside any of
+them::
 
-    {"memory_heap_mb": 15.405, "memory_heap_mb_max": 50}
+    {"memory_heap_mb": 15.405, "memory_heap_mb_max": 50,
+     "memory_heap_mb_tolerance_pct": 10}
 
 Run with Bazel:
     bazel run //tools/valgrind/report:massif_drd_report -- --output-dir <dir>
@@ -36,6 +38,7 @@ from tools.valgrind.report.metrics import (
     print_summary,
     read_baseline,
     read_limit,
+    read_tolerance,
     write_report,
 )
 
@@ -55,7 +58,6 @@ DEFAULT_TOLERANCE_PCT = 5.0
 
 METRIC_NAMES = {
     "memory_heap_mb": "Peak heap (massif)",
-    "memory_heap_extra_mb": "Peak heap extra (massif)",
     "memory_stack_mb": "Peak stacks (DRD)",
     "memory_total_mb": "Peak memory (massif + DRD)",
 }
@@ -158,9 +160,10 @@ def measure(output_dir: Path, dump_dir: Path) -> dict[str, float]:
     )
     stack_mb = stack_b / _BYTES_PER_MB
 
+    # Heap extra is not reported on its own, but it is memory in use, so the
+    # total keeps it.
     return {
         "memory_heap_mb": heap_mb,
-        "memory_heap_extra_mb": heap_extra_mb,
         "memory_stack_mb": stack_mb,
         "memory_total_mb": heap_mb + heap_extra_mb + stack_mb,
     }
@@ -177,8 +180,9 @@ def run(
     """Summarise a massif run, gating on the baselines when they are given.
 
     dump_dir defaults to output_dir, for a run that kept its dumps beside the
-    reports. Returns the exit code: non-zero once a metric is more than
-    tolerance_pct above its baseline, over its limit, or unreadable.
+    reports. Returns the exit code: non-zero once a metric is more than its
+    tolerance above its baseline, over its limit, or unreadable. A metric's
+    tolerance is tolerance_pct unless the baseline overrides it.
     """
     dumps = dump_dir or output_dir
     try:
@@ -208,7 +212,7 @@ def run(
                 UNIT,
                 value,
                 read_baseline(baseline, key),
-                tolerance_pct,
+                read_tolerance(baseline, key, tolerance_pct),
                 read_limit(baseline, key),
             )
             for key, value in measured.items()
@@ -263,7 +267,8 @@ def main(argv: list[str] | None = None) -> int:
         "--tolerance-pct",
         type=float,
         default=DEFAULT_TOLERANCE_PCT,
-        help="Allowed percentage increase over the baseline",
+        help="Allowed percentage increase over the baseline, unless the "
+        "baseline overrides it for a metric",
     )
     args = parser.parse_args(argv)
 

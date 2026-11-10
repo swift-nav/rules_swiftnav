@@ -34,6 +34,7 @@ _STATUS_PRECEDENCE = [
 ]
 
 LIMIT_SUFFIX = "_max"
+TOLERANCE_SUFFIX = "_tolerance_pct"
 
 
 class Metric(TypedDict):
@@ -177,6 +178,31 @@ def read_limit(path: Path, key: str) -> float | None:
     if limit_key not in baselines:
         return None
     return _positive_number(limit_key, baselines[limit_key])
+
+
+def read_tolerance(path: Path, key: str, default: float) -> float:
+    """Read a metric's tolerance override, or default if it has none.
+
+    The override lives beside the baseline under the same key plus
+    ``TOLERANCE_SUFFIX``, and replaces the target-wide tolerance for that
+    metric only::
+
+        {"memory_heap_mb": 15.405, "memory_heap_mb_tolerance_pct": 20}
+
+    Like the target-wide tolerance, any number is accepted.
+
+    Raises:
+        ValueError: if the file is not valid json, or the entry is present but
+            not a number.
+    """
+    baselines = _load_baselines(path)
+    tolerance_key = key + TOLERANCE_SUFFIX
+    if tolerance_key not in baselines:
+        return default
+    value = baselines[tolerance_key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{tolerance_key!r} must be a number, got {value!r}")
+    return value
 
 
 def format_number(value: float, unit: str, signed: bool = False) -> str:
