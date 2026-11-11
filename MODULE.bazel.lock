@@ -290,7 +290,7 @@
     "//cc:extensions.bzl%swift_cc_toolchain_extension": {
       "general": {
         "bzlTransitiveDigest": "UQecAzdWEug5RV6MHA22lDvR2zhaTVY04k66pHTSUxE=",
-        "usagesDigest": "rD/1JbIgocjOqMb/gWCYzEt27j7m9+NO54Yyk3vqWEo=",
+        "usagesDigest": "Bc04F0AD1AJh9YeiIQA2kZk6jq55rL9PwvCzAIvmjtk=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools",
           "REPO_MAPPING:,rules_swiftnav "
@@ -417,7 +417,7 @@
     "//cc/toolchains/yocto_generic:yocto_generic_extension.bzl%yocto_generic_extension": {
       "general": {
         "bzlTransitiveDigest": "Q4v/HN5Wh/W0JsPpeExQzSqIslfepuWsd75kvW+25FI=",
-        "usagesDigest": "qeMWnqqH3FU34AHQPYwV9GD97kUNMLobT3tdffHKx+g=",
+        "usagesDigest": "mBM9DWUoQ6tNgx6kZDJ7AieqiFp7tWBU0jGYj5QnF2E=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
           "yocto_generic": {
@@ -430,7 +430,7 @@
     "//doxygen:extensions.bzl%doxygen_extension": {
       "general": {
         "bzlTransitiveDigest": "KAg0vr/b1m/vOAuO55SZkI9Om/Z2Os1TAwS4SN9do+Y=",
-        "usagesDigest": "oXTSLj/VOvjLisIcqQPzyb4BWfce8bes+gfoFEokFiU=",
+        "usagesDigest": "ZsJ0BO2euf/0wxqEBbrXRMxT+oSwylQIqRvQdUpzWvM=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
@@ -463,7 +463,7 @@
     "//tools/compile_commands:extensions.bzl%bcc_extension": {
       "general": {
         "bzlTransitiveDigest": "roRZHa/LcpgwUBgPROKV5oIysE0Wq4mrIJdwJnQZoXM=",
-        "usagesDigest": "18Oj12qzDuglSmADx8abQm1usoNe9/SzJu0v2NFkulk=",
+        "usagesDigest": "BKn3TpSefBp1PgZsxAhdHkNSTrRjt/+0mGJrrQ2DX6Y=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
         ],
