@@ -16,6 +16,8 @@ The contents of this repository are subject to change frequently.
   `compile_commands.json` generation for downstream repositories.
 - [lfs](lfs/README.md) — fetches Git LFS objects through Bazel from a
   checked-in lockfile instead of `git lfs pull`.
+- [s3_data](s3_data/README.md) — fetches content-addressed S3 objects through
+  Bazel from a checked-in lockfile, with tools to upload and fetch them.
 - [Releasing](docs/RELEASING.md) — how to cut a release.
 
 # LICENSE
